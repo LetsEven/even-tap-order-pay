@@ -67,7 +67,7 @@ export interface DishOrderData {
   user_id: string | null;
   guest_id: string | null;
   guest_name: string;
-  item_name: string;
+  item: string;
   quantity: number;
   price: number;
   branch_number: number;
@@ -78,6 +78,9 @@ export interface DishOrderData {
   images?: string[];
   custom_fields?: any;
   extra_price?: number;
+  menu_item_id?: string | null;
+  special_instructions?: string | null;
+  order_notes?: string | null;
 }
 
 export interface PaymentTransactionData {

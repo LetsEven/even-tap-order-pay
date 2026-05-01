@@ -11,18 +11,17 @@ export function middleware(request: NextRequest) {
     "https://xquisito-backend-production.up.railway.app";
   const isDev = process.env.NODE_ENV === "development";
   const devUrls = isDev ? " http://localhost:5000 ws://localhost:5000" : "";
+  const backendHost = backendUrl.replace(/https?:\/\//, "");
+  const wsProtocol = isDev ? "ws" : "wss";
 
-  // Build CSP header with nonce (PCI DSS compliant - no unsafe-inline in script-src)
-  // Note: style-src uses 'unsafe-inline' because React inline styles don't support nonces
-  // This is acceptable for PCI DSS as the security concern is primarily script injection
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'nonce-${nonce}';
+    script-src 'self' 'nonce-${nonce}' https://ecartpay.com https://sandbox.ecartpay.com https://applepay.cdn-apple.com https://pay.google.com;
     style-src 'self' 'unsafe-inline';
-    img-src 'self' data: blob: ${backendUrl} https://*.supabase.co;
-    font-src 'self';
-    connect-src 'self' ${backendUrl} wss://${backendUrl.replace("https://", "")}${devUrls};
-    frame-src 'none';
+    img-src 'self' data: blob: ${backendUrl} https://*.supabase.co https://www.gstatic.com;
+    font-src 'self' https://applepay.cdn-apple.com;
+    connect-src 'self' ${backendUrl} ${wsProtocol}://${backendHost}${devUrls} https://*.ecartpay.com https://pay.ecart.com https://applepay.cdn-apple.com https://checkoutdev.ecartpay.com https://pay.google.com https://google.com https://www.google.com;
+    frame-src https://ecartpay.com https://sandbox.ecartpay.com https://pay.ecart.com https://applepay.cdn-apple.com https://*.apple.com https://pay.google.com;
     object-src 'none';
     base-uri 'self';
     form-action 'self';
@@ -55,7 +54,7 @@ export function middleware(request: NextRequest) {
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set(
     "Permissions-Policy",
-    "camera=(), microphone=(), geolocation=(), payment=()",
+    "camera=(), microphone=(), geolocation=()",
   );
   response.headers.set("X-DNS-Prefetch-Control", "off");
   response.headers.set("X-Permitted-Cross-Domain-Policies", "none");

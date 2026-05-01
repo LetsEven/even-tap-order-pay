@@ -18,9 +18,11 @@ export interface CartItem {
       optionId: string;
       optionName: string;
       price: number;
+      quantity?: number;
     }>;
   }>;
   subtotal: number;
+  specialInstructions?: string;
 }
 
 export interface Cart {
@@ -28,6 +30,7 @@ export interface Cart {
   items: CartItem[];
   total_items: number;
   total_amount: number;
+  order_notes?: string | null;
 }
 
 export interface CartTotals {
@@ -58,7 +61,7 @@ class CartApiService {
 
   private async request<T>(
     endpoint: string,
-    options?: RequestInit
+    options?: RequestInit,
   ): Promise<ApiResponse<T>> {
     // Usar el helper con refresh automático
     return requestWithAuth<T>(endpoint, options);
@@ -90,7 +93,8 @@ class CartApiService {
     quantity: number = 1,
     customFields: CartItem["customFields"] = [],
     extraPrice: number = 0,
-    price?: number
+    price?: number,
+    specialInstructions?: string,
   ): Promise<ApiResponse<{ cart_item_id: string }>> {
     const userId = this.getUserIdentifier();
 
@@ -104,9 +108,12 @@ class CartApiService {
       branch_number: this.branchNumber,
     };
 
-    // Si se proporciona un precio específico, incluirlo en el request
     if (price !== undefined) {
       body.price = price;
+    }
+
+    if (specialInstructions) {
+      body.special_instructions = specialInstructions;
     }
 
     return this.request<{ cart_item_id: string }>("/cart", {
@@ -150,7 +157,7 @@ class CartApiService {
   // Actualizar cantidad de un item
   async updateCartItemQuantity(
     cartItemId: string,
-    quantity: number
+    quantity: number,
   ): Promise<ApiResponse<{ message: string }>> {
     return this.request<{ message: string }>(`/cart/items/${cartItemId}`, {
       method: "PATCH",
@@ -160,7 +167,7 @@ class CartApiService {
 
   // Eliminar item del carrito
   async removeFromCart(
-    cartItemId: string
+    cartItemId: string,
   ): Promise<ApiResponse<{ message: string }>> {
     return this.request<{ message: string }>(`/cart/items/${cartItemId}`, {
       method: "DELETE",
@@ -186,10 +193,27 @@ class CartApiService {
     return this.getGuestId();
   }
 
+  // Actualizar notas de la orden
+  async updateOrderNotes(
+    orderNotes: string | null,
+  ): Promise<ApiResponse<{ message: string }>> {
+    const userId = this.getUserIdentifier();
+
+    return this.request<{ message: string }>("/cart/notes", {
+      method: "PATCH",
+      body: JSON.stringify({
+        ...userId,
+        restaurant_id: this.restaurantId,
+        branch_number: this.branchNumber,
+        order_notes: orderNotes || null,
+      }),
+    });
+  }
+
   // Migrar carrito de invitado a usuario autenticado
   async migrateGuestCart(
     guestId: string,
-    userId: string
+    userId: string,
   ): Promise<
     ApiResponse<{ items_migrated: number; cart_id: string; message: string }>
   > {
