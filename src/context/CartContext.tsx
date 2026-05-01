@@ -4,6 +4,7 @@ import React, {
   createContext,
   useContext,
   useReducer,
+  useState,
   useEffect,
   ReactNode,
 } from "react";
@@ -15,7 +16,8 @@ import { useRestaurant } from "./RestaurantContext";
 // Interfaz para un item del carrito (frontend)
 export interface CartItem extends MenuItemData {
   quantity: number;
-  cartItemId?: string; // ID del item en el carrito (del backend)
+  cartItemId?: string;
+  specialInstructions?: string;
 }
 
 // Estado del carrito
@@ -109,22 +111,39 @@ function convertApiItemToCartItem(apiItem: ApiCartItem): CartItem {
     images: apiItem.images || [],
     features: apiItem.features || [],
     discount: apiItem.discount || 0,
-    customFields: apiItem.customFields || [],
+    customFields: (apiItem.customFields || []).map((field) => ({
+      fieldId: field.fieldId,
+      fieldName: field.fieldName,
+      selectedOptions: field.selectedOptions.map((opt) => ({
+        optionId: opt.optionId,
+        optionName: opt.optionName,
+        price: opt.price,
+        quantity: opt.quantity ?? 0,
+      })),
+    })),
     extraPrice: apiItem.extraPrice || 0,
     quantity: apiItem.quantity,
     cartItemId: apiItem.id,
+    specialInstructions: apiItem.specialInstructions,
   };
 }
 
 // Contexto del carrito con funciones
 interface CartContextType {
   state: CartState;
-  addItem: (item: MenuItemData) => Promise<void>;
+  addItem: (
+    item: MenuItemData,
+    quantity?: number,
+    specialInstructions?: string | null,
+  ) => Promise<void>;
   removeItem: (itemId: number) => Promise<void>;
-  updateQuantity: (itemId: number, quantity: number) => Promise<void>;
+  updateQuantity: (cartItemId: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
   refreshCart: () => Promise<void>;
   setUserName: (name: string) => void;
+  orderNotes: string;
+  setOrderNotes: (notes: string) => void;
+  updateOrderNotes: (notes: string) => Promise<void>;
 }
 
 const CartContext = createContext<CartContextType | null>(null);
@@ -132,6 +151,7 @@ const CartContext = createContext<CartContextType | null>(null);
 // Provider del carrito
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, initialState);
+  const [orderNotes, setOrderNotes] = useState("");
   const { user, isLoading, isAuthenticated } = useAuth();
   const { restaurantId, branchNumber } = useRestaurant();
 
@@ -188,13 +208,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
             if (response.success && response.data) {
               console.log(
-                `✅ Cart migrated successfully: ${response.data.items_migrated} items migrated`
+                `✅ Cart migrated successfully: ${response.data.items_migrated} items migrated`,
               );
 
               // NO eliminar el guest_id aquí - se eliminará después de que
               // TODAS las migraciones (cart + payment methods) se completen
               console.log(
-                "ℹ️ Guest ID preserved for payment methods migration"
+                "ℹ️ Guest ID preserved for payment methods migration",
               );
 
               // Refrescar el carrito después de la migración
@@ -203,7 +223,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
             } else {
               console.warn(
                 "⚠️ Migration completed but no data returned:",
-                response
+                response,
               );
               // Refrescar el carrito de todos modos
               await refreshCart();
@@ -213,7 +233,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           }
         } else {
           console.log(
-            "ℹ️ No guest_id found in localStorage, skipping migration"
+            "ℹ️ No guest_id found in localStorage, skipping migration",
           );
         }
       } else {
@@ -246,6 +266,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
             cartId: response.data.cart_id,
           },
         });
+        setOrderNotes(response.data.order_notes || "");
       } else {
         dispatch({ type: "SET_LOADING", payload: false });
       }
@@ -256,16 +277,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   // Agregar item al carrito
-  const addItem = async (item: MenuItemData) => {
+  const addItem = async (
+    item: MenuItemData,
+    quantity: number = 1,
+    specialInstructions?: string | null,
+  ) => {
     try {
       dispatch({ type: "SET_LOADING", payload: true });
 
       const response = await cartApi.addToCart(
         item.id,
-        1,
+        quantity,
         item.customFields || [],
         item.extraPrice || 0,
-        item.price // Pasar el precio base (ya con descuento aplicado si lo hay)
+        item.price, // Pasar el precio base (ya con descuento aplicado si lo hay)
+        specialInstructions ?? undefined,
       );
 
       if (response.success) {
@@ -309,21 +335,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   // Actualizar cantidad de un item
-  const updateQuantity = async (itemId: number, quantity: number) => {
+  const updateQuantity = async (cartItemId: string, quantity: number) => {
     try {
       dispatch({ type: "SET_LOADING", payload: true });
 
-      // Buscar el cartItemId del item
-      const item = state.items.find((i) => i.id === itemId);
-      if (!item || !item.cartItemId) {
-        console.error("Cart item not found");
-        dispatch({ type: "SET_LOADING", payload: false });
-        return;
-      }
-
       const response = await cartApi.updateCartItemQuantity(
-        item.cartItemId,
-        quantity
+        cartItemId,
+        quantity,
       );
 
       if (response.success) {
@@ -364,6 +382,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "SET_USER_NAME", payload: name });
   };
 
+  // Actualizar notas de la orden (persiste en DB)
+  const updateOrderNotes = async (notes: string) => {
+    setOrderNotes(notes);
+    try {
+      await cartApi.updateOrderNotes(notes.trim() || null);
+    } catch (error) {
+      console.error("Error updating order notes:", error);
+    }
+  };
+
   const value: CartContextType = {
     state,
     addItem,
@@ -372,6 +400,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     clearCart,
     refreshCart,
     setUserName,
+    orderNotes,
+    setOrderNotes,
+    updateOrderNotes,
   };
 
   // Cargar carrito al montar el componente o cuando cambie el restaurante
