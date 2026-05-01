@@ -4,12 +4,20 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { useTableNavigation } from "../../hooks/useTableNavigation";
 
-export default function DashboardHeader() {
+interface DashboardHeaderProps {
+  onClose?: () => void;
+}
+
+export default function DashboardHeader({ onClose }: DashboardHeaderProps) {
   const { navigateWithTable } = useTableNavigation();
   const router = useRouter();
 
   const handleBack = () => {
-    navigateWithTable("/menu");
+    if (onClose) {
+      onClose();
+    } else {
+      navigateWithTable("/menu");
+    }
   };
 
   const handleLogoClick = () => {

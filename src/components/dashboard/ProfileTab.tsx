@@ -6,7 +6,11 @@ import { User, Camera, Loader2, Phone, X, LogOut, LogIn } from "lucide-react";
 import { authService } from "@/services/auth.service";
 import { useTableNavigation } from "@/hooks/useTableNavigation";
 
-export default function ProfileTab() {
+interface ProfileTabProps {
+  onLogout?: () => void;
+}
+
+export default function ProfileTab({ onLogout }: ProfileTabProps = {}) {
   const { navigateWithTable } = useTableNavigation();
   const { profile, isLoading, logout: contextLogout } = useAuth();
   const [isUpdating, setIsUpdating] = useState(false);
@@ -170,11 +174,13 @@ export default function ProfileTab() {
 
   const handleLogout = async () => {
     try {
-      // Use context logout which will update the auth state
       await contextLogout();
       setIsLogoutModalOpen(false);
-      // Redirect to menu with table navigation
-      navigateWithTable("/menu");
+      if (onLogout) {
+        onLogout();
+      } else {
+        navigateWithTable("/menu");
+      }
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
       alert("Error al cerrar sesión");

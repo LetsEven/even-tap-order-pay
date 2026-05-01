@@ -1,43 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
 import Loader from "./UI/Loader";
-import ProfileTab from "./dashboard/ProfileTab";
-import CardsTab from "./dashboard/CardsTab";
-import HistoryTab from "./dashboard/HistoryTab";
-import SupportTab from "./dashboard/SupportTab";
 import DashboardHeader from "./headers/DashboardHeader";
 import { useTableNavigation } from "@/hooks/useTableNavigation";
 
-export default function DashboardView() {
+const ProfileTab = lazy(() => import("./dashboard/ProfileTab"));
+const CardsTab = lazy(() => import("./dashboard/CardsTab"));
+const HistoryTab = lazy(() => import("./dashboard/HistoryTab"));
+const SupportTab = lazy(() => import("./dashboard/SupportTab"));
+
+interface DashboardViewProps {
+  onClose?: () => void;
+  onLogout?: () => void;
+}
+
+export default function DashboardView({
+  onClose,
+  onLogout,
+}: DashboardViewProps = {}) {
   const [activeTab, setActiveTab] = useState<
     "profile" | "cards" | "history" | "support"
   >("profile");
 
   const { user, isAuthenticated, isLoading, profile } = useAuth();
-  const router = useRouter();
   const { navigateWithTable } = useTableNavigation();
 
-  // States for Support Tab (Pepper chat)
   const [supportMessages, setSupportMessages] = useState<
     Array<{ role: "user" | "pepper"; content: string }>
   >([]);
   const [supportSessionId, setSupportSessionId] = useState<string | null>(null);
 
-  // Loading state
   if (isLoading) {
     return <Loader />;
   }
 
-  // Not authenticated (shouldn't happen but good fallback)
   if (!isAuthenticated || !user) {
     return (
       <div className="min-h-dvh bg-linear-to-br from-[#0a8b9b] to-[#153f43] flex flex-col">
         <div className="flex-1 flex flex-col items-center justify-center px-5 md:px-8 lg:px-10 pb-12 md:py-10 lg:py-12">
           <div className="w-full max-w-md">
-            {/* Logo */}
             <div className="mb-6 md:mb-8 lg:mb-10 text-center">
               <img
                 src="/logos/logo-short-green.webp"
@@ -52,9 +55,7 @@ export default function DashboardView() {
               </p>
             </div>
 
-            {/* Options */}
             <div className="space-y-3 md:space-y-4 lg:space-y-5">
-              {/* Sign In Option */}
               <button
                 onClick={() => navigateWithTable("/auth")}
                 className="w-full bg-white hover:bg-gray-50 text-black py-4 md:py-5 lg:py-6 px-4 md:px-5 lg:px-6 rounded-xl md:rounded-2xl transition-all duration-200 flex items-center gap-3 md:gap-4 lg:gap-5 active:scale-95"
@@ -85,7 +86,6 @@ export default function DashboardView() {
               </button>
             </div>
 
-            {/* Additional Info */}
             <div className="mt-6 md:mt-7 lg:mt-8 text-center">
               <p className="text-white/70 text-xs md:text-sm lg:text-base">
                 ¿No tienes cuenta?{" "}
@@ -104,20 +104,26 @@ export default function DashboardView() {
   }
 
   return (
-    <div className="min-h-dvh bg-linear-to-br from-[#0a8b9b] to-[#153f43] flex flex-col">
-      <DashboardHeader />
+    <div
+      className={`flex flex-col overflow-y-auto ${onClose ? "h-full" : "h-dvh bg-linear-to-br from-[#0a8b9b] to-[#153f43]"}`}
+    >
+      <DashboardHeader onClose={onClose} />
 
       <div className="px-4 md:px-6 lg:px-8 w-full flex-1 flex flex-col">
         {/* Welcome Header */}
-        <div className="left-4 right-4 bg-linear-to-tl from-[#0a8b9b] to-[#1d727e] rounded-t-4xl translate-y-7 z-0">
+        <div
+          className={`left-4 right-4 rounded-t-4xl translate-y-7 z-0 ${onClose ? "bg-black/5" : "bg-linear-to-tl from-[#0a8b9b] to-[#1d727e]"}`}
+        >
           <div className="py-6 md:py-8 lg:py-10 px-8 md:px-10 lg:px-12 flex flex-col justify-center pb-12 md:pb-14 lg:pb-16">
-            <h1 className="text-white text-2xl md:text-3xl lg:text-4xl font-medium">
+            <h1
+              className={`text-2xl md:text-3xl lg:text-4xl font-medium ${onClose ? "text-black/80" : "text-white"}`}
+            >
               ¡Bienvenido{profile?.firstName ? ` ${profile.firstName}` : ""}!
             </h1>
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col">
           <div className="bg-white rounded-t-4xl flex-1 z-5 flex flex-col px-6 md:px-7 lg:px-8 min-h-0">
             {/* Tabs */}
             <div className="relative grid grid-cols-4 gap-2 my-6 md:my-7 lg:my-8 w-full">
@@ -182,19 +188,21 @@ export default function DashboardView() {
 
             {/* Tab Content */}
             <div
-              className={`flex-1 flex flex-col pb-6 min-h-0 ${activeTab === "support" || activeTab === "cards" ? "relative" : ""}`}
+              className={`flex-1 flex flex-col overflow-y-auto pb-6 min-h-0 ${activeTab === "support" || activeTab === "cards" ? "relative" : ""}`}
             >
-              {activeTab === "profile" && <ProfileTab />}
-              {activeTab === "cards" && <CardsTab />}
-              {activeTab === "history" && <HistoryTab />}
-              {activeTab === "support" && (
-                <SupportTab
-                  messages={supportMessages}
-                  setMessages={setSupportMessages}
-                  sessionId={supportSessionId}
-                  setSessionId={setSupportSessionId}
-                />
-              )}
+              <Suspense fallback={null}>
+                {activeTab === "profile" && <ProfileTab onLogout={onLogout} />}
+                {activeTab === "cards" && <CardsTab />}
+                {activeTab === "history" && <HistoryTab />}
+                {activeTab === "support" && (
+                  <SupportTab
+                    messages={supportMessages}
+                    setMessages={setSupportMessages}
+                    sessionId={supportSessionId}
+                    setSessionId={setSupportSessionId}
+                  />
+                )}
+              </Suspense>
             </div>
           </div>
         </div>
