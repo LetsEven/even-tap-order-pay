@@ -3,6 +3,7 @@ import { requestWithAuth, type ApiResponse } from "./request-helper";
 // Tipos para dish individual
 export interface Dish {
   id: string;
+  menu_item_id?: number | null;
   item: string;
   quantity: number;
   price: number;
@@ -12,8 +13,26 @@ export interface Dish {
   total_price: number;
   images: string[];
   custom_fields: any | null;
+  special_instructions?: string | null;
   user_order_id: string | null;
   tap_order_id: string;
+}
+
+export interface LastOrderDish {
+  id: string;
+  menu_item_id: number;
+  item: string;
+  quantity: number;
+  price: number;
+  extra_price: number;
+  images: string[];
+  custom_fields: any | null;
+  special_instructions?: string | null;
+}
+
+export interface LastOrderResponse {
+  hasLastOrder: boolean;
+  data: { tap_order_id: string; dishes: LastOrderDish[] } | null;
 }
 
 export interface TapOrderInfo {
@@ -182,6 +201,19 @@ class TapOrderService {
   ): Promise<ApiResponse<ActiveOrderResponse>> {
     return this.request(
       `/tap-orders/restaurant/${restaurantId}/active/user/${clientId}`,
+      {
+        method: "GET",
+      },
+    );
+  }
+
+  // Obtener última orden de un usuario en un restaurante
+  async getLastOrderByUser(
+    clientId: string,
+    restaurantId: number,
+  ): Promise<ApiResponse<LastOrderResponse>> {
+    return this.request(
+      `/tap-orders/restaurant/${restaurantId}/user/${clientId}/last`,
       {
         method: "GET",
       },

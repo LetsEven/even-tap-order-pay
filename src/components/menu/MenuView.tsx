@@ -31,6 +31,7 @@ import { useGuest } from "@/context/GuestContext";
 import {
   tapOrderService,
   type ActiveOrderResponse,
+  type LastOrderDish,
 } from "@/services/taporders.service";
 
 const ChatView = lazy(() => import("../ChatView"));
@@ -132,6 +133,8 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
   >(null);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [hasLastOrder, setHasLastOrder] = useState(false);
+  const [isReordering, setIsReordering] = useState(false);
   const [showPepperChat, setShowPepperChat] = useState(false);
   const [isPepperClosing, setIsPepperClosing] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -140,7 +143,7 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
   const [showStickyBar, setShowStickyBar] = useState(false);
   const stickyTriggerRef = useRef<HTMLDivElement>(null);
   const { navigateWithTable } = useTableNavigation();
-  const { state: cartState, refreshCart } = useCart();
+  const { state: cartState, refreshCart, addItem } = useCart();
   const { restaurant, restaurantId, menu, loading, error } = useRestaurant();
 
   const closeSettingsModal = () => {
@@ -210,6 +213,56 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
   useEffect(() => {
     checkActiveOrder();
   }, [user?.id, guestId, restaurantId]);
+
+  useEffect(() => {
+    const checkLastOrder = async () => {
+      const clientId = user?.id || guestId;
+      if (!clientId || !restaurantId) return;
+      const response = await tapOrderService.getLastOrderByUser(
+        clientId,
+        restaurantId,
+      );
+      setHasLastOrder(!!(response.success && (response as any).hasLastOrder));
+    };
+    checkLastOrder();
+  }, [user?.id, guestId, restaurantId]);
+
+  const handleReorder = async () => {
+    const clientId = user?.id || guestId;
+    if (!clientId || !restaurantId) return;
+    setIsReordering(true);
+    try {
+      const response = await tapOrderService.getLastOrderByUser(
+        clientId,
+        restaurantId,
+      );
+      const dishes: LastOrderDish[] = (response as any)?.data?.dishes ?? [];
+      if (!dishes.length) return;
+
+      for (const dish of dishes) {
+        await addItem(
+          {
+            id: dish.menu_item_id,
+            name: dish.item,
+            description: "",
+            price: dish.price,
+            images: dish.images,
+            features: [],
+            discount: 0,
+            customFields: dish.custom_fields || [],
+            extraPrice: dish.extra_price || 0,
+          },
+          dish.quantity,
+          dish.special_instructions,
+        );
+      }
+      navigateWithTable("/cart");
+    } catch (error) {
+      console.error("Error al reordenar:", error);
+    } finally {
+      setIsReordering(false);
+    }
+  };
 
   const handleRefreshOrder = async () => {
     setIsRefreshing(true);
@@ -376,17 +429,30 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
               Mesa {tableNumber}
             </h3>
 
-            {/* Link to active order status */}
-            {activeOrder && (
-              <button
-                onClick={() =>
-                  setTimeout(() => setIsStatusModalOpen(true), 400)
-                }
-                className="bg-[#f9f9f9] border border-[#8e8e8e] rounded-full px-3 md:px-4 lg:px-5 py-1 md:py-1.5 text-sm md:text-lg lg:text-xl font-medium text-black w-fit mx-auto active:scale-90 transition-all"
-              >
-                Estatus de pedido
-              </button>
-            )}
+            {/* Link to active order status + reorder */}
+            <div className="flex flex-wrap gap-2 justify-center">
+              {activeOrder && (
+                <button
+                  onClick={() =>
+                    setTimeout(() => setIsStatusModalOpen(true), 400)
+                  }
+                  className="bg-[#f9f9f9] border border-[#8e8e8e] rounded-full px-3 md:px-4 lg:px-5 py-1 md:py-1.5 text-sm md:text-lg lg:text-xl font-medium text-black w-fit active:scale-90 transition-all"
+                >
+                  Estatus de pedido
+                </button>
+              )}
+              {hasLastOrder && (
+                <button
+                  onClick={handleReorder}
+                  disabled={isReordering}
+                  className="bg-[#eab3f4] text-white border border-[#8e8e8e] rounded-full px-3 md:px-4 lg:px-5 py-1 md:py-1.5 text-sm md:text-lg lg:text-xl font-medium w-fit active:scale-90 transition-all disabled:opacity-70 flex items-center gap-1.5"
+                >
+                  {isReordering && <Loader2 className="size-4 animate-spin" />}
+                  Reordenar
+                  <RefreshCw className="size-4" />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Search Input */}
