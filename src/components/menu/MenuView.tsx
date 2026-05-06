@@ -18,7 +18,6 @@ import {
   UserCircle,
   X,
   RefreshCw,
-  Loader2,
   Utensils,
 } from "lucide-react";
 import { useUserData } from "../../context/userDataContext";
@@ -38,6 +37,7 @@ const ChatView = lazy(() => import("../ChatView"));
 const AuthView = lazy(() => import("../AuthView"));
 const DashboardView = lazy(() => import("../DashboardView"));
 const RestaurantClosedModal = lazy(() => import("../RestaurantClosedModal"));
+const ReorderModal = lazy(() => import("../modals/ReorderModal"));
 
 // Pure functions — defined outside to avoid re-creation on every render
 function getStatusColor(status: string) {
@@ -134,7 +134,8 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [hasLastOrder, setHasLastOrder] = useState(false);
-  const [isReordering, setIsReordering] = useState(false);
+  const [showReorderModal, setShowReorderModal] = useState(false);
+  const [lastOrderItems, setLastOrderItems] = useState<LastOrderDish[]>([]);
   const [showPepperChat, setShowPepperChat] = useState(false);
   const [isPepperClosing, setIsPepperClosing] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -156,13 +157,13 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
 
   // Scroll lock unificado para todos los modales
   useEffect(() => {
-    if (showPepperChat || showSettingsModal || isStatusModalOpen) {
+    if (showPepperChat || showSettingsModal || isStatusModalOpen || showReorderModal) {
       lockScroll();
     } else {
       unlockScroll();
     }
     return unlockScroll;
-  }, [showPepperChat, showSettingsModal, isStatusModalOpen]);
+  }, [showPepperChat, showSettingsModal, isStatusModalOpen, showReorderModal]);
 
   // Precargar chunks lazy después de que la página ya es interactiva
   useEffect(() => {
@@ -222,47 +223,19 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
         clientId,
         restaurantId,
       );
-      setHasLastOrder(!!(response.success && (response as any).hasLastOrder));
+      if (response.success && (response as any).hasLastOrder) {
+        const dishes: LastOrderDish[] = (response as any)?.data?.dishes ?? [];
+        const withMenuItemId = dishes.filter((d) => d.menu_item_id);
+        if (withMenuItemId.length) {
+          setLastOrderItems(withMenuItemId);
+          setHasLastOrder(true);
+        }
+      }
     };
     checkLastOrder();
   }, [user?.id, guestId, restaurantId]);
 
-  const handleReorder = async () => {
-    const clientId = user?.id || guestId;
-    if (!clientId || !restaurantId) return;
-    setIsReordering(true);
-    try {
-      const response = await tapOrderService.getLastOrderByUser(
-        clientId,
-        restaurantId,
-      );
-      const dishes: LastOrderDish[] = (response as any)?.data?.dishes ?? [];
-      if (!dishes.length) return;
-
-      for (const dish of dishes) {
-        await addItem(
-          {
-            id: dish.menu_item_id,
-            name: dish.item,
-            description: "",
-            price: dish.price,
-            images: dish.images,
-            features: [],
-            discount: 0,
-            customFields: dish.custom_fields || [],
-            extraPrice: dish.extra_price || 0,
-          },
-          dish.quantity,
-          dish.special_instructions,
-        );
-      }
-      navigateWithTable("/cart");
-    } catch (error) {
-      console.error("Error al reordenar:", error);
-    } finally {
-      setIsReordering(false);
-    }
-  };
+  const handleReorder = () => setShowReorderModal(true);
 
   const handleRefreshOrder = async () => {
     setIsRefreshing(true);
@@ -444,10 +417,8 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
               {hasLastOrder && (
                 <button
                   onClick={handleReorder}
-                  disabled={isReordering}
-                  className="bg-[#eab3f4] text-white border border-[#8e8e8e] rounded-full px-3 md:px-4 lg:px-5 py-1 md:py-1.5 text-sm md:text-lg lg:text-xl font-medium w-fit active:scale-90 transition-all disabled:opacity-70 flex items-center gap-1.5"
+                  className="bg-[#eab3f4] text-white border border-[#8e8e8e] rounded-full px-3 md:px-4 lg:px-5 py-1 md:py-1.5 text-sm md:text-lg lg:text-xl font-medium w-fit active:scale-90 transition-all flex items-center gap-1.5"
                 >
-                  {isReordering && <Loader2 className="size-4 animate-spin" />}
                   Reordenar
                   <RefreshCw className="size-4" />
                 </button>
@@ -819,6 +790,15 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
           `}</style>
         </>
       )}
+
+      {/* Reorder Modal */}
+      <Suspense fallback={null}>
+        <ReorderModal
+          isOpen={showReorderModal}
+          onClose={() => setShowReorderModal(false)}
+          items={lastOrderItems}
+        />
+      </Suspense>
 
       {/* Restaurant Closed Modal */}
       <Suspense fallback={null}>

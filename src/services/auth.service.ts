@@ -74,33 +74,21 @@ class AuthService {
 
   // Manejar refresh del token cuando expira (llamado por servicios cuando reciben 401)
   async handleTokenRefresh(): Promise<string | null> {
-    // Si ya hay un refresh en proceso, esperar a que termine
-    if (this.isRefreshing) {
-      return new Promise((resolve) => {
-        this.subscribeTokenRefresh((token: string) => {
-          resolve(token);
-        });
-      });
-    }
-
-    this.isRefreshing = true;
-
     try {
       const result = await this.refreshToken();
 
       if (result.success && result.data?.session?.access_token) {
-        const newToken = result.data.session.access_token;
-        this.onRefreshed(newToken);
-        this.isRefreshing = false;
-        return newToken;
+        return result.data.session.access_token;
+      } else if (result.error === "Error al refrescar el token") {
+        // Error de red — los tokens pueden seguir siendo válidos, no cerrar sesión
+        console.warn("⚠️ Network error during token refresh, keeping session");
+        return null;
       } else {
-        // Refresh falló, hacer logout
-        this.isRefreshing = false;
+        // El servidor rechazó el refresh (token inválido o expirado) → logout
         await this.logout();
         this.clearAuthToken();
         this.clearAllSessionData();
 
-        // Redirigir a login si estamos en el navegador
         if (typeof window !== "undefined") {
           window.location.href = "/";
         }
@@ -108,18 +96,7 @@ class AuthService {
         return null;
       }
     } catch (error) {
-      console.error("Error in handleTokenRefresh:", error);
-      this.isRefreshing = false;
-
-      // Hacer logout en caso de error
-      await this.logout();
-      this.clearAuthToken();
-      this.clearAllSessionData();
-
-      if (typeof window !== "undefined") {
-        window.location.href = "/";
-      }
-
+      console.error("❌ Unexpected error in handleTokenRefresh:", error);
       return null;
     }
   }
@@ -443,12 +420,40 @@ class AuthService {
     return null;
   }
 
-  // Refrescar el access token
+  // Refrescar el access token (thread-safe: solo se ejecuta una vez en paralelo)
   async refreshToken(): Promise<AuthResponse> {
+    if (this.isRefreshing) {
+      return new Promise((resolve) => {
+        this.subscribeTokenRefresh((token: string) => {
+          if (token) {
+            resolve({
+              success: true,
+              data: {
+                user: { id: "", accountType: "" },
+                session: {
+                  access_token: token,
+                  refresh_token:
+                    localStorage.getItem("xquisito_refresh_token") || "",
+                  expires_at: parseInt(
+                    localStorage.getItem("xquisito_expires_at") || "0",
+                  ),
+                },
+              },
+            });
+          } else {
+            resolve({ success: false, error: "Token refresh failed" });
+          }
+        });
+      });
+    }
+
+    this.isRefreshing = true;
+
     try {
       const refreshToken = localStorage.getItem("xquisito_refresh_token");
 
       if (!refreshToken) {
+        this.isRefreshing = false;
         return {
           success: false,
           error: "No hay refresh token",
@@ -480,11 +485,17 @@ class AuthService {
             data.data.session.expires_at.toString(),
           );
         }
+        this.onRefreshed(data.data.session.access_token);
+      } else {
+        this.onRefreshed("");
       }
 
+      this.isRefreshing = false;
       return data;
     } catch (error) {
       console.error("Error refreshing token:", error);
+      this.isRefreshing = false;
+      this.onRefreshed("");
       return {
         success: false,
         error: "Error al refrescar el token",

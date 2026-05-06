@@ -374,7 +374,6 @@ export default function CardSelectionPage() {
         amount: totalAmount,
         currency: "MXN",
         tableNumber: undefined,
-        restaurantId: restaurantId?.toString(),
       });
 
       const appleOrderId =
@@ -474,7 +473,6 @@ export default function CardSelectionPage() {
         amount: totalAmount,
         currency: "MXN",
         tableNumber: undefined,
-        restaurantId: restaurantId?.toString(),
       });
 
       const googleOrderId =

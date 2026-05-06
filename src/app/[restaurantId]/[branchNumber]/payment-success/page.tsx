@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+
+const ReorderModal = lazy(() => import("@/components/modals/ReorderModal"));
 import { useTableNavigation } from "@/hooks/useTableNavigation";
 import { useRestaurant } from "@/context/RestaurantContext";
 import { useTable } from "@/context/TableContext";
@@ -19,7 +21,7 @@ import {
 } from "lucide-react";
 import { getCardTypeIcon } from "@/utils/cardIcons";
 import { tapOrderService } from "@/services/taporders.service";
-import type { TapOrder } from "@/services/taporders.service";
+import type { TapOrder, LastOrderDish } from "@/services/taporders.service";
 
 export default function PaymentSuccessPage() {
   const params = useParams();
@@ -69,6 +71,8 @@ export default function PaymentSuccessPage() {
   const [isLoadingOrder, setIsLoadingOrder] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
+  const [showReorderModal, setShowReorderModal] = useState(false);
+  const [reorderItems, setReorderItems] = useState<LastOrderDish[]>([]);
   const [isRegisterModalOpen, setIsRegisterModalOpen] =
     useState(!isAuthenticated);
 
@@ -78,7 +82,8 @@ export default function PaymentSuccessPage() {
       isTicketModalOpen ||
       isBreakdownModalOpen ||
       isStatusModalOpen ||
-      isRegisterModalOpen
+      isRegisterModalOpen ||
+      showReorderModal
     ) {
       document.body.style.overflow = "hidden";
     } else {
@@ -93,6 +98,7 @@ export default function PaymentSuccessPage() {
     isBreakdownModalOpen,
     isStatusModalOpen,
     isRegisterModalOpen,
+    showReorderModal,
   ]);
 
   useEffect(() => {
@@ -204,11 +210,33 @@ export default function PaymentSuccessPage() {
   };
 
   const handleViewStatus = () => {
-    // Abrir modal de estatus
     setIsStatusModalOpen(true);
-    // Cargar la orden
     fetchOrder();
   };
+
+  const handleReorder = () => {
+    if (!reorderItems.length) return;
+    setShowReorderModal(true);
+  };
+
+  // Cargar items de reorden desde los dishOrders almacenados
+  useEffect(() => {
+    if (!paymentDetails?.dishOrders?.length) return;
+    const items: LastOrderDish[] = (paymentDetails.dishOrders as any[])
+      .filter((d) => d.dish_order_id && typeof d.dish_order_id === "number")
+      .map((d) => ({
+        id: String(d.dish_order_id),
+        menu_item_id: d.dish_order_id as number,
+        item: d.item,
+        quantity: d.quantity || 1,
+        price: d.price || 0,
+        extra_price: d.extra_price || 0,
+        images: d.images || [],
+        custom_fields: d.custom_fields || null,
+        special_instructions: null,
+      }));
+    if (items.length) setReorderItems(items);
+  }, [paymentDetails]);
 
   // Función para cargar la orden
   const fetchOrder = async (isRefresh = false) => {
@@ -416,6 +444,19 @@ export default function PaymentSuccessPage() {
                 paddingBottom: "max(0rem, env(safe-area-inset-bottom))",
               }}
             >
+              {/* Reordenar btn */}
+              <button
+                onClick={handleReorder}
+                disabled={!reorderItems.length}
+                className="w-full flex items-center justify-center gap-2 md:gap-3 lg:gap-4 text-white py-3 md:py-4 lg:py-5 rounded-full cursor-pointer transition-all active:scale-90 bg-[#eab3f4] text-base md:text-lg lg:text-xl disabled:opacity-70 font-medium"
+              >
+                <RefreshCw
+                  className="size-5 md:size-6 lg:size-7"
+                  strokeWidth={2.5}
+                />
+                Reordenar
+              </button>
+
               <button
                 onClick={handleBackToMenu}
                 className="w-full text-white py-3 md:py-4 lg:py-5 rounded-full cursor-pointer transition-all active:scale-90 bg-linear-to-r from-[#34808C] to-[#173E44] text-base md:text-lg lg:text-xl"
@@ -964,6 +1005,15 @@ export default function PaymentSuccessPage() {
           </div>
         </div>
       )}
+
+      {/* Reorder Modal */}
+      <Suspense fallback={null}>
+        <ReorderModal
+          isOpen={showReorderModal}
+          onClose={() => setShowReorderModal(false)}
+          items={reorderItems}
+        />
+      </Suspense>
     </div>
   );
 }
