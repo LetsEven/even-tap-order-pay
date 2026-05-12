@@ -246,9 +246,12 @@ class AuthService {
             },
           });
         } else {
+          // handleTokenRefresh ya hizo logout si el servidor rechazó el token.
+          // Si fue error de red, devolvemos un error genérico para que el
+          // llamador no cierre la sesión innecesariamente.
           return {
             success: false,
-            error: "Sesión expirada",
+            error: "Error al renovar la sesión",
           };
         }
       }
@@ -339,12 +342,14 @@ class AuthService {
       // Limpiar localStorage
       localStorage.removeItem("xquisito_access_token");
       localStorage.removeItem("xquisito_refresh_token");
+      localStorage.removeItem("xquisito_expires_at");
       localStorage.removeItem("xquisito_user");
     } catch (error) {
       console.error("Error logging out:", error);
       // Limpiar localStorage de todos modos
       localStorage.removeItem("xquisito_access_token");
       localStorage.removeItem("xquisito_refresh_token");
+      localStorage.removeItem("xquisito_expires_at");
       localStorage.removeItem("xquisito_user");
     }
   }

@@ -15,6 +15,7 @@ export interface Restaurant {
       is_closed: boolean;
       open_time: string;
       close_time: string;
+      is_all_day?: boolean;
     };
   };
   created_at: string;

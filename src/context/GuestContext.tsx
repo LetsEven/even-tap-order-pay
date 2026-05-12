@@ -49,7 +49,6 @@ function GuestProviderInternal({ children }: GuestProviderProps) {
     if (user) {
       // User is registered - clear any guest session
       if (isGuest) {
-        console.log("🔐 Registered user detected - clearing guest session");
         clearGuestSession();
       }
     } else {
@@ -60,12 +59,6 @@ function GuestProviderInternal({ children }: GuestProviderProps) {
 
       // Priority 1: If URL has table parameter, use it (even if restoring session)
       if (tableParam) {
-        console.log(
-          "👤 Table parameter detected:",
-          tableParam,
-          "- Setting up guest session"
-        );
-
         // Use existing guest ID if available, or create new one
         const guestIdToUse = storedGuestId || generateGuestId();
 
@@ -76,11 +69,6 @@ function GuestProviderInternal({ children }: GuestProviderProps) {
         setIsGuest(true);
         setGuestId(guestIdToUse);
         setTableNumber(tableParam);
-        console.log("👤 Guest session configured:", {
-          guestId: guestIdToUse,
-          tableNumber: tableParam,
-          wasRestored: !!storedGuestId,
-        });
         return;
       }
 
@@ -91,18 +79,10 @@ function GuestProviderInternal({ children }: GuestProviderProps) {
         setGuestId(storedGuestId);
         setTableNumber(storedTableNumber);
         setGuestName(storedGuestName);
-        console.log("🔄 Restored guest session:", {
-          guestId: storedGuestId,
-          tableNumber: storedTableNumber,
-          guestName: storedGuestName,
-        });
         return;
       }
 
       // Priority 3: No table param and no valid stored session - stay as non-guest
-      console.log(
-        "ℹ️ No table parameter and no valid guest session - staying as non-guest"
-      );
     }
   }, [isLoading, user, searchParams]);
 
@@ -120,17 +100,11 @@ function GuestProviderInternal({ children }: GuestProviderProps) {
       localStorage.setItem("xquisito-table-number", newTableNumber);
       setTableNumber(newTableNumber);
     }
-
-    console.log("👤 Set as guest user:", {
-      guestId: generatedGuestId,
-      tableNumber: newTableNumber,
-    });
   };
 
   const setAsAuthenticated = (userId: string) => {
     // Clear guest session when user authenticates
     clearGuestSession();
-    console.log("🔐 Set as authenticated user:", userId);
   };
 
   const clearGuestSession = () => {
@@ -143,13 +117,11 @@ function GuestProviderInternal({ children }: GuestProviderProps) {
     localStorage.removeItem("xquisito-guest-name");
     // NO eliminar xquisito-guest-id aquí - lo necesitamos para migrar el carrito
     // El CartContext lo eliminará después de la migración exitosa
-    console.log("🗑️ Guest session cleared (guest_id preserved for cart migration)");
   };
 
   const setGuestNameHandler = (name: string) => {
     setGuestName(name);
     localStorage.setItem("xquisito-guest-name", name);
-    console.log("👤 Guest name set:", name);
   };
 
   // Helper function to generate guest ID

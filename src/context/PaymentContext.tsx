@@ -42,31 +42,22 @@ export function PaymentProvider({ children }: PaymentProviderProps) {
 
     // For registered users - prioritize user over guest session
     if (user) {
-      console.log("🔐 Fetching payment methods for registered user:", user.id);
-
       // NO eliminar guest_id aquí - CartContext lo necesita para migrar el carrito
       // El CartContext se encargará de limpiarlo después de la migración exitosa
       const guestIdBefore = localStorage.getItem("xquisito-guest-id");
       if (guestIdBefore) {
-        console.log(
-          "  ℹ️ Guest-id found (will be used for cart migration):",
-          guestIdBefore,
-        );
         // Solo limpiar table/restaurant/name, NO el guest_id
         localStorage.removeItem("xquisito-table-number");
         localStorage.removeItem("xquisito-restaurant-id");
         localStorage.removeItem("xquisito-guest-name");
       }
 
-      console.log("  isGuest state:", isGuest);
       setIsLoading(true);
       try {
         // Set auth token from AuthContext (token is automatically managed)
         // No need to manually get token since paymentService handles it through AuthContext
 
         const response = await paymentService.getPaymentMethods();
-        console.log("🔍 Full API response:", response);
-        console.log("🔍 Response.data:", response.data);
 
         if (response.success) {
           // Handle different possible response structures
@@ -82,14 +73,8 @@ export function PaymentProvider({ children }: PaymentProviderProps) {
           }
 
           setPaymentMethods(methods);
-          console.log(
-            "💳 Loaded payment methods for registered user:",
-            methods.length,
-            methods,
-          );
         } else {
           setPaymentMethods([]);
-          console.log("💳 No payment methods found for registered user");
         }
       } catch (error) {
         console.error(
@@ -105,12 +90,9 @@ export function PaymentProvider({ children }: PaymentProviderProps) {
 
     // For guests, ensure we have a guest ID
     if (isGuest && guestId) {
-      console.log("👥 Fetching payment methods for guest:", guestId);
       setIsLoading(true);
       try {
         const response = await paymentService.getPaymentMethods();
-        console.log("🔍 Full API response (guest):", response);
-        console.log("🔍 Response.data (guest):", response.data);
 
         if (response.success) {
           // Handle different possible response structures
@@ -126,14 +108,8 @@ export function PaymentProvider({ children }: PaymentProviderProps) {
           }
 
           setPaymentMethods(methods);
-          console.log(
-            "💳 Loaded payment methods for guest:",
-            methods.length,
-            methods,
-          );
         } else {
           setPaymentMethods([]);
-          console.log("💳 No payment methods found for guest");
         }
       } catch (error) {
         console.error("❌ Error fetching payment methods for guest:", error);
@@ -145,7 +121,6 @@ export function PaymentProvider({ children }: PaymentProviderProps) {
     }
 
     // No valid authentication context
-    console.log("⚠️ No valid authentication context for payment methods");
     setPaymentMethods([]);
   };
 
@@ -160,16 +135,9 @@ export function PaymentProvider({ children }: PaymentProviderProps) {
   const setDefaultPaymentMethod = async (paymentMethodId: string) => {
     // Only registered users can set default payment methods
     if (!user) {
-      console.log(
-        "⚠️ setDefaultPaymentMethod: Only registered users can set default payment methods",
-      );
       throw new Error("Only registered users can set default payment methods");
     }
 
-    console.log(
-      "🔧 Setting default payment method for registered user:",
-      paymentMethodId,
-    );
     try {
       // Auth token is automatically managed by AuthContext and paymentService
 
@@ -182,10 +150,6 @@ export function PaymentProvider({ children }: PaymentProviderProps) {
             ...pm,
             isDefault: pm.id === paymentMethodId,
           })),
-        );
-        console.log(
-          "✅ Default payment method set successfully:",
-          paymentMethodId,
         );
       } else {
         throw new Error(
@@ -201,33 +165,17 @@ export function PaymentProvider({ children }: PaymentProviderProps) {
   const deletePaymentMethod = async (paymentMethodId: string) => {
     // Only registered users can delete saved payment methods
     if (!user) {
-      console.log(
-        "⚠️ deletePaymentMethod: Only registered users can delete saved payment methods",
-      );
-      console.log("🔍 Current auth state:", {
-        user,
-        isAuthenticated,
-        isLoading,
-      });
       throw new Error("Debes estar autenticado para eliminar tarjetas");
     }
 
-    console.log(
-      "🗑️ Deleting payment method for registered user:",
-      paymentMethodId,
-      "User ID:",
-      user.id,
-    );
     try {
       // Auth token is automatically managed by AuthContext and paymentService
 
       const response =
         await paymentService.deletePaymentMethod(paymentMethodId);
-      console.log("🗑️ Delete response:", response);
 
       if (response.success) {
         removePaymentMethod(paymentMethodId);
-        console.log("✅ Payment method deleted successfully:", paymentMethodId);
       } else {
         console.error("❌ Delete payment method failed:", response.error);
         throw new Error(
@@ -245,43 +193,25 @@ export function PaymentProvider({ children }: PaymentProviderProps) {
     const guestIdToMigrate = localStorage.getItem("xquisito-guest-id");
 
     if (!guestIdToMigrate) {
-      console.log("ℹ️ No guest ID found - skipping payment methods migration");
       return;
     }
 
     if (!user) {
-      console.log("⚠️ User not authenticated - cannot migrate payment methods");
       return;
     }
-
-    console.log(
-      "🔄 Migrating payment methods from guest:",
-      guestIdToMigrate,
-      "to user:",
-      user.id,
-    );
 
     try {
       const response =
         await paymentService.migrateGuestPaymentMethods(guestIdToMigrate);
 
       if (response.success) {
-        console.log(
-          "✅ Payment methods migrated successfully:",
-          response.data?.migratedCount || 0,
-          "methods",
-        );
-
         // Refresh payment methods to show the migrated ones
         await refreshPaymentMethods();
 
         // IMPORTANTE: Solo eliminar el guest-id después de que TODAS las migraciones se completen
         // Esto incluye: cart migration (ejecutada en CartContext) + payment methods migration
-        console.log(
-          "🗑️ All migrations completed - removing guest ID from localStorage",
-        );
+
         localStorage.removeItem("xquisito-guest-id");
-        console.log("✅ Guest ID successfully removed");
       } else {
         console.error(
           "❌ Failed to migrate payment methods:",
@@ -297,17 +227,9 @@ export function PaymentProvider({ children }: PaymentProviderProps) {
   useEffect(() => {
     // If user is authenticated, clear any guest session
     if (user && isGuest) {
-      console.log("🔐 User authenticated - clearing guest session");
       setAsAuthenticated(user.id);
     }
 
-    console.log("🔄 PaymentContext - Context changed:", {
-      isAuthenticated,
-      hasUser: !!user,
-      userId: user?.id,
-      isGuest,
-      guestId,
-    });
     refreshPaymentMethods();
   }, [isAuthenticated, user?.id, isGuest, guestId, setAsAuthenticated]);
 
@@ -320,10 +242,6 @@ export function PaymentProvider({ children }: PaymentProviderProps) {
       const guestIdInStorage = localStorage.getItem("xquisito-guest-id");
 
       if (user && guestIdInStorage) {
-        console.log(
-          "🔄 Auto-triggering payment methods migration after authentication",
-        );
-
         // Esperar un poco para asegurarse de que el CartContext termine su migración primero
         await new Promise((resolve) => setTimeout(resolve, 1500));
 

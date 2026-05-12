@@ -52,14 +52,13 @@ export function useValidateAccess() {
             parseInt(restaurantId),
             parseInt(branchNumber),
             parseInt(tableNumber),
-            "tap-order-pay"
+            "tap-order-pay",
           );
 
         if (!validation.valid) {
           console.error("❌ Validation failed:", validation.error);
           setValidationError(validation.error || "VALIDATION_ERROR");
         } else {
-          console.log("✅ Validation successful");
           setValidationError(null);
         }
       } catch (err) {

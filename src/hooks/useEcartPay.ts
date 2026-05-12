@@ -14,7 +14,7 @@ export const useEcartPay = () => {
 
   const createCheckout = useCallback(
     async (
-      options: EcartPayCheckoutOptions
+      options: EcartPayCheckoutOptions,
     ): Promise<EcartPayCheckoutResult> => {
       setIsLoading(true);
       setError(null);
@@ -24,11 +24,7 @@ export const useEcartPay = () => {
           throw new Error("EcartPay SDK not loaded. Please refresh the page.");
         }
 
-        console.log("🔄 Creating EcartPay checkout with options:", options);
-
         const result = await window.Pay!.Checkout.create(options);
-
-        console.log("📤 Raw EcartPay result:", result);
 
         // Handle different response formats from EcartPay
         if (result && typeof result === "object") {
@@ -54,7 +50,7 @@ export const useEcartPay = () => {
                 status: "completed",
                 amount: options.order.items.reduce(
                   (sum, item) => sum + item.price * item.quantity,
-                  0
+                  0,
                 ),
                 currency: options.order.currency,
               },
@@ -76,7 +72,7 @@ export const useEcartPay = () => {
               status: "completed",
               amount: options.order.items.reduce(
                 (sum, item) => sum + item.price * item.quantity,
-                0
+                0,
               ),
               currency: options.order.currency,
             },
@@ -92,7 +88,7 @@ export const useEcartPay = () => {
         setIsLoading(false);
       }
     },
-    [isSDKLoaded]
+    [isSDKLoaded],
   );
 
   const waitForSDK = useCallback(
@@ -117,7 +113,7 @@ export const useEcartPay = () => {
         checkSDK();
       });
     },
-    [isSDKLoaded]
+    [isSDKLoaded],
   );
 
   return {

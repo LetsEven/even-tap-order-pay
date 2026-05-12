@@ -27,7 +27,7 @@ interface RestaurantContextValue {
 }
 
 const RestaurantContext = createContext<RestaurantContextValue | undefined>(
-  undefined
+  undefined,
 );
 
 interface RestaurantProviderProps {
@@ -44,13 +44,11 @@ export function RestaurantProvider({ children }: RestaurantProviderProps) {
 
   // Función para establecer el restaurantId y cargar los datos
   const setRestaurantId = (id: number) => {
-    console.log("🍽️ Setting restaurant ID:", id);
     setRestaurantIdState(id);
   };
 
   // Función para establecer el branchNumber
   const setBranchNumber = (num: number) => {
-    console.log("🏢 Setting branch number:", num);
     setBranchNumberState(num);
   };
 
@@ -58,7 +56,6 @@ export function RestaurantProvider({ children }: RestaurantProviderProps) {
   const refetchMenu = async () => {
     if (!restaurantId) return;
 
-    console.log("🔄 Refetching menu for restaurant:", restaurantId);
     await fetchRestaurantData(restaurantId, branchNumber || undefined);
   };
 
@@ -69,36 +66,17 @@ export function RestaurantProvider({ children }: RestaurantProviderProps) {
       setError(null);
 
       if (branch) {
-        console.log(
-          "📡 Fetching restaurant data for ID:",
-          id,
-          "branch:",
-          branch
-        );
         // Obtener restaurante y menú filtrado por sucursal
         const data = await restaurantService.getRestaurantWithMenuByBranch(
           id,
-          branch
-        );
-
-        console.log("✅ Restaurant data loaded:", data.restaurant.name);
-        console.log(
-          "✅ Menu loaded with",
-          data.menu.length,
-          "sections (filtered by branch",
           branch,
-          ")"
         );
 
         setRestaurant(data.restaurant);
         setMenu(data.menu);
       } else {
-        console.log("📡 Fetching restaurant data for ID:", id);
         // Obtener restaurante y menú completo (sin filtrar por sucursal)
         const data = await restaurantService.getRestaurantWithMenu(id);
-
-        console.log("✅ Restaurant data loaded:", data.restaurant.name);
-        console.log("✅ Menu loaded with", data.menu.length, "sections");
 
         setRestaurant(data.restaurant);
         setMenu(data.menu);
