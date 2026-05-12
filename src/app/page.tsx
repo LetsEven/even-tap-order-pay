@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 // Restaurant ID y Branch por defecto para testing
-const DEFAULT_RESTAURANT_ID = 5;
+const DEFAULT_RESTAURANT_ID = 15;
 const DEFAULT_BRANCH_NUMBER = 1;
 const DEFAULT_TABLE = 2;
 
@@ -22,16 +22,6 @@ export default function Home() {
     const storedRestaurant = sessionStorage.getItem("pendingRestaurantId");
     const authFromPaymentFlow = sessionStorage.getItem("authFromPaymentFlow");
     const authFromMenu = sessionStorage.getItem("authFromMenu");
-
-    console.log("🔍 Root page debugging:", {
-      isLoading,
-      isAuthenticated,
-      storedTable,
-      storedRestaurant,
-      authFromPaymentFlow,
-      authFromMenu,
-      currentPath: window.location.pathname,
-    });
 
     // Determinar restaurantId
     const restaurantParam = searchParams.get("restaurant");
@@ -80,9 +70,6 @@ export default function Home() {
     }
 
     // Default redirect
-    console.log(
-      `✅ Default redirect to /${DEFAULT_RESTAURANT_ID}/${DEFAULT_BRANCH_NUMBER}/menu?table=${DEFAULT_TABLE}`,
-    );
     router.replace(
       `/${DEFAULT_RESTAURANT_ID}/${DEFAULT_BRANCH_NUMBER}/menu?table=${DEFAULT_TABLE}`,
     );

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useTable } from "@/context/TableContext";
 import { useCart, CartItem } from "@/context/CartContext";
+import { useGuest } from "@/context/GuestContext";
 import { useTableNavigation } from "@/hooks/useTableNavigation";
 import { useRestaurant } from "@/context/RestaurantContext";
 import MenuHeaderBack from "@/components/headers/MenuHeaderBack";
@@ -30,6 +31,7 @@ export default function UserPage() {
   const [orderUserName, setOrderUserName] = useState("");
   const { dispatch } = useTable();
   const { state: cartState, setUserName: setCartUserName } = useCart();
+  const { setGuestName } = useGuest();
   const { tableNumber, navigateWithTable } = useTableNavigation();
   const router = useRouter();
 
@@ -75,8 +77,9 @@ export default function UserPage() {
         // Guardar items antes de que se limpie el carrito
         setOrderedItems([...cartState.items]);
         setOrderUserName(userName.trim());
-        // Guardar el nombre del usuario en el contexto del carrito
+        // Guardar el nombre del usuario en el contexto del carrito y en localStorage (persiste recarga)
         setCartUserName(userName.trim());
+        setGuestName(userName.trim());
         // Navegar a card-selection
         navigateWithTable("/card-selection");
       } catch (error) {
@@ -104,11 +107,11 @@ export default function UserPage() {
   }
 
   return (
-    <div className="min-h-new bg-gradient-to-br from-[#0a8b9b] to-[#153f43] flex flex-col">
+    <div className="min-h-new bg-linear-to-br from-[#0a8b9b] to-[#153f43] flex flex-col">
       <MenuHeaderBack />
 
       <div className="px-4 md:px-6 lg:px-8 w-full flex-1 flex flex-col">
-        <div className="left-4 right-4 bg-gradient-to-tl from-[#0a8b9b] to-[#1d727e] rounded-t-4xl translate-y-7 z-0">
+        <div className="left-4 right-4 bg-linear-to-tl from-[#0a8b9b] to-[#1d727e] rounded-t-4xl translate-y-7 z-0">
           <div className="py-6 md:py-8 lg:py-10 px-8 md:px-10 lg:px-12 flex flex-col justify-center">
             <h2 className="font-medium text-white text-3xl md:text-4xl lg:text-5xl leading-7 md:leading-9 lg:leading-tight mt-2 md:mt-3 mb-6 md:mb-8">
               Ingresa tu nombre para continuar
@@ -132,7 +135,7 @@ export default function UserPage() {
                   value={userName}
                   onKeyDown={handleKeyDown}
                   onChange={handleNameChange}
-                  className="w-full px-6 md:px-8 lg:px-10 py-3 md:py-4 lg:py-5 bg-gray-100/90 backdrop-blur-xl !rounded-[9999px] text-black text-xl md:text-2xl lg:text-3xl text-center font-normal placeholder:text-gray-400 focus:outline-none border border-white/80 shadow-[0_2px_8px_rgba(0,0,0,0.06),inset_0_1px_6px_rgba(255,255,255,0.8)] focus:shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_0_0_1.2px_rgba(20,184,166,0.5)] transition-shadow"
+                  className="w-full px-6 md:px-8 lg:px-10 py-3 md:py-4 lg:py-5 bg-gray-100/90 backdrop-blur-xl rounded-[9999px]! text-black text-xl md:text-2xl lg:text-3xl text-center font-normal placeholder:text-gray-400 focus:outline-none border border-white/80 shadow-[0_2px_8px_rgba(0,0,0,0.06),inset_0_1px_6px_rgba(255,255,255,0.8)] focus:shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_0_0_1.2px_rgba(20,184,166,0.5)] transition-shadow"
                 />
               </div>
             </div>
@@ -148,8 +151,8 @@ export default function UserPage() {
             disabled={!userName.trim()}
             className={`w-full py-3 md:py-4 lg:py-5 rounded-full transition-all active:scale-90 text-white cursor-pointer text-base md:text-lg lg:text-xl ${
               userName.trim() && !isSubmitting
-                ? "bg-gradient-to-r from-[#34808C] to-[#173E44]"
-                : "bg-gradient-to-r from-[#34808C] to-[#173E44] opacity-50 cursor-not-allowed"
+                ? "bg-linear-to-r from-[#34808C] to-[#173E44]"
+                : "bg-linear-to-r from-[#34808C] to-[#173E44] opacity-50 cursor-not-allowed"
             }`}
           >
             {isSubmitting ? (

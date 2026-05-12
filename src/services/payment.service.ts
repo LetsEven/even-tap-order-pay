@@ -39,6 +39,7 @@ export interface ProcessPaymentRequest {
   orderId: string;
   tableNumber: string;
   restaurantId: string;
+  installments?: number;
 }
 
 export interface PaymentHistory {
@@ -150,6 +151,7 @@ class PaymentService {
     currency: string;
     tableNumber?: string;
     restaurantId?: string;
+    customerName?: string;
   }): Promise<ApiResponse<{ orderId: string }>> {
     return this.request("/payments/apple-pay/order", {
       method: "POST",
@@ -163,6 +165,7 @@ class PaymentService {
     currency: string;
     tableNumber?: string;
     restaurantId?: string;
+    customerName?: string;
   }): Promise<ApiResponse<{ orderId: string }>> {
     return this.request("/payments/google-pay/order", {
       method: "POST",

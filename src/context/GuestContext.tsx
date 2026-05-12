@@ -66,9 +66,11 @@ function GuestProviderInternal({ children }: GuestProviderProps) {
         localStorage.setItem("xquisito-table-number", tableParam);
         localStorage.setItem("xquisito-guest-id", guestIdToUse);
 
+        const storedGuestName = localStorage.getItem("xquisito-guest-name");
         setIsGuest(true);
         setGuestId(guestIdToUse);
         setTableNumber(tableParam);
+        setGuestName(storedGuestName);
         return;
       }
 

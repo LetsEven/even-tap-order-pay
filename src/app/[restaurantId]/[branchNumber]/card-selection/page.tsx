@@ -4,7 +4,7 @@ import { useCart } from "@/context/CartContext";
 import { useTableNavigation } from "@/hooks/useTableNavigation";
 import { usePayment } from "@/context/PaymentContext";
 import { useValidateAccess } from "@/hooks/useValidateAccess";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useGuest } from "@/context/GuestContext";
 import MenuHeaderBack from "@/components/headers/MenuHeaderBack";
@@ -16,6 +16,7 @@ import { tapOrderService } from "@/services/taporders.service";
 import { paymentService } from "@/services/payment.service";
 import { calculateCommissions } from "@/utils/commissionCalculator";
 import { usePaymentProvider } from "@/hooks/usePaymentProvider";
+import { useAgentStatus } from "@/hooks/useAgentStatus";
 
 export default function CardSelectionPage() {
   const {
@@ -25,14 +26,16 @@ export default function CardSelectionPage() {
   } = useValidateAccess();
   const restaurantId = restaurantIdNum.toString();
   const { provider, isLoadingProvider } = usePaymentProvider(restaurantId);
+  const { isAgentRequired } = useAgentStatus(restaurantIdNum, branchNumber);
 
   const { state: cartState, clearCart, orderNotes, setOrderNotes } = useCart();
   const { navigateWithTable, tableNumber } = useTableNavigation();
   const { paymentMethods, deletePaymentMethod } = usePayment();
   const { user, profile } = useAuth();
-  const { guestId } = useGuest();
+  const { guestId, guestName } = useGuest();
 
-  // Tarjeta por defecto del sistema para todos los usuarios
+  const isDev = process.env.NODE_ENV === "development";
+
   const defaultSystemCard = {
     id: "system-default-card",
     lastFourDigits: "1234",
@@ -42,13 +45,15 @@ export default function CardSelectionPage() {
     isSystemCard: true,
   };
 
-  // Combinar tarjetas del sistema con las del usuario
-  const allPaymentMethods = [defaultSystemCard, ...paymentMethods];
+  const allPaymentMethods = [
+    ...(isDev ? [defaultSystemCard] : []),
+    ...paymentMethods,
+  ];
 
   const baseAmount = cartState.totalPrice;
   const MINIMUM_AMOUNT = 20;
 
-  // Estados para propina
+  // Propina
   const [tipPercentage, setTipPercentage] = useState(0);
   const [customTip, setCustomTip] = useState("");
   const [showCustomTipInput, setShowCustomTipInput] = useState(false);
@@ -56,7 +61,7 @@ export default function CardSelectionPage() {
   const [showPaymentOptionsModal, setShowPaymentOptionsModal] = useState(false);
   const [selectedMSI, setSelectedMSI] = useState<number | null>(null);
 
-  // Estados para tarjetas
+  // Tarjetas
   const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState<
     string | null
   >(null);
@@ -74,14 +79,42 @@ export default function CardSelectionPage() {
   );
   const applePayListenersRef = useRef(false);
 
-  // Google Pay
+  // Google Pay — detección iOS como lazy initializer para evitar re-render
   const [googlePayReady, setGooglePayReady] = useState(false);
-  const [googlePayUnavailable, setGooglePayUnavailable] = useState(false);
+  const [googlePayUnavailable, setGooglePayUnavailable] = useState<boolean>(
+    () => {
+      if (typeof window === "undefined") return false;
+      const ua = navigator.userAgent;
+      return (
+        /iPhone|iPad|iPod/.test(ua) ||
+        (ua.includes("Macintosh") &&
+          navigator.vendor === "Apple Computer, Inc.")
+      );
+    },
+  );
   const [isGooglePayProcessing, setIsGooglePayProcessing] = useState(false);
   const [googlePayPaymentId, setGooglePayPaymentId] = useState<string | null>(
     null,
   );
   const googlePayListenersRef = useRef(false);
+
+  // Refs para valores frescos en success handlers sin stale closures
+  const cartItemsRef = useRef(cartState.items);
+  const cartUserNameRef = useRef(cartState.userName);
+  const profileRef = useRef(profile);
+  const guestNameRef = useRef(guestName);
+  useEffect(() => {
+    cartItemsRef.current = cartState.items;
+  }, [cartState.items]);
+  useEffect(() => {
+    cartUserNameRef.current = cartState.userName;
+  }, [cartState.userName]);
+  useEffect(() => {
+    profileRef.current = profile;
+  }, [profile]);
+  useEffect(() => {
+    guestNameRef.current = guestName;
+  }, [guestName]);
 
   // Animación de orden
   const [showAnimation, setShowAnimation] = useState(false);
@@ -91,7 +124,6 @@ export default function CardSelectionPage() {
   >([]);
   const [completedUserName, setCompletedUserName] = useState<string>("");
 
-  // Calcular propina
   const calculateTipAmount = () => {
     if (customTip && parseFloat(customTip) > 0) return parseFloat(customTip);
     return (baseAmount * tipPercentage) / 100;
@@ -122,7 +154,6 @@ export default function CardSelectionPage() {
     setTipPercentage(0);
   };
 
-  // Set default payment method when payment methods are loaded
   useEffect(() => {
     if (!selectedPaymentMethodId && allPaymentMethods.length > 0) {
       const defaultMethod =
@@ -134,21 +165,7 @@ export default function CardSelectionPage() {
     }
   }, [allPaymentMethods.length, selectedPaymentMethodId, cartState.isLoading]);
 
-  // Log provider
-  useEffect(() => {
-    if (!isLoadingProvider) {
-      console.log(
-        `[PaymentProvider] Proveedor activo: ${provider ?? "null"} (restaurantId: ${restaurantId})`,
-      );
-      if (provider === "clip") {
-        console.warn(
-          "[PaymentProvider] Clip seleccionado — flujo no implementado aún, usando eCartPay como fallback",
-        );
-      }
-    }
-  }, [provider, isLoadingProvider, restaurantId]);
-
-  // Cargar SDK de Ecart Pay para Apple Pay
+  // Cargar SDK de Apple Pay
   useEffect(() => {
     if (isLoadingProvider) return;
     if (provider !== null && provider !== "ecartpay") return;
@@ -157,7 +174,7 @@ export default function CardSelectionPage() {
     if (!ApplePaySession || !ApplePaySession.canMakePayments?.()) return;
 
     setApplePayUnavailable(false);
-    const src = "https://ecartpay.com/sdk/pay.js";
+    const src = "https://ecartpay.com/sdk/pay.js?v=2";
     if (!document.querySelector(`script[src="${src}"]`)) {
       const script = document.createElement("script");
       script.src = src;
@@ -166,196 +183,25 @@ export default function CardSelectionPage() {
     }
   }, [provider, isLoadingProvider]);
 
-  // Helper para obtener teléfono del cliente
-  const fetchCustomerPhone = async (): Promise<string | null> => {
-    if (!user?.id) return null;
-    try {
-      const token = localStorage.getItem("xquisito_access_token");
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) return null;
-      const result = await res.json();
-      return result.success && result.data?.profile?.phone
-        ? result.data.profile.phone
-        : null;
-    } catch {
-      return null;
+  // Cargar SDK de Google Pay
+  useEffect(() => {
+    if (isLoadingProvider) return;
+    if (provider !== null && provider !== "ecartpay") return;
+    if (googlePayUnavailable) return;
+
+    const src = "https://ecartpay.com/sdk/pay.js?v=2";
+    if (!document.querySelector(`script[src="${src}"]`)) {
+      const script = document.createElement("script");
+      script.src = src;
+      script.async = true;
+      document.head.appendChild(script);
     }
-  };
+  }, [provider, isLoadingProvider, googlePayUnavailable]);
 
-  // Helper para crear dish orders en tap order
-  const createDishOrdersForTap = async (
-    items: typeof cartState.items,
-    customerName: string,
-    customerPhone: string | null,
-    customerEmail: string,
-    clerkUserId: string | null,
-  ): Promise<{ firstTapOrderId: string | null; dishOrderIds: string[] }> => {
-    let firstTapOrderId: string | null = null;
-    const dishOrderIds: string[] = [];
-
-    for (const item of items) {
-      const images =
-        item.images && Array.isArray(item.images) && item.images.length > 0
-          ? item.images.filter((img) => img && typeof img === "string")
-          : [];
-      const customFields =
-        item.customFields &&
-        Array.isArray(item.customFields) &&
-        item.customFields.length > 0
-          ? item.customFields
-          : null;
-
-      const dishOrderResult = await tapOrderService.createDishOrder(
-        restaurantId,
-        branchNumber.toString(),
-        tableNumber!,
-        {
-          user_id: user?.id || null,
-          guest_id: guestId || null,
-          guest_name: customerName,
-          item: item.name,
-          price: item.price,
-          quantity: item.quantity || 1,
-          branch_number: parseInt(branchNumber.toString()),
-          customer_name: customerName,
-          customer_phone: customerPhone ?? undefined,
-          customer_email: customerEmail,
-          clerk_user_id: clerkUserId,
-          images,
-          custom_fields: customFields,
-          extra_price: item.extraPrice || 0,
-          menu_item_id: item.id ? item.id.toString() : null,
-          special_instructions: item.specialInstructions || null,
-          order_notes: orderNotes.trim() || null,
-        },
-      );
-
-      if (!dishOrderResult.success) {
-        throw new Error(
-          dishOrderResult.error || "Error al crear el dish order",
-        );
-      }
-
-      const dishOrderId = dishOrderResult.data?.dish_order_id || null;
-      if (dishOrderId) dishOrderIds.push(dishOrderId);
-
-      if (!firstTapOrderId) {
-        firstTapOrderId = dishOrderResult.data?.tap_order_id || null;
-        if (firstTapOrderId) setCompletedOrderId(firstTapOrderId);
-      }
-    }
-
-    return { firstTapOrderId, dishOrderIds };
-  };
-
-  const finalizeTapOrder = async (
-    tapOrderId: string,
-    dishOrderIds: string[],
-    paymentMethodIdForRecord: string | null,
-  ) => {
-    await tapOrderService.updatePaymentStatus(tapOrderId, "paid");
-    await tapOrderService.updateOrderStatus(tapOrderId, "completed");
-
-    for (const id of dishOrderIds) {
-      try {
-        await tapOrderService.markDishOrderAsPaid(id);
-      } catch {}
-    }
-
-    try {
-      const xquisitoRateApplied =
-        subtotalForCommission > 0
-          ? (xquisitoCommissionTotal / subtotalForCommission) * 100
-          : 0;
-      await tapOrderService.recordPaymentTransaction({
-        payment_method_id: paymentMethodIdForRecord,
-        restaurant_id: parseInt(restaurantId),
-        id_table_order: null,
-        id_tap_orders_and_pay: tapOrderId,
-        base_amount: baseAmount,
-        tip_amount: tipAmount,
-        iva_tip: ivaTip,
-        xquisito_commission_total: xquisitoCommissionTotal,
-        xquisito_commission_client: xquisitoCommissionClient,
-        xquisito_commission_restaurant: xquisitoCommissionRestaurant,
-        iva_xquisito_client: ivaXquisitoClient,
-        iva_xquisito_restaurant: ivaXquisitoRestaurant,
-        xquisito_client_charge: xquisitoClientCharge,
-        xquisito_restaurant_charge: xquisitoRestaurantCharge,
-        xquisito_rate_applied: xquisitoRateApplied,
-        total_amount_charged: totalAmount,
-        subtotal_for_commission: subtotalForCommission,
-        currency: "MXN",
-      });
-    } catch (e) {
-      console.error("Error recording payment transaction:", e);
-    }
-  };
-
-  const savePaymentForSuccess = (
-    tapOrderId: string | null,
-    cardLast4: string,
-    cardBrand: string,
-    paymentMethodIdForRecord: string | null,
-    customerName: string,
-    customerEmail: string,
-    customerPhone: string | null,
-    items: typeof cartState.items,
-  ) => {
-    const userName = profile?.firstName || cartState.userName || "Usuario";
-    const data = {
-      orderId: tapOrderId,
-      paymentId: tapOrderId,
-      transactionId: tapOrderId,
-      totalAmountCharged: totalAmount,
-      amount: totalAmount,
-      baseAmount,
-      tipAmount,
-      xquisitoCommissionClient,
-      ivaXquisitoClient,
-      xquisitoCommissionTotal,
-      userName,
-      customerName,
-      customerEmail,
-      customerPhone,
-      cardLast4,
-      cardBrand,
-      orderStatus: "confirmed",
-      paymentStatus: "paid",
-      createdAt: new Date().toISOString(),
-      dishOrders: items.map((item) => ({
-        dish_order_id: item.id || Date.now(),
-        item: item.name,
-        quantity: item.quantity || 1,
-        price: item.price,
-        extra_price: item.extraPrice || 0,
-        total_price: item.price * (item.quantity || 1),
-        guest_name: customerName,
-        custom_fields: item.customFields || null,
-        images: item.images,
-      })),
-      restaurantId: parseInt(restaurantId),
-      paymentMethodId: paymentMethodIdForRecord,
-      timestamp: Date.now(),
-      tableNumber,
-    };
-
-    localStorage.setItem("xquisito-completed-payment", JSON.stringify(data));
-    const uniqueKey = `xquisito-payment-success-${tapOrderId}`;
-    sessionStorage.setItem(uniqueKey, JSON.stringify(data));
-    sessionStorage.setItem("xquisito-current-payment-key", uniqueKey);
-    sessionStorage.setItem("xquisito-current-order-id", tapOrderId || "");
-  };
-
-  // Apple Pay SDK helper
   const getApplePaySDK = () =>
     new Promise<any>((resolve) => {
-      if ((window as any).Pay?.ApplePay) {
+      if ((window as any).Pay?.ApplePay)
         return resolve((window as any).Pay.ApplePay);
-      }
-
       const interval = setInterval(() => {
         if ((window as any).Pay?.ApplePay) {
           clearInterval(interval);
@@ -364,99 +210,10 @@ export default function CardSelectionPage() {
       }, 100);
     });
 
-  // Inicializar Apple Pay SDK cuando los datos estén listos
-  const initApplePay = useCallback(async () => {
-    if (typeof window === "undefined" || !totalAmount) return;
-
-    try {
-      // Crear orden en Ecart Pay para obtener orderId
-      const orderResult = await paymentService.createApplePayOrder({
-        amount: totalAmount,
-        currency: "MXN",
-        tableNumber: undefined,
-      });
-
-      const appleOrderId =
-        (orderResult as any).orderId ?? orderResult.data?.orderId;
-      if (!orderResult.success || !appleOrderId) {
-        const orderErr = `[AP-ORDER] No se pudo crear la orden: ${JSON.stringify(orderResult.error ?? orderResult)}`;
-        console.warn("⚠️ Apple Pay:", orderErr);
-        setErrorMessage(orderErr);
-        return;
-      }
-
-      const applePaySDK = await getApplePaySDK();
-      if (!applePaySDK) {
-        const sdkErr = "[AP-SDK] SDK no disponible en window.Pay.ApplePay";
-        console.warn("⚠️", sdkErr);
-        setErrorMessage(sdkErr);
-        return;
-      }
-
-      console.log("ORDER RESULT:", orderResult);
-
-      // Register listeners only once to avoid duplicates on re-renders
-      if (!applePayListenersRef.current) {
-        applePayListenersRef.current = true;
-        applePaySDK.on("ready", () => {
-          console.log("✅ Apple Pay botón listo");
-          setApplePayReady(true);
-        });
-        applePaySDK.on("unavailable", () => {
-          console.log("ℹ️ Apple Pay no disponible en este dispositivo/cuenta");
-          setApplePayUnavailable(true);
-        });
-        applePaySDK.on("cancel", () => {
-          console.log("🚫 Apple Pay cancelado por el usuario");
-          setIsApplePayProcessing(false);
-        });
-        applePaySDK.on("error", (err: any) => {
-          const errMsg = `[AP-ERROR] ${typeof err === "object" ? JSON.stringify(err) : String(err)}`;
-          console.error("❌ Apple Pay error:", err);
-          setIsApplePayProcessing(false);
-          setApplePayUnavailable(true);
-          setErrorMessage(errMsg);
-        });
-        applePaySDK.on("success", async () => {
-          console.log("💳 Apple Pay: pago autorizado");
-          const applePayId = `apple-pay-${Date.now()}`;
-          setApplePayPaymentId(applePayId);
-          setIsApplePayProcessing(true);
-          setCompletedOrderItems([...cartState.items]);
-          const userName =
-            profile?.firstName || cartState.userName || "Usuario";
-          setCompletedUserName(userName);
-          setShowAnimation(true);
-        });
-      }
-
-      applePaySDK.render({
-        container: "#apple-pay-container",
-        orderId: appleOrderId,
-        amount: totalAmount,
-        currency: "MXN",
-        countryCode: "MX",
-        supportedNetworks: ["visa", "masterCard", "amex"],
-        merchantCapabilities: [
-          "supports3DS",
-          "supportsDebit",
-          "supportsCredit",
-        ],
-        buttonStyle: "black",
-        buttonType: "pay",
-      });
-    } catch (err) {
-      const errMsg = `[AP-INIT] ${err instanceof Error ? err.message : JSON.stringify(err)}`;
-      console.error("❌ Error inicializando Apple Pay:", err);
-      setErrorMessage(errMsg);
-    }
-  }, [totalAmount, restaurantId, cartState.items, cartState.userName, profile]);
-
   const getGooglePaySDK = () =>
     new Promise<any>((resolve) => {
-      if ((window as any).Pay?.GooglePay) {
+      if ((window as any).Pay?.GooglePay)
         return resolve((window as any).Pay.GooglePay);
-      }
       const interval = setInterval(() => {
         if ((window as any).Pay?.GooglePay) {
           clearInterval(interval);
@@ -465,107 +222,179 @@ export default function CardSelectionPage() {
       }, 100);
     });
 
-  const initGooglePay = useCallback(async () => {
-    if (typeof window === "undefined" || !totalAmount) return;
+  // Inicializar Apple Pay SDK
+  useEffect(() => {
+    if (isLoadingInitial || totalAmount <= 0 || typeof window === "undefined")
+      return;
+    if (applePayListenersRef.current) return;
+    applePayListenersRef.current = true;
 
-    try {
-      const orderResult = await paymentService.createGooglePayOrder({
-        amount: totalAmount,
-        currency: "MXN",
-        tableNumber: undefined,
-      });
-
-      const googleOrderId =
-        (orderResult as any).orderId ?? orderResult.data?.orderId;
-      if (!orderResult.success || !googleOrderId) {
-        const orderErr = `[GP-ORDER] No se pudo crear la orden: ${JSON.stringify(orderResult.error ?? orderResult)}`;
-        console.warn("⚠️ Google Pay:", orderErr);
-        setErrorMessage(orderErr);
-        return;
-      }
-
-      const googlePaySDK = await getGooglePaySDK();
-      if (!googlePaySDK) {
-        const sdkErr = "[GP-SDK] SDK no disponible en window.Pay.GooglePay";
-        console.warn("⚠️", sdkErr);
-        setErrorMessage(sdkErr);
-        return;
-      }
-
-      if (!googlePayListenersRef.current) {
-        googlePayListenersRef.current = true;
-        googlePaySDK.on("ready", () => {
-          console.log("✅ Google Pay botón listo");
-          setGooglePayReady(true);
+    (async () => {
+      try {
+        const orderResult = await paymentService.createApplePayOrder({
+          amount: totalAmount,
+          currency: "MXN",
+          restaurantId: restaurantId,
+          customerName:
+            profileRef.current?.firstName ||
+            guestNameRef.current ||
+            cartUserNameRef.current ||
+            undefined,
         });
-        googlePaySDK.on("unavailable", () => {
-          console.log(
-            "ℹ️ Google Pay no disponible en este dispositivo/navegador",
+
+        const appleOrderId =
+          (orderResult as any).orderId ?? orderResult.data?.orderId;
+        if (!orderResult.success || !appleOrderId) {
+          console.warn(
+            "⚠️ [AP-ORDER] No se pudo crear la orden:",
+            orderResult.error ?? orderResult,
           );
-          setGooglePayUnavailable(true);
+          applePayListenersRef.current = false;
+          return;
+        }
+
+        const sdkAlreadyLoaded = !!(window as any).Pay?.ApplePay;
+        const applePaySDK = await getApplePaySDK();
+        if (!applePaySDK) {
+          console.warn("⚠️ [AP-SDK] SDK no disponible en window.Pay.ApplePay");
+          applePayListenersRef.current = false;
+          return;
+        }
+
+        applePaySDK.on("ready", () =>
+          setTimeout(() => setApplePayReady(true), 2800),
+        );
+        applePaySDK.on("unavailable", () => setApplePayUnavailable(true));
+        applePaySDK.on("cancel", () => setIsApplePayProcessing(false));
+        applePaySDK.on("error", (err: any) => {
+          console.error("❌ Apple Pay error:", err);
+          setIsApplePayProcessing(false);
+          setApplePayUnavailable(true);
         });
-        googlePaySDK.on("cancel", () => {
-          console.log("🚫 Google Pay cancelado por el usuario");
-          setIsGooglePayProcessing(false);
+        applePaySDK.on("success", (event: any) => {
+          sessionStorage.removeItem("xquisito-current-order-id");
+          sessionStorage.removeItem("xquisito-current-payment-key");
+          setApplePayPaymentId(event?.detail?.id || appleOrderId);
+          setIsApplePayProcessing(true);
+          setCompletedOrderItems([...cartItemsRef.current]);
+          setCompletedUserName(
+            profileRef.current?.firstName ||
+              guestNameRef.current ||
+              cartUserNameRef.current ||
+              "Usuario",
+          );
+          setShowAnimation(true);
         });
+
+        applePaySDK.render({
+          container: "#apple-pay-container",
+          orderId: appleOrderId,
+          amount: totalAmount,
+          currency: "MXN",
+          countryCode: "MX",
+          supportedNetworks: ["visa", "masterCard", "amex"],
+          merchantCapabilities: [
+            "supports3DS",
+            "supportsDebit",
+            "supportsCredit",
+          ],
+          buttonStyle: "black",
+          buttonType: "pay",
+          borderRadius: "8px",
+        });
+
+        if (sdkAlreadyLoaded) setTimeout(() => setApplePayReady(true), 2800);
+      } catch (err) {
+        applePayListenersRef.current = false;
+        console.error("❌ Error inicializando Apple Pay:", err);
+      }
+    })();
+  }, [isLoadingInitial, totalAmount]);
+
+  // Inicializar Google Pay SDK
+  useEffect(() => {
+    if (isLoadingInitial || totalAmount <= 0 || typeof window === "undefined")
+      return;
+    if (googlePayUnavailable) return;
+    if (googlePayListenersRef.current) return;
+    googlePayListenersRef.current = true;
+
+    (async () => {
+      try {
+        const orderResult = await paymentService.createGooglePayOrder({
+          amount: totalAmount,
+          currency: "MXN",
+          restaurantId: restaurantId,
+          customerName:
+            profileRef.current?.firstName ||
+            guestNameRef.current ||
+            cartUserNameRef.current ||
+            undefined,
+        });
+
+        const googleOrderId =
+          (orderResult as any).orderId ?? orderResult.data?.orderId;
+        if (!orderResult.success || !googleOrderId) {
+          console.warn(
+            "⚠️ [GP-ORDER] No se pudo crear la orden:",
+            orderResult.error ?? orderResult,
+          );
+          googlePayListenersRef.current = false;
+          return;
+        }
+
+        const sdkAlreadyLoaded = !!(window as any).Pay?.GooglePay;
+        const googlePaySDK = await getGooglePaySDK();
+        if (!googlePaySDK) {
+          console.warn("⚠️ [GP-SDK] SDK no disponible en window.Pay.GooglePay");
+          googlePayListenersRef.current = false;
+          return;
+        }
+
+        googlePaySDK.on("ready", () =>
+          setTimeout(() => setGooglePayReady(true), 2800),
+        );
+        googlePaySDK.on("unavailable", () => setGooglePayUnavailable(true));
+        googlePaySDK.on("cancel", () => setIsGooglePayProcessing(false));
         googlePaySDK.on("error", (err: any) => {
-          const errMsg = `[GP-ERROR] ${err?.detail?.message || (typeof err === "object" ? JSON.stringify(err) : String(err))}`;
           console.error("❌ Google Pay error:", err);
           setIsGooglePayProcessing(false);
           setGooglePayUnavailable(true);
-          setErrorMessage(errMsg);
         });
-        googlePaySDK.on("success", async () => {
-          console.log("💳 Google Pay: pago autorizado");
-          const gpPayId = `google-pay-${Date.now()}`;
-          setGooglePayPaymentId(gpPayId);
+        googlePaySDK.on("success", (event: any) => {
+          sessionStorage.removeItem("xquisito-current-order-id");
+          sessionStorage.removeItem("xquisito-current-payment-key");
+          setGooglePayPaymentId(event?.detail?.id || googleOrderId);
           setIsGooglePayProcessing(true);
-          setCompletedOrderItems([...cartState.items]);
-          const userName =
-            profile?.firstName || cartState.userName || "Usuario";
-          setCompletedUserName(userName);
+          setCompletedOrderItems([...cartItemsRef.current]);
+          setCompletedUserName(
+            profileRef.current?.firstName ||
+              guestNameRef.current ||
+              cartUserNameRef.current ||
+              "Usuario",
+          );
           setShowAnimation(true);
         });
+
+        googlePaySDK.render({
+          container: "#google-pay-container",
+          orderId: googleOrderId,
+          amount: totalAmount,
+          currency: "MXN",
+          countryCode: "MX",
+          allowedCardNetworks: ["VISA", "MASTERCARD", "AMEX"],
+          allowedAuthMethods: ["PAN_ONLY", "CRYPTOGRAM_3DS"],
+          buttonColor: "black",
+          buttonType: "pay",
+        });
+
+        if (sdkAlreadyLoaded) setTimeout(() => setGooglePayReady(true), 2800);
+      } catch (err) {
+        googlePayListenersRef.current = false;
+        console.error("❌ Error inicializando Google Pay:", err);
       }
-
-      googlePaySDK.render({
-        container: "#google-pay-container",
-        orderId: googleOrderId,
-        amount: totalAmount,
-        currency: "MXN",
-        countryCode: "MX",
-        allowedCardNetworks: ["VISA", "MASTERCARD", "AMEX"],
-        allowedAuthMethods: ["PAN_ONLY", "CRYPTOGRAM_3DS"],
-        buttonColor: "black",
-        buttonType: "pay",
-      });
-    } catch (err) {
-      const errMsg = `[GP-INIT] ${err instanceof Error ? err.message : JSON.stringify(err)}`;
-      console.error("❌ Error inicializando Google Pay:", err);
-      setErrorMessage(errMsg);
-    }
-  }, [totalAmount, restaurantId, cartState.items, cartState.userName, profile]);
-
-  useEffect(() => {
-    if (!isLoadingInitial && totalAmount > 0) {
-      initApplePay();
-    }
-  }, [isLoadingInitial, totalAmount, initApplePay]);
-
-  useEffect(() => {
-    if (!isLoadingInitial && totalAmount > 0) initApplePay();
-  }, [isLoadingInitial, totalAmount, initApplePay]);
-
-  useEffect(() => {
-    if (!isLoadingInitial && totalAmount > 0) {
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-      if (isIOS) {
-        setGooglePayUnavailable(true);
-        return;
-      }
-      initGooglePay();
-    }
-  }, [isLoadingInitial, totalAmount, initGooglePay]);
+    })();
+  }, [isLoadingInitial, totalAmount, googlePayUnavailable]);
 
   const handleInitiatePayment = (): void => {
     if (!tableNumber) {
@@ -579,7 +408,12 @@ export default function CardSelectionPage() {
       return;
     }
     setCompletedOrderItems([...cartState.items]);
-    setCompletedUserName(profile?.firstName || cartState.userName || "Usuario");
+    setCompletedUserName(
+      profile?.firstName ||
+        guestNameRef.current ||
+        cartState.userName ||
+        "Usuario",
+    );
     setShowAnimation(true);
   };
 
@@ -590,161 +424,209 @@ export default function CardSelectionPage() {
   };
 
   const handleConfirmPayment = async (): Promise<void> => {
-    const clerkUserId = user?.id
-      ? user.id
-      : typeof window !== "undefined"
-        ? localStorage.getItem("xquisito-guest-id")
-        : null;
+    const items =
+      completedOrderItems.length > 0 ? completedOrderItems : cartState.items;
 
-    // Apple Pay flow
-    if (isApplePayProcessing) {
-      setIsProcessing(true);
-      try {
-        const customerPhone = await fetchCustomerPhone();
-        const customerName =
-          profile?.firstName || cartState.userName || "Invitado";
-        const customerEmail =
-          profile?.email || user?.email || `${user?.id}@xquisito.ai`;
-
-        if (!completedOrderItems.length)
-          throw new Error("El carrito está vacío");
-
-        const { firstTapOrderId, dishOrderIds } = await createDishOrdersForTap(
-          completedOrderItems,
-          customerName,
-          customerPhone,
-          customerEmail,
-          clerkUserId,
-        );
-
-        if (firstTapOrderId) {
-          await finalizeTapOrder(firstTapOrderId, dishOrderIds, null);
-          savePaymentForSuccess(
-            firstTapOrderId,
-            "AP",
-            "apple",
-            null,
-            customerName,
-            customerEmail,
-            customerPhone,
-            completedOrderItems,
-          );
-          await clearCart();
-          setOrderNotes("");
-          setCompletedOrderId(firstTapOrderId);
-        }
-      } catch (error) {
-        sessionStorage.removeItem("xquisito-current-order-id");
-        sessionStorage.removeItem("xquisito-current-payment-key");
-        setCompletedOrderId(null);
-        setErrorMessage(
-          error instanceof Error ? error.message : "Error desconocido",
-        );
-        setShowAnimation(false);
-      } finally {
-        setIsProcessing(false);
-      }
-      return;
-    }
-
-    // Google Pay flow
-    if (isGooglePayProcessing) {
-      setIsProcessing(true);
-      try {
-        const customerPhone = await fetchCustomerPhone();
-        const customerName =
-          profile?.firstName || cartState.userName || "Invitado";
-        const customerEmail =
-          profile?.email || user?.email || `${user?.id}@xquisito.ai`;
-
-        if (!completedOrderItems.length)
-          throw new Error("El carrito está vacío");
-
-        const { firstTapOrderId, dishOrderIds } = await createDishOrdersForTap(
-          completedOrderItems,
-          customerName,
-          customerPhone,
-          customerEmail,
-          clerkUserId,
-        );
-
-        if (firstTapOrderId) {
-          await finalizeTapOrder(firstTapOrderId, dishOrderIds, null);
-          savePaymentForSuccess(
-            firstTapOrderId,
-            "GP",
-            "google",
-            null,
-            customerName,
-            customerEmail,
-            customerPhone,
-            completedOrderItems,
-          );
-          await clearCart();
-          setOrderNotes("");
-          setCompletedOrderId(firstTapOrderId);
-        }
-      } catch (error) {
-        sessionStorage.removeItem("xquisito-current-order-id");
-        sessionStorage.removeItem("xquisito-current-payment-key");
-        setCompletedOrderId(null);
-        setErrorMessage(
-          error instanceof Error ? error.message : "Error desconocido",
-        );
-        setShowAnimation(false);
-      } finally {
-        setIsProcessing(false);
-      }
-      return;
-    }
-
-    if (!tableNumber || !selectedPaymentMethodId) {
+    if (!items || items.length === 0) {
+      setErrorMessage("El carrito está vacío");
       setShowAnimation(false);
       return;
     }
 
+    const userId = user?.id || guestId || null;
+    const customerName =
+      profile?.firstName || guestName || cartState.userName || "Invitado";
+    const customerEmail = profile?.email || user?.email || null;
+    const customerPhone = user?.phone || null;
+    const isGuest = !user?.id && !!guestId;
+    const xquisitoRateApplied =
+      subtotalForCommission > 0
+        ? (xquisitoCommissionTotal / subtotalForCommission) * 100
+        : 0;
+
+    const mappedItems = items.map((item) => ({
+      item: item.name,
+      price: item.price,
+      quantity: item.quantity || 1,
+      images:
+        item.images && Array.isArray(item.images) && item.images.length > 0
+          ? item.images.filter((img) => typeof img === "string")
+          : [],
+      custom_fields:
+        item.customFields &&
+        Array.isArray(item.customFields) &&
+        item.customFields.length > 0
+          ? item.customFields
+          : null,
+      extra_price: item.extraPrice || 0,
+      menu_item_id: item.id ? item.id.toString() : null,
+      special_instructions: item.specialInstructions || null,
+    }));
+
+    const commonBody = {
+      clerk_user_id: userId,
+      guest_id: guestId || null,
+      user_id: userId,
+      is_guest: isGuest,
+      customer_name: customerName,
+      customer_email: customerEmail,
+      customer_phone: customerPhone,
+      restaurant_id: parseInt(restaurantId),
+      branch_number: parseInt(branchNumber.toString()),
+      table_number: tableNumber!,
+      order_notes: orderNotes.trim() || null,
+      items: mappedItems,
+      base_amount: baseAmount,
+      tip_amount: tipAmount,
+      total_amount_charged: totalAmount,
+      currency: "MXN",
+      transaction_by: profile?.firstName || customerName,
+      iva_tip: ivaTip,
+      xquisito_commission_total: xquisitoCommissionTotal,
+      xquisito_commission_client: xquisitoCommissionClient,
+      xquisito_commission_restaurant: xquisitoCommissionRestaurant,
+      iva_xquisito_client: ivaXquisitoClient,
+      iva_xquisito_restaurant: ivaXquisitoRestaurant,
+      xquisito_client_charge: xquisitoClientCharge,
+      xquisito_restaurant_charge: xquisitoRestaurantCharge,
+      xquisito_rate_applied: xquisitoRateApplied,
+    };
+
+    const saveAndFinalize = (
+      tapOrderId: string,
+      cardLast4: string,
+      cardBrand: string,
+      paymentMethodId: string | null,
+    ) => {
+      const userName = profile?.firstName || cartState.userName || "Usuario";
+      const data = {
+        orderId: tapOrderId,
+        paymentId: tapOrderId,
+        transactionId: tapOrderId,
+        totalAmountCharged: totalAmount,
+        amount: totalAmount,
+        baseAmount,
+        tipAmount,
+        xquisitoCommissionClient,
+        ivaXquisitoClient,
+        xquisitoCommissionTotal,
+        userName,
+        customerName,
+        customerEmail,
+        customerPhone,
+        cardLast4,
+        cardBrand,
+        orderStatus: "confirmed",
+        paymentStatus: "paid",
+        createdAt: new Date().toISOString(),
+        dishOrders: items.map((item) => ({
+          dish_order_id: item.id || Date.now(),
+          item: item.name,
+          quantity: item.quantity || 1,
+          price: item.price,
+          extra_price: item.extraPrice || 0,
+          total_price: item.price * (item.quantity || 1),
+          guest_name: customerName,
+          custom_fields: item.customFields || null,
+          images: item.images,
+        })),
+        restaurantId: parseInt(restaurantId),
+        paymentMethodId,
+        timestamp: Date.now(),
+        tableNumber,
+      };
+
+      localStorage.setItem("xquisito-completed-payment", JSON.stringify(data));
+      const uniqueKey = `xquisito-payment-success-${tapOrderId}`;
+      sessionStorage.setItem(uniqueKey, JSON.stringify(data));
+      sessionStorage.setItem("xquisito-current-payment-key", uniqueKey);
+      sessionStorage.setItem("xquisito-current-order-id", tapOrderId);
+    };
+
     setIsProcessing(true);
 
     try {
-      const customerPhone = await fetchCustomerPhone();
-      const customerName =
-        profile?.firstName || cartState.userName || "Invitado";
-      const customerEmail =
-        profile?.email || user?.email || `${user?.id}@xquisito.ai`;
+      // ── Apple Pay ──────────────────────────────────────────────────────────
+      if (isApplePayProcessing) {
+        const result = await tapOrderService.confirmOrder({
+          ...commonBody,
+          payment_method_id: null,
+          payment_source: "apple_pay",
+          ecartpay_order_id: applePayPaymentId,
+        });
 
-      if (!cartState.items.length) throw new Error("El carrito está vacío");
-
-      // Sistema card: skip EcartPay
-      if (selectedPaymentMethodId === "system-default-card") {
-        const { firstTapOrderId, dishOrderIds } = await createDishOrdersForTap(
-          cartState.items,
-          customerName,
-          customerPhone,
-          customerEmail,
-          clerkUserId,
-        );
-
-        if (firstTapOrderId) {
-          await finalizeTapOrder(firstTapOrderId, dishOrderIds, null);
-          savePaymentForSuccess(
-            firstTapOrderId,
-            "1234",
-            "amex",
-            null,
-            customerName,
-            customerEmail,
-            customerPhone,
-            cartState.items,
+        if (!result.success || !result.data?.order) {
+          throw new Error(
+            (result.error as any)?.message ||
+              result.error ||
+              "Error al confirmar la orden",
           );
-          await clearCart();
-          setOrderNotes("");
-          setCompletedOrderId(firstTapOrderId);
         }
+
+        const orderId = result.data.order.id;
+        saveAndFinalize(orderId, "AP", "apple", null);
+        setOrderNotes("");
+        await clearCart();
+        setCompletedOrderId(orderId);
         return;
       }
 
-      // Tarjetas reales: EcartPay
-      const paymentData = {
+      // ── Google Pay ─────────────────────────────────────────────────────────
+      if (isGooglePayProcessing) {
+        const result = await tapOrderService.confirmOrder({
+          ...commonBody,
+          payment_method_id: null,
+          payment_source: "google_pay",
+          ecartpay_order_id: googlePayPaymentId,
+        });
+
+        if (!result.success || !result.data?.order) {
+          throw new Error(
+            (result.error as any)?.message ||
+              result.error ||
+              "Error al confirmar la orden",
+          );
+        }
+
+        const orderId = result.data.order.id;
+        saveAndFinalize(orderId, "GP", "google", null);
+        setOrderNotes("");
+        await clearCart();
+        setCompletedOrderId(orderId);
+        return;
+      }
+
+      if (!tableNumber || !selectedPaymentMethodId) {
+        setShowAnimation(false);
+        return;
+      }
+
+      // ── Tarjeta del sistema (sin EcartPay) ─────────────────────────────────
+      if (selectedPaymentMethodId === "system-default-card") {
+        const result = await tapOrderService.confirmOrder({
+          ...commonBody,
+          payment_method_id: null,
+          payment_source: "dev",
+        });
+
+        if (!result.success || !result.data?.order) {
+          throw new Error(
+            (result.error as any)?.message ||
+              result.error ||
+              "Error al confirmar la orden",
+          );
+        }
+
+        const orderId = result.data.order.id;
+        saveAndFinalize(orderId, "1234", "amex", null);
+        setOrderNotes("");
+        await clearCart();
+        setCompletedOrderId(orderId);
+        return;
+      }
+
+      // ── Tarjeta guardada (EcartPay primero) ────────────────────────────────
+      const paymentResult = await paymentService.processPayment({
         paymentMethodId: selectedPaymentMethodId,
         amount: totalAmount,
         currency: "MXN",
@@ -753,46 +635,42 @@ export default function CardSelectionPage() {
         tableNumber: tableNumber,
         restaurantId,
         installments: selectedMSI || undefined,
-      };
+      });
 
-      const paymentResult = await paymentService.processPayment(paymentData);
       if (!paymentResult.success) {
         throw new Error(
           paymentResult.error?.message || "Error al procesar el pago",
         );
       }
 
-      const { firstTapOrderId, dishOrderIds } = await createDishOrdersForTap(
-        cartState.items,
-        customerName,
-        customerPhone,
-        customerEmail,
-        clerkUserId,
-      );
+      const confirmResult = await tapOrderService.confirmOrder({
+        ...commonBody,
+        payment_method_id: selectedPaymentMethodId,
+        payment_source: "saved_card",
+        installments: selectedMSI || null,
+      });
 
-      if (firstTapOrderId) {
-        await finalizeTapOrder(
-          firstTapOrderId,
-          dishOrderIds,
-          selectedPaymentMethodId,
+      if (!confirmResult.success || !confirmResult.data?.order) {
+        throw new Error(
+          (confirmResult.error as any)?.message ||
+            confirmResult.error ||
+            "Error al confirmar la orden",
         );
-        const selectedMethod = allPaymentMethods.find(
-          (pm) => pm.id === selectedPaymentMethodId,
-        );
-        savePaymentForSuccess(
-          firstTapOrderId,
-          selectedMethod?.lastFourDigits || "****",
-          selectedMethod?.cardBrand || "visa",
-          selectedPaymentMethodId,
-          customerName,
-          customerEmail,
-          customerPhone,
-          cartState.items,
-        );
-        await clearCart();
-        setOrderNotes("");
-        setCompletedOrderId(firstTapOrderId);
       }
+
+      const orderId = confirmResult.data.order.id;
+      const selectedMethod = allPaymentMethods.find(
+        (pm) => pm.id === selectedPaymentMethodId,
+      );
+      saveAndFinalize(
+        orderId,
+        selectedMethod?.lastFourDigits || "****",
+        selectedMethod?.cardBrand || "visa",
+        selectedPaymentMethodId,
+      );
+      setOrderNotes("");
+      await clearCart();
+      setCompletedOrderId(orderId);
     } catch (error) {
       sessionStorage.removeItem("xquisito-current-order-id");
       sessionStorage.removeItem("xquisito-current-payment-key");
@@ -813,17 +691,17 @@ export default function CardSelectionPage() {
   };
 
   const handleDeleteCard = async (paymentMethodId: string) => {
+    if (!confirm("¿Estás seguro de que quieres eliminar esta tarjeta?")) return;
     setDeletingCardId(paymentMethodId);
     try {
       await deletePaymentMethod(paymentMethodId);
-    } catch (error) {
+    } catch {
       setErrorMessage("Error al eliminar la tarjeta. Intenta de nuevo.");
     } finally {
       setDeletingCardId(null);
     }
   };
 
-  // Calcular total con MSI
   const getDisplayTotal = () => {
     if (selectedMSI === null) return totalAmount;
     const selectedMethod = allPaymentMethods.find(
@@ -864,14 +742,12 @@ export default function CardSelectionPage() {
           <MenuHeaderBack />
         </div>
         <div className="h-20" />
-
         <div className="px-4 md:px-6 lg:px-8 w-full flex-1 flex flex-col">
           <div className="bg-linear-to-tl from-[#0a8b9b] to-[#1d727e] rounded-t-4xl translate-y-7 z-0">
             <div className="py-6 px-8 flex flex-col justify-center">
               <div className="h-8 w-3/4 bg-white/20 rounded-full mt-2 mb-6 animate-pulse" />
             </div>
           </div>
-
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="bg-white rounded-t-4xl flex-1 flex flex-col px-8 overflow-hidden z-10">
               <div className="flex-1 overflow-y-auto py-8 pb-[120px] flex flex-col gap-4">
@@ -891,7 +767,6 @@ export default function CardSelectionPage() {
             </div>
           </div>
         </div>
-
         <div
           className="fixed bottom-0 left-0 right-0 bg-white mx-4 px-8 z-60 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]"
           style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
@@ -919,17 +794,38 @@ export default function CardSelectionPage() {
           userName={completedUserName}
           orderedItems={completedOrderItems}
           onContinue={() => {
-            let orderId =
-              sessionStorage.getItem("xquisito-current-order-id") ||
-              completedOrderId;
+            let orderId = sessionStorage.getItem("xquisito-current-order-id");
+
+            if (!orderId) {
+              orderId = completedOrderId;
+            }
+
+            if (!orderId) {
+              for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                if (key && key.startsWith("xquisito-payment-success-")) {
+                  try {
+                    const data = sessionStorage.getItem(key);
+                    if (data) {
+                      orderId = JSON.parse(data).orderId;
+                      break;
+                    }
+                  } catch {}
+                }
+              }
+            }
+
             if (!orderId) {
               try {
                 const data = localStorage.getItem("xquisito-completed-payment");
                 if (data) orderId = JSON.parse(data).orderId;
               } catch {}
             }
+
+            if (!orderId || orderId === "unknown") return;
+
             navigateWithTable(
-              `/payment-success?orderId=${orderId || "unknown"}&success=true`,
+              `/payment-success?orderId=${orderId}&success=true`,
             );
           }}
           onCancel={handleCancelPayment}
@@ -951,7 +847,9 @@ export default function CardSelectionPage() {
 
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="bg-white rounded-t-4xl flex-1 flex flex-col px-8 overflow-hidden z-50">
-              <div className="flex-1 overflow-y-auto py-8 pb-[140px]">
+              <div
+                className={`flex-1 overflow-y-auto py-8 ${isAgentRequired ? "pb-[160px]" : "pb-[120px]"}`}
+              >
                 {/* Resumen del pedido */}
                 <div className="space-y-2 mb-6">
                   <div className="flex justify-between items-center">
@@ -1088,7 +986,11 @@ export default function CardSelectionPage() {
                             Pago a meses
                           </span>
                           <div
-                            className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedMSI !== null ? "border-[#eab3f4] bg-[#eab3f4]" : "border-gray-300"}`}
+                            className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                              selectedMSI !== null
+                                ? "border-[#eab3f4] bg-[#eab3f4]"
+                                : "border-gray-300"
+                            }`}
                           >
                             {selectedMSI !== null && (
                               <div className="w-full h-full rounded-full bg-white scale-50" />
@@ -1101,8 +1003,8 @@ export default function CardSelectionPage() {
                 </div>
 
                 {/* Métodos de pago */}
-                <div className="mb-4">
-                  <h3 className="text-black font-medium mb-3 text-base md:text-lg lg:text-xl">
+                <div className="mb-2.5">
+                  <h3 className="text-black font-medium mb-3">
                     Métodos de pago
                   </h3>
                   <div className="space-y-2.5">
@@ -1120,7 +1022,7 @@ export default function CardSelectionPage() {
                             setSelectedPaymentMethodId(method.id);
                             setSelectedMSI(null);
                           }}
-                          className="flex items-center justify-center gap-3 mx-auto cursor-pointer text-base md:text-lg lg:text-xl"
+                          className="flex items-center justify-center gap-3 mx-auto cursor-pointer"
                         >
                           <div>{getCardTypeIcon(method.cardBrand)}</div>
                           <div>
@@ -1163,26 +1065,78 @@ export default function CardSelectionPage() {
                     ))}
 
                     {/* Apple Pay */}
-                    <div
-                      id="apple-pay-container"
-                      className={`w-full ${!applePayReady || applePayUnavailable ? "hidden" : ""}`}
-                    />
+                    {!applePayUnavailable && !isAgentRequired && (
+                      <div className="relative w-full h-[48px]">
+                        <div id="apple-pay-container" className="w-full" />
+                        {!applePayReady && (
+                          <div className="absolute inset-0 rounded-full bg-black flex items-center justify-center gap-2">
+                            <span
+                              className="text-white text-xl leading-none"
+                              style={{
+                                fontFamily:
+                                  "-apple-system, BlinkMacSystemFont, sans-serif",
+                              }}
+                              aria-hidden="true"
+                            >
+                              {""}
+                            </span>
+                            <span className="text-white font-medium text-base tracking-wide">
+                              Pay
+                            </span>
+                            <Loader2 className="size-4 animate-spin text-white" />
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* Google Pay */}
-                    <div
-                      id="google-pay-container"
-                      className={`w-full ${!googlePayReady || googlePayUnavailable ? "hidden" : ""}`}
-                    />
+                    {!googlePayUnavailable && !isAgentRequired && (
+                      <div className="relative w-full h-[48px]">
+                        <div id="google-pay-container" className="w-full" />
+                        {!googlePayReady && (
+                          <div className="absolute inset-0 rounded-full bg-black flex items-center justify-center gap-2">
+                            <svg
+                              width="18"
+                              height="18"
+                              viewBox="0 0 18 18"
+                              fill="none"
+                              aria-hidden="true"
+                            >
+                              <path
+                                d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"
+                                fill="#4285F4"
+                              />
+                              <path
+                                d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z"
+                                fill="#34A853"
+                              />
+                              <path
+                                d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"
+                                fill="#FBBC05"
+                              />
+                              <path
+                                d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"
+                                fill="#EA4335"
+                              />
+                            </svg>
+                            <span className="text-white font-medium text-base tracking-wide">
+                              Pay
+                            </span>
+                            <Loader2 className="size-4 animate-spin text-white" />
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 {/* Agregar tarjeta */}
-                <div className="mb-4">
+                <div className="mb-2.5">
                   <button
                     onClick={handleAddCard}
-                    className="border border-black/50 flex justify-center items-center gap-1 w-full text-black py-3 rounded-full cursor-pointer transition-colors bg-[#f9f9f9] hover:bg-gray-100 text-base md:text-lg lg:text-xl"
+                    className="border border-black/50 flex justify-center items-center gap-1 w-full text-black py-3 rounded-full cursor-pointer transition-colors bg-[#f9f9f9] hover:bg-gray-100"
                   >
-                    <Plus className="size-5 md:size-6 lg:size-7" />
+                    <Plus className="size-5" />
                     Agregar método de pago
                   </button>
                 </div>
@@ -1192,36 +1146,43 @@ export default function CardSelectionPage() {
         </div>
 
         {/* Barra inferior fija */}
-        <div
-          className="fixed bottom-0 left-0 right-0 bg-white mx-4 px-8 z-60 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]"
-          style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
-        >
-          <div className="mt-4">
-            <button
-              onClick={handleInitiatePayment}
-              disabled={
-                isProcessing || !selectedPaymentMethodId || isUnderMinimum
-              }
-              className={`w-full text-white py-3 rounded-full cursor-pointer transition-all active:scale-90 text-base md:text-lg lg:text-xl ${
-                isProcessing || !selectedPaymentMethodId || isUnderMinimum
-                  ? "bg-linear-to-r from-[#34808C] to-[#173E44] opacity-50 cursor-not-allowed"
-                  : "bg-linear-to-r from-[#34808C] to-[#173E44] animate-pulse-button"
-              }`}
-            >
-              {isProcessing ? (
-                <div className="flex items-center justify-center gap-2">
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  <span>Procesando pago...</span>
-                </div>
-              ) : !selectedPaymentMethodId ? (
-                "Selecciona una tarjeta"
-              ) : isUnderMinimum ? (
-                "Mínimo no alcanzado"
-              ) : (
-                "Pagar y ordenar"
-              )}
-            </button>
-          </div>
+        <div className="fixed bottom-0 left-0 right-0 bg-white mx-4 px-8 z-90 py-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+          {isAgentRequired && (
+            <p className="text-red-500 text-xs text-center mb-6">
+              El sistema de caja no está disponible en este momento. Intenta más
+              tarde.
+            </p>
+          )}
+          <button
+            onClick={handleInitiatePayment}
+            disabled={
+              isProcessing ||
+              !selectedPaymentMethodId ||
+              isUnderMinimum ||
+              isAgentRequired
+            }
+            className={`py-3 text-white rounded-full cursor-pointer font-normal h-fit w-full flex items-center justify-center text-base active:scale-95 transition-transform ${
+              isProcessing ||
+              !selectedPaymentMethodId ||
+              isUnderMinimum ||
+              isAgentRequired
+                ? "bg-linear-to-r from-[#34808C] to-[#173E44] opacity-50 cursor-not-allowed px-10"
+                : "bg-linear-to-r from-[#34808C] to-[#173E44] px-10 animate-pulse-button"
+            }`}
+          >
+            {isProcessing ? (
+              <div className="flex items-center justify-center gap-2">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span>Procesando pago...</span>
+              </div>
+            ) : !selectedPaymentMethodId ? (
+              "Selecciona una tarjeta"
+            ) : isUnderMinimum ? (
+              "Mínimo no alcanzado"
+            ) : (
+              "Pagar y ordenar"
+            )}
+          </button>
         </div>
 
         {/* Modal resumen del total */}
@@ -1345,7 +1306,11 @@ export default function CardSelectionPage() {
                     <div className="space-y-2.5">
                       <div
                         onClick={() => setSelectedMSI(null)}
-                        className={`py-2 px-5 border rounded-full cursor-pointer transition-colors ${selectedMSI === null ? "border-teal-500 bg-teal-50" : "border-black/50 bg-[#f9f9f9] hover:border-gray-400"}`}
+                        className={`py-2 px-5 border rounded-full cursor-pointer transition-colors ${
+                          selectedMSI === null
+                            ? "border-teal-500 bg-teal-50"
+                            : "border-black/50 bg-[#f9f9f9] hover:border-gray-400"
+                        }`}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
@@ -1357,7 +1322,11 @@ export default function CardSelectionPage() {
                             </p>
                           </div>
                           <div
-                            className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedMSI === null ? "border-teal-500 bg-teal-500" : "border-gray-300"}`}
+                            className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                              selectedMSI === null
+                                ? "border-teal-500 bg-teal-500"
+                                : "border-gray-300"
+                            }`}
                           >
                             {selectedMSI === null && (
                               <div className="w-full h-full rounded-full bg-white scale-50" />
@@ -1386,7 +1355,11 @@ export default function CardSelectionPage() {
                           <div
                             key={option.months}
                             onClick={() => setSelectedMSI(option.months)}
-                            className={`py-2 px-5 border rounded-full cursor-pointer transition-colors ${selectedMSI === option.months ? "border-teal-500 bg-teal-50" : "border-black/50 bg-[#f9f9f9] hover:border-gray-400"}`}
+                            className={`py-2 px-5 border rounded-full cursor-pointer transition-colors ${
+                              selectedMSI === option.months
+                                ? "border-teal-500 bg-teal-50"
+                                : "border-black/50 bg-[#f9f9f9] hover:border-gray-400"
+                            }`}
                           >
                             <div className="flex items-center justify-between">
                               <div className="flex-1">
@@ -1399,7 +1372,11 @@ export default function CardSelectionPage() {
                                 </p>
                               </div>
                               <div
-                                className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedMSI === option.months ? "border-teal-500 bg-teal-500" : "border-gray-300"}`}
+                                className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                                  selectedMSI === option.months
+                                    ? "border-teal-500 bg-teal-500"
+                                    : "border-gray-300"
+                                }`}
                               >
                                 {selectedMSI === option.months && (
                                   <div className="w-full h-full rounded-full bg-white scale-50" />

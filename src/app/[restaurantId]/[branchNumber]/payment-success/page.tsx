@@ -49,13 +49,15 @@ export default function PaymentSuccessPage() {
     searchParams.get("paymentId") || searchParams.get("orderId");
   const urlAmount = parseFloat(searchParams.get("amount") || "0");
 
+  // No abrir el modal de registro si el usuario viene de un redirect de auth
+  const cameFromAuth =
+    typeof window !== "undefined" &&
+    sessionStorage.getItem("xquisito-post-auth-redirect");
+
   // Handler for sign up navigation
   const handleSignUp = () => {
-    // Save the current URL to redirect back after registration
     const currentUrl = window.location.pathname + window.location.search;
     sessionStorage.setItem("xquisito-post-auth-redirect", currentUrl);
-
-    // Navigate to auth page
     navigateWithTable("/auth");
   };
 
@@ -73,8 +75,36 @@ export default function PaymentSuccessPage() {
   const [orderError, setOrderError] = useState<string | null>(null);
   const [showReorderModal, setShowReorderModal] = useState(false);
   const [reorderItems, setReorderItems] = useState<LastOrderDish[]>([]);
-  const [isRegisterModalOpen, setIsRegisterModalOpen] =
-    useState(!isAuthenticated);
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(
+    !isAuthenticated && !cameFromAuth,
+  );
+
+  // Limpiar el flag de redirect después de cargar
+  useEffect(() => {
+    if (cameFromAuth) {
+      sessionStorage.removeItem("xquisito-post-auth-redirect");
+    }
+  }, [cameFromAuth]);
+
+  // Bloquear scroll de la página completa al montar
+  useEffect(() => {
+    const prev = {
+      overflow: document.body.style.overflow,
+      position: document.body.style.position,
+      width: document.body.style.width,
+      height: document.body.style.height,
+    };
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.width = "100%";
+    document.body.style.height = "100%";
+    return () => {
+      document.body.style.overflow = prev.overflow;
+      document.body.style.position = prev.position;
+      document.body.style.width = prev.width;
+      document.body.style.height = prev.height;
+    };
+  }, []);
 
   // Bloquear scroll cuando los modales están abiertos
   useEffect(() => {
@@ -103,10 +133,6 @@ export default function PaymentSuccessPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      console.log(
-        "🔍 Payment success page - checking storage for payment data",
-      );
-
       // Get payment ID from URL to identify this specific payment
       const urlPaymentId = paymentId || searchParams.get("transactionId");
 
@@ -143,7 +169,6 @@ export default function PaymentSuccessPage() {
       if (storedPayment) {
         try {
           const parsed = JSON.parse(storedPayment);
-          console.log("📦 Parsed payment details:", parsed);
           setPaymentDetails(parsed);
 
           // If from localStorage (first time), save to sessionStorage for persistence
@@ -170,7 +195,6 @@ export default function PaymentSuccessPage() {
           console.error("Failed to parse stored payment details:", e);
         }
       } else {
-        console.log("📦 No payment data found in storage");
       }
     }
   }, [paymentId, searchParams]);
@@ -179,8 +203,64 @@ export default function PaymentSuccessPage() {
   const amount =
     paymentDetails?.totalAmountCharged || paymentDetails?.amount || urlAmount;
 
-  // Get dish orders from paymentDetails
-  const dishOrders = paymentDetails?.dishOrders || [];
+  // dishOrders: se carga del backend o del storage como fallback
+  const [dishOrders, setDishOrders] = useState<any[]>([]);
+  const [orderCreatedAt, setOrderCreatedAt] = useState<Date | null>(null);
+
+  const fetchDishOrders = async () => {
+    const orderId = paymentId || paymentDetails?.orderId;
+    if (!orderId) {
+      setDishOrders(paymentDetails?.dishOrders || []);
+      return;
+    }
+    try {
+      const result = await tapOrderService.getOrderById(orderId);
+      if (result.success && result.data) {
+        const orderData = (result.data as any)?.data || result.data;
+        if (orderData?.tap_order?.created_at) {
+          setOrderCreatedAt(new Date(orderData.tap_order.created_at));
+        }
+        if (orderData?.dishes?.length) {
+          const transformed = orderData.dishes.map((d: any) => ({
+            dish_order_id: d.menu_item_id || d.id,
+            item: d.item,
+            quantity: d.quantity,
+            price: d.price,
+            extra_price: d.extra_price || 0,
+            total_price:
+              d.total_price ?? (d.price + (d.extra_price || 0)) * d.quantity,
+            guest_name: d.guest_name || null,
+            custom_fields: d.custom_fields || null,
+            images: d.images || [],
+          }));
+          setDishOrders(transformed);
+          // Actualizar reorderItems con datos frescos
+          const reorder: LastOrderDish[] = orderData.dishes
+            .filter((d: any) => d.menu_item_id)
+            .map((d: any) => ({
+              id: String(d.id),
+              menu_item_id: d.menu_item_id as number,
+              item: d.item,
+              quantity: d.quantity,
+              price: d.price,
+              extra_price: d.extra_price || 0,
+              images: d.images || [],
+              custom_fields: d.custom_fields || null,
+              special_instructions: d.special_instructions || null,
+            }));
+          if (reorder.length) setReorderItems(reorder);
+          return;
+        }
+      }
+    } catch {
+      // silently fall through to storage
+    }
+    setDishOrders(paymentDetails?.dishOrders || []);
+  };
+
+  useEffect(() => {
+    fetchDishOrders();
+  }, [paymentId, paymentDetails]);
 
   const handleBackToMenu = () => {
     // Clear payment success data from sessionStorage
@@ -219,25 +299,6 @@ export default function PaymentSuccessPage() {
     setShowReorderModal(true);
   };
 
-  // Cargar items de reorden desde los dishOrders almacenados
-  useEffect(() => {
-    if (!paymentDetails?.dishOrders?.length) return;
-    const items: LastOrderDish[] = (paymentDetails.dishOrders as any[])
-      .filter((d) => d.dish_order_id && typeof d.dish_order_id === "number")
-      .map((d) => ({
-        id: String(d.dish_order_id),
-        menu_item_id: d.dish_order_id as number,
-        item: d.item,
-        quantity: d.quantity || 1,
-        price: d.price || 0,
-        extra_price: d.extra_price || 0,
-        images: d.images || [],
-        custom_fields: d.custom_fields || null,
-        special_instructions: null,
-      }));
-    if (items.length) setReorderItems(items);
-  }, [paymentDetails]);
-
   // Función para cargar la orden
   const fetchOrder = async (isRefresh = false) => {
     if (!paymentId) return;
@@ -255,7 +316,6 @@ export default function PaymentSuccessPage() {
       if (result.success && result.data) {
         const orderData = result.data?.data || result.data;
         setOrder(orderData);
-        console.log("Order loaded:", orderData);
       } else {
         setOrderError(result.error || "Error al cargar la orden");
       }
@@ -304,7 +364,6 @@ export default function PaymentSuccessPage() {
   // Handle rating selection
   const handleRatingClick = (starRating: number) => {
     if (hasRated) {
-      console.log("⚠️ User has already rated");
       return;
     }
     setRating(starRating);
@@ -322,11 +381,6 @@ export default function PaymentSuccessPage() {
     }
 
     try {
-      console.log("🔍 Submitting restaurant review:", {
-        restaurant_id: parseInt(restaurantId),
-        rating: rating,
-      });
-
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/restaurants/restaurant-reviews`,
         {
@@ -344,7 +398,6 @@ export default function PaymentSuccessPage() {
       const data = await response.json();
 
       if (data.success) {
-        console.log("✅ Restaurant review submitted successfully");
         setHasRated(true);
       } else {
         console.error("❌ Failed to submit restaurant review:", data.message);
@@ -355,7 +408,7 @@ export default function PaymentSuccessPage() {
   };
 
   return (
-    <div className="min-h-new bg-linear-to-br from-[#0a8b9b] to-[#153f43] flex flex-col">
+    <div className="min-h-dvh overflow-hidden bg-linear-to-br from-[#0a8b9b] to-[#153f43] flex flex-col">
       {/* Success Icon */}
       <div className="flex-1 flex justify-center items-center">
         <img
@@ -576,16 +629,20 @@ export default function PaymentSuccessPage() {
 
                   {paymentDetails?.cardLast4 && (
                     <div className="flex items-center gap-2 md:gap-3 lg:gap-4 text-white/90">
-                      <div className="bg-green-100 px-1 py-1.5 md:py-2 md:px-1.5 lg:py-2.5 lg:px-2 rounded-xl flex items-center justify-center">
-                        {getCardTypeIcon(
-                          paymentDetails.cardBrand || "unknown",
-                          "small",
-                          32,
-                          20,
-                        )}
+                      <div className="bg-green-100 p-2 md:p-2.5 lg:p-3 rounded-xl flex items-center justify-center">
+                        <div className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 flex items-center justify-center scale-150">
+                          {getCardTypeIcon(
+                            paymentDetails.cardBrand || "unknown",
+                            "medium",
+                          )}
+                        </div>
                       </div>
                       <span className="text-sm md:text-base lg:text-lg">
-                        **** {paymentDetails.cardLast4.slice(-3)}
+                        {paymentDetails.cardBrand === "apple"
+                          ? "Apple Pay"
+                          : paymentDetails.cardBrand === "google"
+                            ? "Google Pay"
+                            : `**** ${paymentDetails.cardLast4.slice(-4)}`}
                       </span>
                     </div>
                   )}

@@ -8,7 +8,7 @@ export interface Dish {
   quantity: number;
   price: number;
   extra_price: number;
-  status: "pending" | "in_progress" | "ready" | "delivered";
+  status: "preparing" | "ready" | "delivered";
   payment_status: "not_paid" | "paid";
   total_price: number;
   images: string[];
@@ -123,6 +123,57 @@ export interface PaymentTransactionData {
   currency?: string;
 }
 
+export interface ConfirmTapOrderItem {
+  item: string;
+  quantity?: number;
+  price: number;
+  images?: string[];
+  custom_fields?: any;
+  extra_price?: number;
+  menu_item_id?: string | null;
+  special_instructions?: string | null;
+}
+
+export interface ConfirmTapOrderData {
+  clerk_user_id?: string | null;
+  guest_id?: string | null;
+  user_id?: string | null;
+  is_guest?: boolean;
+  customer_name: string;
+  customer_email?: string | null;
+  customer_phone?: string | null;
+  restaurant_id: number;
+  branch_number: number;
+  table_number: string;
+  order_notes?: string | null;
+  items: ConfirmTapOrderItem[];
+  payment_method_id?: string | null;
+  base_amount: number;
+  tip_amount?: number;
+  total_amount_charged: number;
+  currency?: string;
+  payment_source?: "apple_pay" | "google_pay" | "saved_card" | "dev" | null;
+  ecartpay_order_id?: string | null;
+  transaction_by?: string | null;
+  installments?: number | null;
+  // comisiones (el backend las recalcula, se envían como referencia)
+  iva_tip?: number;
+  xquisito_commission_total?: number;
+  xquisito_commission_client?: number;
+  xquisito_commission_restaurant?: number;
+  iva_xquisito_client?: number;
+  iva_xquisito_restaurant?: number;
+  xquisito_client_charge?: number;
+  xquisito_restaurant_charge?: number;
+  xquisito_rate_applied?: number;
+}
+
+export interface ConfirmTapOrderResponse {
+  success: boolean;
+  data?: { order: any; transaction: any };
+  error?: string;
+}
+
 class TapOrderService {
   private async request<T>(
     endpoint: string,
@@ -205,6 +256,21 @@ class TapOrderService {
         method: "GET",
       },
     );
+  }
+
+  // Confirmar orden atómica: crea tap order + dish orders + transacción en una sola llamada
+  async confirmOrder(
+    data: ConfirmTapOrderData,
+  ): Promise<ConfirmTapOrderResponse> {
+    try {
+      return await this.request<any>("/tap-orders/confirm", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    } catch (error) {
+      console.error("Error confirming tap order:", error);
+      return { success: false, error: "Error al confirmar la orden" };
+    }
   }
 
   // Obtener última orden de un usuario en un restaurante
