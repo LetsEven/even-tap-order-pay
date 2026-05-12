@@ -292,15 +292,11 @@ export default function CardSelectionPage() {
           amount: totalAmount,
           currency: "MXN",
           countryCode: "MX",
-          supportedNetworks: ["visa", "masterCard", "amex"],
-          merchantCapabilities: [
-            "supports3DS",
-            "supportsDebit",
-            "supportsCredit",
-          ],
+          label: "My Store",
           buttonStyle: "black",
           buttonType: "pay",
           borderRadius: "8px",
+          supportedNetworks: ["visa", "masterCard", "amex"],
         });
 
         if (sdkAlreadyLoaded) setTimeout(() => setApplePayReady(true), 2800);
