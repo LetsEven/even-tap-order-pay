@@ -23,9 +23,9 @@ export default function MenuHeaderBack() {
           </div>
         </div>
 
-        {/* Xquisito Logo */}
+        {/* Even Logo */}
         <div className="absolute left-1/2 transform -translate-x-1/2 size-10 md:size-12 lg:size-14">
-          <img src="/logos/logo-short-green.webp" alt="Xquisito Logo" />
+          <img src="/logos/logo-short-green.webp" alt="Even Logo" />
         </div>
 
         {/* Espacio para mantener el layout */}

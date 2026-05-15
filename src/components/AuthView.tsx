@@ -245,7 +245,7 @@ export default function AuthView({ onClose }: AuthViewProps) {
           <div className="mb-8 text-center">
             <img
               src="/logos/logo-short-green.webp"
-              alt="Xquisito Logo"
+              alt="Even Logo"
               className="size-16 mx-auto mb-4"
             />
             <h1 className="text-2xl font-medium text-black/90">

@@ -168,7 +168,7 @@ const OrderAnimation = ({
                 <div className="size-20 md:size-24 lg:size-28 flex items-center justify-center rounded-full relative z-10">
                   <img
                     src="/logos/logo-short-green.webp"
-                    alt="Xquisito Logo"
+                    alt="Even Logo"
                     className="size-14 md:size-16 lg:size-20 grayscale opacity-50"
                   />
                 </div>
@@ -253,7 +253,7 @@ const OrderAnimation = ({
                             ) : (
                               <img
                                 src="/logos/logo-short-green.webp"
-                                alt="Logo Xquisito"
+                                alt="Logo Even"
                                 className="size-6 md:size-8 lg:size-10 object-contain"
                               />
                             )}

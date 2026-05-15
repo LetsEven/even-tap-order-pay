@@ -44,7 +44,7 @@ export default function DashboardView({
             <div className="mb-6 md:mb-8 lg:mb-10 text-center">
               <img
                 src="/logos/logo-short-green.webp"
-                alt="Xquisito Logo"
+                alt="Even Logo"
                 className="size-16 md:size-20 lg:size-24 mx-auto mb-4 md:mb-5 lg:mb-6"
               />
               <h1 className="text-white text-xl md:text-2xl lg:text-3xl font-medium mb-2 md:mb-3 lg:mb-4">

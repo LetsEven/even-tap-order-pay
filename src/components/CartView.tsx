@@ -10,7 +10,13 @@ import { useAuth } from "../context/AuthContext";
 
 export default function CartView() {
   const { state: tableState } = useTable();
-  const { state: cartState, updateQuantity, orderNotes, setOrderNotes, updateOrderNotes } = useCart();
+  const {
+    state: cartState,
+    updateQuantity,
+    orderNotes,
+    setOrderNotes,
+    updateOrderNotes,
+  } = useCart();
   const { navigateWithTable } = useTableNavigation();
   const { isAuthenticated, isLoading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -111,7 +117,7 @@ export default function CartView() {
                                 ) : (
                                   <img
                                     src="/logos/logo-short-green.webp"
-                                    alt="Logo Xquisito"
+                                    alt="Logo Even"
                                     className="size-18 md:size-20 lg:size-22 object-contain"
                                   />
                                 )}
@@ -150,7 +156,11 @@ export default function CartView() {
                             <div className="flex items-center gap-2 md:gap-3">
                               <Minus
                                 onClick={() =>
-                                  item.cartItemId && updateQuantity(item.cartItemId, item.quantity - 1)
+                                  item.cartItemId &&
+                                  updateQuantity(
+                                    item.cartItemId,
+                                    item.quantity - 1,
+                                  )
                                 }
                                 className="size-4 md:size-5 lg:size-6 flex items-center justify-center text-black cursor-pointer"
                               />
@@ -159,7 +169,11 @@ export default function CartView() {
                               </p>
                               <Plus
                                 onClick={() =>
-                                  item.cartItemId && updateQuantity(item.cartItemId, item.quantity + 1)
+                                  item.cartItemId &&
+                                  updateQuantity(
+                                    item.cartItemId,
+                                    item.quantity + 1,
+                                  )
                                 }
                                 className="size-4 md:size-5 lg:size-6 flex items-center justify-center text-black cursor-pointer"
                               />

@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 
 // Tipos para los datos de registro del usuario
 export interface SignUpData {
@@ -15,7 +21,9 @@ interface UserDataContextValue {
   clearSignUpData: () => void;
 }
 
-const UserDataContext = createContext<UserDataContextValue | undefined>(undefined);
+const UserDataContext = createContext<UserDataContextValue | undefined>(
+  undefined,
+);
 
 interface UserDataProviderProps {
   children: ReactNode;
@@ -30,7 +38,7 @@ export function UserDataProvider({ children }: UserDataProviderProps) {
   // Load from localStorage on mount (for persistence between page changes)
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("xquisito-signup-data");
+      const stored = localStorage.getItem("even-signup-data");
       if (stored) {
         try {
           const parsed = JSON.parse(stored) as SignUpData;
@@ -45,7 +53,7 @@ export function UserDataProvider({ children }: UserDataProviderProps) {
   // Save to localStorage when data changes
   useEffect(() => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("xquisito-signup-data", JSON.stringify(signUpData));
+      localStorage.setItem("even-signup-data", JSON.stringify(signUpData));
     }
   }, [signUpData]);
 
@@ -56,7 +64,7 @@ export function UserDataProvider({ children }: UserDataProviderProps) {
   const clearSignUpData = () => {
     setSignUpData({ age: null, gender: null });
     if (typeof window !== "undefined") {
-      localStorage.removeItem("xquisito-signup-data");
+      localStorage.removeItem("even-signup-data");
     }
   };
 

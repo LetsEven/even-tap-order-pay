@@ -44,12 +44,12 @@ export function PaymentProvider({ children }: PaymentProviderProps) {
     if (user) {
       // NO eliminar guest_id aquí - CartContext lo necesita para migrar el carrito
       // El CartContext se encargará de limpiarlo después de la migración exitosa
-      const guestIdBefore = localStorage.getItem("xquisito-guest-id");
+      const guestIdBefore = localStorage.getItem("even-guest-id");
       if (guestIdBefore) {
         // Solo limpiar table/restaurant/name, NO el guest_id
-        localStorage.removeItem("xquisito-table-number");
-        localStorage.removeItem("xquisito-restaurant-id");
-        localStorage.removeItem("xquisito-guest-name");
+        localStorage.removeItem("even-table-number");
+        localStorage.removeItem("even-restaurant-id");
+        localStorage.removeItem("even-guest-name");
       }
 
       setIsLoading(true);
@@ -190,7 +190,7 @@ export function PaymentProvider({ children }: PaymentProviderProps) {
 
   const migrateGuestPaymentMethods = async () => {
     // Get guest ID from localStorage
-    const guestIdToMigrate = localStorage.getItem("xquisito-guest-id");
+    const guestIdToMigrate = localStorage.getItem("even-guest-id");
 
     if (!guestIdToMigrate) {
       return;
@@ -211,7 +211,7 @@ export function PaymentProvider({ children }: PaymentProviderProps) {
         // IMPORTANTE: Solo eliminar el guest-id después de que TODAS las migraciones se completen
         // Esto incluye: cart migration (ejecutada en CartContext) + payment methods migration
 
-        localStorage.removeItem("xquisito-guest-id");
+        localStorage.removeItem("even-guest-id");
       } else {
         console.error(
           "❌ Failed to migrate payment methods:",
@@ -239,7 +239,7 @@ export function PaymentProvider({ children }: PaymentProviderProps) {
       // Solo ejecutar cuando:
       // 1. El usuario está autenticado
       // 2. Hay un guest-id en localStorage
-      const guestIdInStorage = localStorage.getItem("xquisito-guest-id");
+      const guestIdInStorage = localStorage.getItem("even-guest-id");
 
       if (user && guestIdInStorage) {
         // Esperar un poco para asegurarse de que el CartContext termine su migración primero

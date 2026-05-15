@@ -227,7 +227,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
               await refreshCart();
               if (typeof window !== "undefined") {
                 window.dispatchEvent(
-                  new CustomEvent("xquisito:cartMigrationComplete"),
+                  new CustomEvent("even:cartMigrationComplete"),
                 );
               }
             } else {

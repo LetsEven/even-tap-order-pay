@@ -52,13 +52,13 @@ export interface PaymentHistory {
 class PaymentService {
   private async request<T>(
     endpoint: string,
-    options?: RequestInit
+    options?: RequestInit,
   ): Promise<ApiResponse<T>> {
     // Usar el helper con refresh automático
     const result = await requestWithAuth<T>(endpoint, options);
 
     // Adaptar el formato de error al esperado por PaymentService
-    if (!result.success && result.error && typeof result.error === 'string') {
+    if (!result.success && result.error && typeof result.error === "string") {
       return {
         success: false,
         error: {
@@ -73,14 +73,14 @@ class PaymentService {
 
   // Añadir método de pago
   async addPaymentMethod(
-    paymentData: AddPaymentMethodRequest
+    paymentData: AddPaymentMethodRequest,
   ): Promise<ApiResponse<{ paymentMethod: PaymentMethod }>> {
     // Obtener email del usuario autenticado o usar un email temporal para guests
-    let userEmail = "guest@xquisito.com"; // Fallback
+    let userEmail = "guest@letseven.io"; // Fallback
 
     if (typeof window !== "undefined") {
       // Intentar obtener email del localStorage (si está disponible)
-      const storedEmail = localStorage.getItem("xquisito_user_email");
+      const storedEmail = localStorage.getItem("even_user_email");
       if (storedEmail) {
         userEmail = storedEmail;
       }
@@ -112,7 +112,7 @@ class PaymentService {
 
   // Eliminar método de pago
   async deletePaymentMethod(
-    paymentMethodId: string
+    paymentMethodId: string,
   ): Promise<ApiResponse<{ message: string }>> {
     return this.request(`/payment-methods/${paymentMethodId}`, {
       method: "DELETE",
@@ -121,7 +121,7 @@ class PaymentService {
 
   // Establecer método de pago como predeterminado
   async setDefaultPaymentMethod(
-    paymentMethodId: string
+    paymentMethodId: string,
   ): Promise<ApiResponse<{ message: string }>> {
     return this.request(`/payment-methods/${paymentMethodId}/default`, {
       method: "PUT",
@@ -130,7 +130,7 @@ class PaymentService {
 
   // Procesar pago
   async processPayment(
-    paymentData: ProcessPaymentRequest
+    paymentData: ProcessPaymentRequest,
   ): Promise<ApiResponse<any>> {
     return this.request("/payments", {
       method: "POST",
@@ -175,7 +175,7 @@ class PaymentService {
 
   // Migrar métodos de pago de guest a usuario autenticado
   async migrateGuestPaymentMethods(
-    guestId: string
+    guestId: string,
   ): Promise<ApiResponse<{ migratedCount: number }>> {
     return this.request("/payment-methods/migrate-from-guest", {
       method: "POST",

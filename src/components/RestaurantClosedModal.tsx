@@ -66,7 +66,7 @@ export default function RestaurantClosedModal({
                 <div className="w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 bg-gray-200 rounded-lg md:rounded-xl flex items-center justify-center mb-3 md:mb-4 lg:mb-5">
                   <img
                     src="/logos/logo-short-green.webp"
-                    alt="Logo Xquisito"
+                    alt="Logo Even"
                     className="w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 object-contain"
                   />
                 </div>

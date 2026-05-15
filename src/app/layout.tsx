@@ -89,7 +89,7 @@ const helveticaNeue = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Xquisito Tap Order & Pay",
+  title: "Even Tap Order & Pay",
   description: "Tu menú digital con un toque de NFC",
   icons: {
     icon: [

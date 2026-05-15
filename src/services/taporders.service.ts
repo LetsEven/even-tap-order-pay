@@ -110,14 +110,14 @@ export interface PaymentTransactionData {
   base_amount: number;
   tip_amount: number;
   iva_tip: number;
-  xquisito_commission_total: number;
-  xquisito_commission_client: number;
-  xquisito_commission_restaurant: number;
-  iva_xquisito_client: number;
-  iva_xquisito_restaurant: number;
-  xquisito_client_charge: number;
-  xquisito_restaurant_charge: number;
-  xquisito_rate_applied: number;
+  even_commission_total: number;
+  even_commission_client: number;
+  even_commission_restaurant: number;
+  iva_even_client: number;
+  iva_even_restaurant: number;
+  even_client_charge: number;
+  even_restaurant_charge: number;
+  even_rate_applied: number;
   total_amount_charged: number;
   subtotal_for_commission: number;
   currency?: string;
@@ -158,14 +158,14 @@ export interface ConfirmTapOrderData {
   installments?: number | null;
   // comisiones (el backend las recalcula, se envían como referencia)
   iva_tip?: number;
-  xquisito_commission_total?: number;
-  xquisito_commission_client?: number;
-  xquisito_commission_restaurant?: number;
-  iva_xquisito_client?: number;
-  iva_xquisito_restaurant?: number;
-  xquisito_client_charge?: number;
-  xquisito_restaurant_charge?: number;
-  xquisito_rate_applied?: number;
+  even_commission_total?: number;
+  even_commission_client?: number;
+  even_commission_restaurant?: number;
+  iva_even_client?: number;
+  iva_even_restaurant?: number;
+  even_client_charge?: number;
+  even_restaurant_charge?: number;
+  even_rate_applied?: number;
 }
 
 export interface ConfirmTapOrderResponse {

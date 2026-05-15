@@ -8,7 +8,7 @@ export function middleware(request: NextRequest) {
   // Backend URL from environment variable (removes /api suffix if present)
   const backendUrl =
     process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") ||
-    "https://xquisito-backend-production.up.railway.app";
+    "https://even-backend-production.up.railway.app";
   const isDev = process.env.NODE_ENV === "development";
   const devUrls = isDev ? " http://localhost:5000 ws://localhost:5000" : "";
   const backendHost = backendUrl.replace(/https?:\/\//, "");

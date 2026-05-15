@@ -136,7 +136,7 @@ export default function ProfileTab({ onLogout }: ProfileTabProps = {}) {
     setIsUpdating(true);
 
     try {
-      const token = localStorage.getItem("xquisito_access_token");
+      const token = localStorage.getItem("even_access_token");
       if (!token) {
         alert("No estás autenticado");
         return;

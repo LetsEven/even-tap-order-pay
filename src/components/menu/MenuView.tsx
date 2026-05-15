@@ -158,7 +158,12 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
 
   // Scroll lock unificado para todos los modales
   useEffect(() => {
-    if (showPepperChat || showSettingsModal || isStatusModalOpen || showReorderModal) {
+    if (
+      showPepperChat ||
+      showSettingsModal ||
+      isStatusModalOpen ||
+      showReorderModal
+    ) {
       lockScroll();
     } else {
       unlockScroll();
@@ -655,7 +660,7 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
                           ) : (
                             <img
                               src="/logos/logo-short-green.webp"
-                              alt="Logo Xquisito"
+                              alt="Logo Even"
                               className="size-12 md:size-14 lg:size-16 object-contain"
                             />
                           )}

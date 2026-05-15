@@ -73,7 +73,7 @@ class CartApiService {
    */
   private getGuestId(): string {
     if (typeof window === "undefined") return "";
-    return localStorage.getItem("xquisito-guest-id") || "";
+    return localStorage.getItem("even-guest-id") || "";
   }
 
   // Obtener identificador de usuario (user_id o guest_id)

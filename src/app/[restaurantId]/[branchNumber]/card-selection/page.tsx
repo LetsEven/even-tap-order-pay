@@ -134,13 +134,13 @@ export default function CardSelectionPage() {
   const {
     ivaTip,
     subtotalForCommission,
-    xquisitoCommissionTotal,
-    xquisitoCommissionClient,
-    xquisitoCommissionRestaurant,
-    ivaXquisitoClient,
-    ivaXquisitoRestaurant,
-    xquisitoClientCharge,
-    xquisitoRestaurantCharge,
+    evenCommissionTotal,
+    evenCommissionClient,
+    evenCommissionRestaurant,
+    ivaEvenClient,
+    ivaEvenRestaurant,
+    evenClientCharge,
+    evenRestaurantCharge,
     totalAmountCharged: totalAmount,
   } = commissions;
 
@@ -272,8 +272,8 @@ export default function CardSelectionPage() {
           setApplePayUnavailable(true);
         });
         applePaySDK.on("success", (event: any) => {
-          sessionStorage.removeItem("xquisito-current-order-id");
-          sessionStorage.removeItem("xquisito-current-payment-key");
+          sessionStorage.removeItem("even-current-order-id");
+          sessionStorage.removeItem("even-current-payment-key");
           setApplePayPaymentId(event?.detail?.id || appleOrderId);
           setIsApplePayProcessing(true);
           setCompletedOrderItems([...cartItemsRef.current]);
@@ -358,8 +358,8 @@ export default function CardSelectionPage() {
           setGooglePayUnavailable(true);
         });
         googlePaySDK.on("success", (event: any) => {
-          sessionStorage.removeItem("xquisito-current-order-id");
-          sessionStorage.removeItem("xquisito-current-payment-key");
+          sessionStorage.removeItem("even-current-order-id");
+          sessionStorage.removeItem("even-current-payment-key");
           setGooglePayPaymentId(event?.detail?.id || googleOrderId);
           setIsGooglePayProcessing(true);
           setCompletedOrderItems([...cartItemsRef.current]);
@@ -435,9 +435,9 @@ export default function CardSelectionPage() {
     const customerEmail = profile?.email || user?.email || null;
     const customerPhone = user?.phone || null;
     const isGuest = !user?.id && !!guestId;
-    const xquisitoRateApplied =
+    const evenRateApplied =
       subtotalForCommission > 0
-        ? (xquisitoCommissionTotal / subtotalForCommission) * 100
+        ? (evenCommissionTotal / subtotalForCommission) * 100
         : 0;
 
     const mappedItems = items.map((item) => ({
@@ -478,14 +478,14 @@ export default function CardSelectionPage() {
       currency: "MXN",
       transaction_by: profile?.firstName || customerName,
       iva_tip: ivaTip,
-      xquisito_commission_total: xquisitoCommissionTotal,
-      xquisito_commission_client: xquisitoCommissionClient,
-      xquisito_commission_restaurant: xquisitoCommissionRestaurant,
-      iva_xquisito_client: ivaXquisitoClient,
-      iva_xquisito_restaurant: ivaXquisitoRestaurant,
-      xquisito_client_charge: xquisitoClientCharge,
-      xquisito_restaurant_charge: xquisitoRestaurantCharge,
-      xquisito_rate_applied: xquisitoRateApplied,
+      even_commission_total: evenCommissionTotal,
+      even_commission_client: evenCommissionClient,
+      even_commission_restaurant: evenCommissionRestaurant,
+      iva_even_client: ivaEvenClient,
+      iva_even_restaurant: ivaEvenRestaurant,
+      even_client_charge: evenClientCharge,
+      even_restaurant_charge: evenRestaurantCharge,
+      even_rate_applied: evenRateApplied,
     };
 
     const saveAndFinalize = (
@@ -503,9 +503,9 @@ export default function CardSelectionPage() {
         amount: totalAmount,
         baseAmount,
         tipAmount,
-        xquisitoCommissionClient,
-        ivaXquisitoClient,
-        xquisitoCommissionTotal,
+        evenCommissionClient,
+        ivaEvenClient,
+        evenCommissionTotal,
         userName,
         customerName,
         customerEmail,
@@ -532,11 +532,11 @@ export default function CardSelectionPage() {
         tableNumber,
       };
 
-      localStorage.setItem("xquisito-completed-payment", JSON.stringify(data));
-      const uniqueKey = `xquisito-payment-success-${tapOrderId}`;
+      localStorage.setItem("even-completed-payment", JSON.stringify(data));
+      const uniqueKey = `even-payment-success-${tapOrderId}`;
       sessionStorage.setItem(uniqueKey, JSON.stringify(data));
-      sessionStorage.setItem("xquisito-current-payment-key", uniqueKey);
-      sessionStorage.setItem("xquisito-current-order-id", tapOrderId);
+      sessionStorage.setItem("even-current-payment-key", uniqueKey);
+      sessionStorage.setItem("even-current-order-id", tapOrderId);
     };
 
     setIsProcessing(true);
@@ -668,8 +668,8 @@ export default function CardSelectionPage() {
       await clearCart();
       setCompletedOrderId(orderId);
     } catch (error) {
-      sessionStorage.removeItem("xquisito-current-order-id");
-      sessionStorage.removeItem("xquisito-current-payment-key");
+      sessionStorage.removeItem("even-current-order-id");
+      sessionStorage.removeItem("even-current-payment-key");
       setCompletedOrderId(null);
       setErrorMessage(
         error instanceof Error ? error.message : "Error desconocido",
@@ -790,7 +790,7 @@ export default function CardSelectionPage() {
           userName={completedUserName}
           orderedItems={completedOrderItems}
           onContinue={() => {
-            let orderId = sessionStorage.getItem("xquisito-current-order-id");
+            let orderId = sessionStorage.getItem("even-current-order-id");
 
             if (!orderId) {
               orderId = completedOrderId;
@@ -799,7 +799,7 @@ export default function CardSelectionPage() {
             if (!orderId) {
               for (let i = 0; i < sessionStorage.length; i++) {
                 const key = sessionStorage.key(i);
-                if (key && key.startsWith("xquisito-payment-success-")) {
+                if (key && key.startsWith("even-payment-success-")) {
                   try {
                     const data = sessionStorage.getItem(key);
                     if (data) {
@@ -813,7 +813,7 @@ export default function CardSelectionPage() {
 
             if (!orderId) {
               try {
-                const data = localStorage.getItem("xquisito-completed-payment");
+                const data = localStorage.getItem("even-completed-payment");
                 if (data) orderId = JSON.parse(data).orderId;
               } catch {}
             }
@@ -1228,13 +1228,13 @@ export default function CardSelectionPage() {
                       </span>
                     </div>
                   )}
-                  {xquisitoClientCharge > 0 && (
+                  {evenClientCharge > 0 && (
                     <div className="flex justify-between items-center">
                       <span className="text-black font-medium text-base md:text-lg">
                         + Comisión de servicio
                       </span>
                       <span className="text-black font-medium text-base md:text-lg">
-                        ${xquisitoClientCharge.toFixed(2)} MXN
+                        ${evenClientCharge.toFixed(2)} MXN
                       </span>
                     </div>
                   )}
