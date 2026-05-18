@@ -8,6 +8,7 @@ import { useTableNavigation } from "@/hooks/useTableNavigation";
 import { useRestaurant } from "@/context/RestaurantContext";
 import { useTable } from "@/context/TableContext";
 import { useAuth } from "@/context/AuthContext";
+import { useGuest } from "@/context/GuestContext";
 import {
   Receipt,
   X,
@@ -29,7 +30,8 @@ export default function PaymentSuccessPage() {
   const restaurantId = params?.restaurantId as string;
   const branchNumber = params?.branchNumber as string;
   const { state } = useTable();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const { guestId } = useGuest();
 
   useEffect(() => {
     if (restaurantId && !isNaN(parseInt(restaurantId))) {
@@ -208,6 +210,27 @@ export default function PaymentSuccessPage() {
   const [orderCreatedAt, setOrderCreatedAt] = useState<Date | null>(null);
 
   const fetchDishOrders = async () => {
+    // 1. Siempre intentar obtener reorderItems desde getLastOrderByUser
+    //    (igual que MenuView — usa las dishes que garantizan tener menu_item_id)
+    const clientId = user?.id || guestId;
+    if (clientId && restaurantId) {
+      try {
+        const lastOrder = await tapOrderService.getLastOrderByUser(
+          clientId,
+          parseInt(restaurantId),
+        );
+        if (lastOrder.success && (lastOrder as any).hasLastOrder) {
+          const dishes: LastOrderDish[] =
+            (lastOrder as any)?.data?.dishes ?? [];
+          const withMenuItemId = dishes.filter((d) => d.menu_item_id);
+          if (withMenuItemId.length) setReorderItems(withMenuItemId);
+        }
+      } catch {
+        // si falla, continuar con el resto
+      }
+    }
+
+    // 2. Obtener detalles completos de la orden para el ticket (dishOrders)
     const orderId = paymentId || paymentDetails?.orderId;
     if (!orderId) {
       setDishOrders(paymentDetails?.dishOrders || []);
@@ -234,21 +257,6 @@ export default function PaymentSuccessPage() {
             images: d.images || [],
           }));
           setDishOrders(transformed);
-          // Actualizar reorderItems con datos frescos
-          const reorder: LastOrderDish[] = orderData.dishes
-            .filter((d: any) => d.menu_item_id)
-            .map((d: any) => ({
-              id: String(d.id),
-              menu_item_id: d.menu_item_id as number,
-              item: d.item,
-              quantity: d.quantity,
-              price: d.price,
-              extra_price: d.extra_price || 0,
-              images: d.images || [],
-              custom_fields: d.custom_fields || null,
-              special_instructions: d.special_instructions || null,
-            }));
-          if (reorder.length) setReorderItems(reorder);
           return;
         }
       }
@@ -431,16 +439,15 @@ export default function PaymentSuccessPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-t-4xl relative z-10 flex flex-col min-h-96 justify-center px-6 md:px-8 lg:px-10 flex-1 py-8 md:py-10 lg:py-12">
+          <div className="bg-white rounded-t-4xl relative z-10 flex flex-col min-h-80 justify-center px-6 md:px-8 lg:px-10 flex-1 py-8 md:py-10 lg:py-12">
             {/* Rating Prompt */}
-            <div className="text-center mb-8 md:mb-10 lg:mb-12">
+            {/*<div className="text-center mb-8 md:mb-10 lg:mb-12">
               <p className="text-xl md:text-2xl lg:text-3xl font-medium text-black mb-2 md:mb-3 lg:mb-4">
                 {hasRated
                   ? "¡Gracias por tu calificación!"
                   : "Califica tu experiencia en el restaurante"}
               </p>
               <div className="flex flex-col items-center gap-3 md:gap-3.5 lg:gap-4">
-                {/* Stars container */}
                 <div className="flex gap-1 md:gap-1.5 lg:gap-2">
                   {[1, 2, 3, 4, 5].map((starIndex) => {
                     const currentRating = hoveredRating || rating;
@@ -460,7 +467,6 @@ export default function PaymentSuccessPage() {
                           !hasRated && handleRatingClick(starIndex)
                         }
                       >
-                        {/* Estrella */}
                         <svg
                           className={`size-8 md:size-10 lg:size-12 transition-all ${
                             isFilled ? "text-yellow-400" : "text-white"
@@ -477,18 +483,18 @@ export default function PaymentSuccessPage() {
                   })}
                 </div>
 
-                {/* Submit button - appears when a rating is selected */}
                 {rating > 0 && !hasRated && (
                   <button
-                    onClick={handleSubmitRating}
-                    className="px-5 md:px-6 py-1.5 md:py-2 bg-linear-to-r from-[#34808C] to-[#173E44] hover:from-[#2a6d77] hover:to-[#12323a] text-white text-sm md:text-base font-medium rounded-full transition-all duration-300 hover:scale-90 hover:shadow-lg animate-fade-in"
-                    aria-label="Enviar calificación"
+                  onClick={handleSubmitRating}
+                  className="px-5 md:px-6 py-1.5 md:py-2 bg-linear-to-r from-[#34808C] to-[#173E44] hover:from-[#2a6d77] hover:to-[#12323a] text-white text-sm md:text-base font-medium rounded-full transition-all duration-300 hover:scale-90 hover:shadow-lg animate-fade-in"
+                  aria-label="Enviar calificación"
                   >
                     Enviar
                   </button>
                 )}
               </div>
             </div>
+                */}
 
             {/* Action Buttons */}
             <div
