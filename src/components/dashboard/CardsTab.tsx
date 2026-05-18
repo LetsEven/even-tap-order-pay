@@ -51,7 +51,7 @@ export default function CardsTab() {
   return (
     <div className="absolute inset-0 flex flex-col">
       <div className="flex-1"></div>
-      <div className="flex-shrink-0 pb-6 md:pb-8 lg:pb-10">
+      <div className="shrink-0 pb-6 md:pb-8 lg:pb-10">
         {/* Loading State */}
         {isLoading ? (
           <div className="flex items-center justify-center py-12 md:py-16 lg:py-20">
@@ -88,7 +88,7 @@ export default function CardsTab() {
                       <div>
                         <div className="flex items-center gap-2 md:gap-3 lg:gap-4">
                           <span className="text-black text-base md:text-lg lg:text-xl">
-                            **** **** **** {method.lastFourDigits}
+                            **** {method.lastFourDigits}
                           </span>
                           {method.expiryMonth && method.expiryYear && (
                             <p className="text-xs md:text-sm lg:text-base text-gray-500">

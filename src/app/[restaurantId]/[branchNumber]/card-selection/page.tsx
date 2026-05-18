@@ -46,7 +46,8 @@ export default function CardSelectionPage() {
   };
 
   const allPaymentMethods = [
-    ...(isDev ? [defaultSystemCard] : []),
+    //...(isDev ? [defaultSystemCard] : []),
+    defaultSystemCard,
     ...paymentMethods,
   ];
 
@@ -1023,7 +1024,7 @@ export default function CardSelectionPage() {
                           <div>{getCardTypeIcon(method.cardBrand)}</div>
                           <div>
                             <p className="text-black">
-                              •••• •••• •••• {method.lastFourDigits}
+                              **** {method.lastFourDigits}
                             </p>
                           </div>
                         </div>
