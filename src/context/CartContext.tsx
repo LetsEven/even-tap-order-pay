@@ -184,6 +184,7 @@ interface CartContextType {
     specialInstructions?: string | null,
   ) => Promise<void>;
   removeItem: (itemId: number) => Promise<void>;
+  decrementItem: (itemId: number) => Promise<void>;
   updateQuantity: (cartItemId: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
   refreshCart: () => Promise<void>;
@@ -416,6 +417,87 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const decrementItem = async (itemId: number) => {
+    let item = state.items.find((i) => i.id === itemId);
+    if (!item?.cartItemId) {
+      const fresh = await cartApi.getCart();
+      if (fresh.success && fresh.data) {
+        const freshItems = fresh.data.items.map(convertApiItemToCartItem);
+        dispatch({
+          type: "SET_CART",
+          payload: {
+            items: freshItems,
+            ...computeTotals(freshItems),
+            cartId: fresh.data.cart_id,
+          },
+        });
+        item = freshItems.find((i) => i.id === itemId);
+      }
+      if (!item?.cartItemId) return;
+    }
+
+    const cartItemId = item.cartItemId;
+    const newQuantity = item.quantity - 1;
+    const previousItems = state.items;
+    const previousCartId = state.cartId;
+
+    if (newQuantity <= 0) {
+      dispatch({ type: "REMOVE_ITEM", payload: cartItemId });
+      try {
+        const response = await cartApi.removeFromCart(cartItemId);
+        if (!response.success) {
+          dispatch({
+            type: "SET_CART",
+            payload: {
+              items: previousItems,
+              ...computeTotals(previousItems),
+              cartId: previousCartId,
+            },
+          });
+        }
+      } catch {
+        dispatch({
+          type: "SET_CART",
+          payload: {
+            items: previousItems,
+            ...computeTotals(previousItems),
+            cartId: previousCartId,
+          },
+        });
+      }
+    } else {
+      dispatch({
+        type: "UPDATE_QUANTITY",
+        payload: { cartItemId, quantity: newQuantity },
+      });
+      try {
+        const response = await cartApi.updateCartItemQuantity(
+          cartItemId,
+          newQuantity,
+        );
+        if (!response.success) {
+          dispatch({
+            type: "SET_CART",
+            payload: {
+              items: previousItems,
+              ...computeTotals(previousItems),
+              cartId: previousCartId,
+            },
+          });
+        }
+      } catch {
+        dispatch({
+          type: "SET_CART",
+          payload: {
+            items: previousItems,
+            ...computeTotals(previousItems),
+            cartId: previousCartId,
+          },
+        });
+      }
+    }
+  };
+
   const clearCart = async () => {
     try {
       dispatch({ type: "SET_LOADING", payload: true });
@@ -449,6 +531,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     state,
     addItem,
     removeItem,
+    decrementItem,
     updateQuantity,
     clearCart,
     refreshCart,

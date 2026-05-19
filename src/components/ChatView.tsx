@@ -1,11 +1,15 @@
 "use client";
 
-import { ChevronDown, SendHorizontal } from "lucide-react";
-import { useState, useRef, useEffect, memo } from "react";
+import { ChevronDown, SendHorizontal, ShoppingBag, Check } from "lucide-react";
+import { useState, useRef, useEffect, memo, useMemo } from "react";
 import { useRestaurant } from "../context/RestaurantContext";
 import { useGuest } from "../context/GuestContext";
 import { useAuth } from "../context/AuthContext";
 import { usePepper } from "../context/PepperContext";
+import RestaurantClosedModal from "./RestaurantClosedModal";
+import OutOfStockModal from "./OutOfStockModal";
+import { cartApi } from "../services/cart.service";
+import { useCart } from "../context/CartContext";
 
 interface ChatViewProps {
   onBack: () => void;
@@ -236,18 +240,249 @@ const hasIncompleteImageUrl = (text: string): boolean => {
   return false;
 };
 
+// Regex para detectar el marcador ORDER_BUTTON
+const ORDER_BUTTON_REGEX =
+  /\[ORDER_BUTTON:\s*dish_id=(\d+),\s*name="([^"]+)"\]/;
+// Para ocultar el marcador mientras se está escribiendo en streaming
+const PARTIAL_ORDER_BUTTON_REGEX = /\[ORDER_BUTTON[^\]]*\]?/g;
+
+// Botón que agrega directamente al carrito
+const OrderButton = ({
+  dishId,
+  dishName,
+  restaurantId,
+  branchNumber,
+  userId,
+}: {
+  dishId: number;
+  dishName: string;
+  restaurantId: number | null;
+  branchNumber: number | null;
+  userId: string | null;
+}) => {
+  const { menu, isOpen, restaurant } = useRestaurant();
+  const { refreshCart } = useCart();
+  const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">(
+    "idle",
+  );
+  const [showClosedModal, setShowClosedModal] = useState(false);
+  const [showOutOfStockModal, setShowOutOfStockModal] = useState(false);
+
+  const resolvedDishId = (() => {
+    const normalize = (s: string) =>
+      s
+        .toLowerCase()
+        .trim()
+        .normalize("NFD")
+        .replace(/[̀-ͯ]/g, "")
+        .replace(/\s*\([^)]*\)\s*/g, " ")
+        .trim();
+
+    const STOP_WORDS = new Set([
+      "de",
+      "a",
+      "la",
+      "el",
+      "los",
+      "las",
+      "con",
+      "y",
+      "en",
+      "al",
+      "del",
+      "un",
+      "una",
+      "lo",
+      "se",
+      "su",
+      "por",
+      "o",
+    ]);
+
+    const keyWords = (s: string): string[] =>
+      normalize(s)
+        .split(/\s+/)
+        .filter((w) => w.length > 1 && !STOP_WORDS.has(w));
+
+    if (!menu?.length) return dishId;
+
+    const searchWords = keyWords(dishName);
+    if (!searchWords.length) return dishId;
+
+    let bestId = dishId;
+    let bestScore = 0;
+
+    for (const section of menu) {
+      for (const item of section.items ?? []) {
+        const itemWords = keyWords(item.name);
+        if (!itemWords.length) continue;
+
+        const matched = searchWords.filter((sw) =>
+          itemWords.some(
+            (iw) =>
+              iw === sw ||
+              (sw.length >= 4 && iw.startsWith(sw)) ||
+              (iw.length >= 4 && sw.startsWith(iw)),
+          ),
+        ).length;
+
+        const score = matched / Math.max(searchWords.length, itemWords.length);
+
+        if (score > bestScore) {
+          bestScore = score;
+          bestId = item.id;
+        }
+      }
+    }
+
+    return bestScore >= 0.5 ? bestId : dishId;
+  })();
+
+  const isOutOfStock = useMemo(() => {
+    if (!menu?.length) return false;
+    for (const section of menu) {
+      for (const item of section.items ?? []) {
+        if (item.id === resolvedDishId) {
+          return item.is_out_of_stock === true;
+        }
+      }
+    }
+    return false;
+  }, [menu, resolvedDishId]);
+
+  const handleAdd = async () => {
+    if (status !== "idle") return;
+    if (!isOpen) {
+      setShowClosedModal(true);
+      return;
+    }
+    if (isOutOfStock) {
+      setShowOutOfStockModal(true);
+      return;
+    }
+    setStatus("loading");
+    cartApi.setRestaurantId(restaurantId);
+    cartApi.setBranchNumber(branchNumber);
+    cartApi.setSupabaseUserId(userId);
+    const result = await cartApi.addToCart(resolvedDishId);
+    if (result.success) {
+      await refreshCart();
+      setStatus("done");
+    } else {
+      setStatus("error");
+    }
+  };
+
+  const glassStyle: React.CSSProperties =
+    status === "done"
+      ? {
+          background:
+            "linear-gradient(160deg, rgba(220,252,231,0.95) 0%, rgba(187,247,208,0.85) 100%)",
+          boxShadow:
+            "0 4px 16px rgba(74,222,128,0.25), 0 1px 0 rgba(255,255,255,0.8) inset",
+          border: "1px solid rgba(134,239,172,0.5)",
+        }
+      : status === "error"
+        ? {
+            background:
+              "linear-gradient(160deg, rgba(254,226,226,0.95) 0%, rgba(252,165,165,0.85) 100%)",
+            boxShadow:
+              "0 4px 16px rgba(239,68,68,0.2), 0 1px 0 rgba(255,255,255,0.7) inset",
+            border: "1px solid rgba(252,165,165,0.5)",
+          }
+        : status === "loading"
+          ? {
+              background:
+                "linear-gradient(160deg, rgba(245,210,255,0.7) 0%, rgba(220,140,238,0.6) 100%)",
+              boxShadow: "0 2px 12px rgba(200,100,230,0.2)",
+              border: "1px solid rgba(255,255,255,0.4)",
+              backdropFilter: "blur(12px)",
+            }
+          : {
+              background:
+                "linear-gradient(160deg, rgba(250,220,255,0.97) 0%, rgba(235,178,244,0.92) 40%, rgba(210,130,235,0.88) 100%)",
+              boxShadow:
+                "0 6px 24px rgba(190,80,230,0.3), 0 1px 0 rgba(255,255,255,0.75) inset, 0 -1px 0 rgba(120,0,160,0.08) inset",
+              border: "1px solid rgba(255,255,255,0.6)",
+              backdropFilter: "blur(16px)",
+            };
+
+  return (
+    <>
+      <RestaurantClosedModal
+        isOpen={showClosedModal}
+        onClose={() => setShowClosedModal(false)}
+        openingHours={restaurant?.opening_hours}
+        restaurantName={restaurant?.name}
+        restaurantLogo={restaurant?.logo_url}
+      />
+      <OutOfStockModal
+        isOpen={showOutOfStockModal}
+        onClose={() => setShowOutOfStockModal(false)}
+        itemName={dishName}
+      />
+      <button
+        onClick={handleAdd}
+        disabled={status === "loading" || status === "done"}
+        className="mt-2 relative overflow-hidden flex items-center gap-2 transition-all active:scale-[0.97] font-semibold rounded-2xl px-5 py-3 text-base md:text-lg w-full justify-center text-black"
+        style={glassStyle}
+      >
+        <div
+          className="absolute top-0 left-0 right-0 pointer-events-none rounded-t-2xl"
+          style={{
+            height: "42%",
+            background:
+              "linear-gradient(180deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 100%)",
+          }}
+        />
+        <span className="relative z-10 flex items-center gap-2">
+          {status === "done" ? (
+            <>
+              <Check className="size-5" />
+              Agregado al carrito
+            </>
+          ) : status === "loading" ? (
+            <>
+              <Spinner />
+              Agregando...
+            </>
+          ) : (
+            <>
+              <ShoppingBag className="size-5" />
+              {status === "error"
+                ? "Error, intenta de nuevo"
+                : `Agregar ${dishName}`}
+            </>
+          )}
+        </span>
+      </button>
+    </>
+  );
+};
+
 // Componente para renderizar mensajes con imágenes (sin memo para garantizar re-render con nuevas URLs)
 const MessageContent = ({
   content,
   isStreaming,
   activeTool,
+  restaurantId,
+  branchNumber,
+  userId,
 }: {
   content: string;
   isStreaming?: boolean;
   activeTool?: string | null;
+  restaurantId: number | null;
+  branchNumber: number | null;
+  userId: string | null;
 }) => {
+  // Extraer ORDER_BUTTON del contenido
+  const orderButtonMatch = ORDER_BUTTON_REGEX.exec(content);
+  const dishId = orderButtonMatch ? orderButtonMatch[1] : null;
+  const dishName = orderButtonMatch ? orderButtonMatch[2] : null;
+  const cleanContent = content.replace(ORDER_BUTTON_REGEX, "").trim();
   // Si el contenido está vacío, mostrar herramienta o puntos de carga
-  if (!content) {
+  if (!cleanContent) {
     if (activeTool) {
       return (
         <div className="flex items-center gap-2">
@@ -264,7 +499,10 @@ const MessageContent = ({
   // Si está en streaming, reemplazar URLs de imagen con LoadingDots inline
   if (isStreaming) {
     const IMAGE_PLACEHOLDER = "\u0000IMG\u0000";
-    let processed = content
+    // Ocultar el marcador ORDER_BUTTON mientras se está escribiendo
+    let processed = cleanContent
+      .replace(PARTIAL_ORDER_BUTTON_REGEX, "")
+      .trim()
       .replace(
         /!\[[^\]]*\]\(https?:\/\/[^\s)]+\.(?:jpg|jpeg|png|gif|webp|svg|avif)(?:\?[^\s)]*)?\)/gi,
         IMAGE_PLACEHOLDER,
@@ -318,7 +556,7 @@ const MessageContent = ({
   }> = [];
 
   let match;
-  while ((match = markdownImageRegex.exec(content)) !== null) {
+  while ((match = markdownImageRegex.exec(cleanContent)) !== null) {
     matches.push({
       index: match.index,
       length: match[0].length,
@@ -329,7 +567,7 @@ const MessageContent = ({
   }
 
   // Luego, encontrar URLs directas (que no estén dentro de Markdown)
-  while ((match = directImageRegex.exec(content)) !== null) {
+  while ((match = directImageRegex.exec(cleanContent)) !== null) {
     // Verificar que no esté dentro de un match de Markdown
     const isInsideMarkdown = matches.some(
       (m) => match!.index >= m.index && match!.index < m.index + m.length,
@@ -349,9 +587,8 @@ const MessageContent = ({
 
   // Construir los elementos
   for (const m of matches) {
-    // Agregar texto antes de la imagen
     if (m.index > lastIndex) {
-      const text = content.slice(lastIndex, m.index);
+      const text = cleanContent.slice(lastIndex, m.index);
       if (text.trim()) {
         elements.push(
           <p key={key++} className="whitespace-pre-wrap">
@@ -379,8 +616,8 @@ const MessageContent = ({
   }
 
   // Agregar texto restante
-  if (lastIndex < content.length) {
-    const text = content.slice(lastIndex);
+  if (lastIndex < cleanContent.length) {
+    const text = cleanContent.slice(lastIndex);
     if (text.trim()) {
       elements.push(
         <p key={key++} className="whitespace-pre-wrap">
@@ -391,11 +628,26 @@ const MessageContent = ({
   }
 
   // Si no hay elementos (solo espacios), mostrar el contenido original
-  if (elements.length === 0) {
-    return <p className="whitespace-pre-wrap">{renderBoldText(content)}</p>;
+  if (elements.length === 0 && !dishId) {
+    return (
+      <p className="whitespace-pre-wrap">{renderBoldText(cleanContent)}</p>
+    );
   }
 
-  return <div className="space-y-2">{elements}</div>;
+  return (
+    <div className="space-y-2">
+      {elements}
+      {dishId && dishName && (
+        <OrderButton
+          dishId={Number(dishId)}
+          dishName={dishName}
+          restaurantId={restaurantId}
+          branchNumber={branchNumber}
+          userId={userId}
+        />
+      )}
+    </div>
+  );
 };
 
 export default function ChatView({ onBack }: ChatViewProps) {
@@ -415,8 +667,10 @@ export default function ChatView({ onBack }: ChatViewProps) {
     setHasStartedChat,
   } = usePepper();
 
+  const [showClosedModal, setShowClosedModal] = useState(false);
+
   // Obtener contextos
-  const { restaurantId, branchNumber } = useRestaurant();
+  const { restaurantId, branchNumber, isOpen, restaurant } = useRestaurant();
   const { guestId, isGuest } = useGuest();
   const { user, profile } = useAuth();
 
@@ -430,6 +684,10 @@ export default function ChatView({ onBack }: ChatViewProps) {
   }, [messages, activeTool]);
 
   const handleSend = async () => {
+    if (!isOpen) {
+      setShowClosedModal(true);
+      return;
+    }
     if (message.trim() && !isLoading) {
       if (!hasStartedChat) {
         setHasStartedChat(true);
@@ -544,89 +802,26 @@ export default function ChatView({ onBack }: ChatViewProps) {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      {hasStartedChat ? (
-        <div className="p-4 md:p-5 lg:p-6 flex items-center gap-3 md:gap-4 shrink-0">
-          <button
-            onClick={onBack}
-            className="text-gray-400 hover:text-gray-700 rounded-full p-1 md:p-1.5 lg:p-2 transition-colors cursor-pointer"
-          >
-            <ChevronDown className="size-6 md:size-7 lg:size-8" />
-          </button>
-          <div className="flex items-center gap-3 md:gap-4">
-            <div className="bg-white rounded-full border border-black/20 size-10 md:size-12 lg:size-14">
-              <video
-                src="/videos/video-icon-pepper.webm"
-                autoPlay
-                loop
-                muted
-                playsInline
-                disablePictureInPicture
-                controls={false}
-                controlsList="nodownload nofullscreen noremoteplayback"
-                className="w-full h-full object-cover rounded-full"
-              />
-            </div>
-            <div>
-              <h2 className="text-black/90 font-medium text-lg md:text-xl lg:text-2xl">
-                Pepper
-              </h2>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="p-4 md:p-5 lg:p-6 flex items-center shrink-0">
-          <button
-            onClick={onBack}
-            className="text-gray-400 hover:text-gray-700 rounded-full py-2 md:py-2.5 lg:py-3 transition-colors cursor-pointer"
-          >
-            <ChevronDown className="size-6 md:size-7 lg:size-8" />
-          </button>
-        </div>
-      )}
-
-      {/* Mensajes */}
-      <div
-        className={`flex-1 overflow-y-auto ${
-          hasStartedChat
-            ? "p-4 md:p-6 lg:p-8"
-            : "flex items-center justify-center"
-        }`}
-      >
-        {hasStartedChat && (
-          <div className="min-h-full flex flex-col justify-end gap-3 md:gap-4 lg:gap-5">
-            {messages.map((msg, index) => {
-              const isLastPepperMessage =
-                msg.role === "pepper" && index === messages.length - 1;
-              return (
-                <div
-                  key={msg.id}
-                  className={`flex ${
-                    msg.role === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <div
-                    className={`max-w-[80%] rounded-xl md:rounded-2xl px-4 md:px-5 lg:px-6 py-2 md:py-3 lg:py-4 text-black text-base md:text-lg lg:text-xl ${
-                      msg.role === "user" ? "bg-[#ebb2f4]" : "bg-white/60"
-                    }`}
-                  >
-                    <MessageContent
-                      content={msg.content}
-                      isStreaming={isLastPepperMessage && isStreaming}
-                      activeTool={isLastPepperMessage ? activeTool : null}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-            <div ref={messagesEndRef} />
-          </div>
-        )}
-        {!hasStartedChat && (
-          <div className="text-center max-w-md px-8 md:px-10 lg:px-12">
-            <div className="mb-8 md:mb-10 lg:mb-12 flex justify-center">
-              <div className="rounded-full h-28 w-28 md:h-36 md:w-36 lg:h-40 lg:w-40 overflow-hidden flex items-center justify-center">
+    <>
+      <RestaurantClosedModal
+        isOpen={showClosedModal}
+        onClose={() => setShowClosedModal(false)}
+        openingHours={restaurant?.opening_hours}
+        restaurantName={restaurant?.name}
+        restaurantLogo={restaurant?.logo_url}
+      />
+      <div className="flex flex-col h-full">
+        {/* Header */}
+        {hasStartedChat ? (
+          <div className="p-4 md:p-5 lg:p-6 flex items-center gap-3 md:gap-4 shrink-0">
+            <button
+              onClick={onBack}
+              className="text-gray-400 hover:text-gray-700 rounded-full p-1 md:p-1.5 lg:p-2 transition-colors cursor-pointer"
+            >
+              <ChevronDown className="size-6 md:size-7 lg:size-8" />
+            </button>
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="bg-white rounded-full border border-black/20 size-10 md:size-12 lg:size-14">
                 <video
                   src="/videos/video-icon-pepper.webm"
                   autoPlay
@@ -636,41 +831,116 @@ export default function ChatView({ onBack }: ChatViewProps) {
                   disablePictureInPicture
                   controls={false}
                   controlsList="nodownload nofullscreen noremoteplayback"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover rounded-full"
                 />
               </div>
+              <div>
+                <h2 className="text-black/90 font-medium text-lg md:text-xl lg:text-2xl">
+                  Pepper
+                </h2>
+              </div>
             </div>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-black mb-8 md:mb-10 lg:mb-12">
-              Pepper
-            </h2>
-            <p className="text-gray-600 text-lg md:text-xl lg:text-2xl">
-              ¿En qué te puedo ayudar hoy?
-            </p>
+          </div>
+        ) : (
+          <div className="p-4 md:p-5 lg:p-6 flex items-center shrink-0">
+            <button
+              onClick={onBack}
+              className="text-gray-400 hover:text-gray-700 rounded-full py-2 md:py-2.5 lg:py-3 transition-colors cursor-pointer"
+            >
+              <ChevronDown className="size-6 md:size-7 lg:size-8" />
+            </button>
           </div>
         )}
-      </div>
 
-      {/* Input */}
-      <div className="shrink-0 flex justify-center pb-6 px-4 md:px-6 lg:px-8">
-        <div className="flex items-center gap-2 md:gap-3 lg:gap-4 bg-white/90 backdrop-blur-md rounded-full px-6 md:px-8 lg:px-10 py-4 md:py-5 lg:py-6 border border-white/40 w-full max-w-2xl shadow-lg">
-          <input
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Pregunta lo que necesites..."
-            className="flex-1 min-w-0 bg-transparent text-black placeholder-gray-500 focus:outline-none text-base md:text-lg lg:text-xl"
-            style={{ textOverflow: "ellipsis" }}
-          />
-          <button
-            onClick={handleSend}
-            className="text-[#ebb2f4] rounded-full transition-colors disabled:text-gray-400"
-            disabled={!message.trim() || isLoading}
-          >
-            <SendHorizontal className="size-6 md:size-7 lg:size-8 -rotate-90" />
-          </button>
+        {/* Mensajes */}
+        <div
+          className={`flex-1 overflow-y-auto ${
+            hasStartedChat
+              ? "p-4 md:p-6 lg:p-8"
+              : "flex items-center justify-center"
+          }`}
+        >
+          {hasStartedChat && (
+            <div className="min-h-full flex flex-col justify-end gap-3 md:gap-4 lg:gap-5">
+              {messages.map((msg, index) => {
+                const isLastPepperMessage =
+                  msg.role === "pepper" && index === messages.length - 1;
+                return (
+                  <div
+                    key={msg.id}
+                    className={`flex ${
+                      msg.role === "user" ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    <div
+                      className={`max-w-[80%] rounded-xl md:rounded-2xl px-4 md:px-5 lg:px-6 py-2 md:py-3 lg:py-4 text-black text-base md:text-lg lg:text-xl ${
+                        msg.role === "user" ? "bg-[#ebb2f4]" : "bg-white/60"
+                      }`}
+                    >
+                      <MessageContent
+                        content={msg.content}
+                        isStreaming={isLastPepperMessage && isStreaming}
+                        activeTool={isLastPepperMessage ? activeTool : null}
+                        restaurantId={restaurantId}
+                        branchNumber={branchNumber}
+                        userId={user?.id ?? null}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
+          {!hasStartedChat && (
+            <div className="text-center max-w-md px-8 md:px-10 lg:px-12">
+              <div className="mb-8 md:mb-10 lg:mb-12 flex justify-center">
+                <div className="rounded-full h-28 w-28 md:h-36 md:w-36 lg:h-40 lg:w-40 overflow-hidden flex items-center justify-center">
+                  <video
+                    src="/videos/video-icon-pepper.webm"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    disablePictureInPicture
+                    controls={false}
+                    controlsList="nodownload nofullscreen noremoteplayback"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-black mb-8 md:mb-10 lg:mb-12">
+                Pepper
+              </h2>
+              <p className="text-gray-600 text-lg md:text-xl lg:text-2xl">
+                ¿En qué te puedo ayudar hoy?
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Input */}
+        <div className="shrink-0 flex justify-center pb-6 px-4 md:px-6 lg:px-8">
+          <div className="flex items-center gap-2 md:gap-3 lg:gap-4 bg-white/90 backdrop-blur-md rounded-full px-6 md:px-8 lg:px-10 py-4 md:py-5 lg:py-6 border border-white/40 w-full max-w-2xl shadow-lg">
+            <input
+              type="text"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && handleSend()}
+              placeholder="Pregunta lo que necesites..."
+              className="flex-1 min-w-0 bg-transparent text-black placeholder-gray-500 focus:outline-none text-base md:text-lg lg:text-xl"
+              style={{ textOverflow: "ellipsis" }}
+            />
+            <button
+              onClick={handleSend}
+              className="text-[#ebb2f4] rounded-full transition-colors disabled:text-gray-400"
+              disabled={!message.trim() || isLoading}
+            >
+              <SendHorizontal className="size-6 md:size-7 lg:size-8 -rotate-90" />
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
