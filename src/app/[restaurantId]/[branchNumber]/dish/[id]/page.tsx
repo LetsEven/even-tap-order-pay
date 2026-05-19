@@ -10,6 +10,7 @@ import { ChevronDown, X, Home, AlertCircle, CircleAlert } from "lucide-react";
 import MenuHeaderDish from "@/components/headers/MenuHeaderDish";
 import Loader from "@/components/UI/Loader";
 import RestaurantClosedModal from "@/components/RestaurantClosedModal";
+import OutOfStockModal from "@/components/OutOfStockModal";
 import ValidationError from "@/components/ValidationError";
 import {
   MenuItem as MenuItemDB,
@@ -73,6 +74,7 @@ export default function DishDetailPage() {
   const [reviewRating, setReviewRating] = useState(0);
   const [hoveredReviewRating, setHoveredReviewRating] = useState(0);
   const [showClosedModal, setShowClosedModal] = useState(false);
+  const [showOutOfStockModal, setShowOutOfStockModal] = useState(false);
   const [dishStats, setDishStats] = useState<ReviewStats | null>(null);
   const [myReview, setMyReview] = useState<Review | null>(null);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
@@ -89,6 +91,7 @@ export default function DishDetailPage() {
           dish: adaptDish(foundItem),
           section: section.name,
           customFields: parseCustomFields(foundItem),
+          isOutOfStock: (foundItem as MenuItemDB).is_out_of_stock ?? false,
         };
       }
     }
@@ -101,6 +104,7 @@ export default function DishDetailPage() {
     dish: MenuItemData;
     section: string;
     customFields: CustomField[];
+    isOutOfStock?: boolean;
   } | null>(initialDishData);
 
   // Fetch desde API (para recargas directas o si no está en caché)
@@ -111,7 +115,7 @@ export default function DishDetailPage() {
       setDishError(null);
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/menu/items/${dishId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/menu/items/${dishId}?restaurantId=${params.restaurantId}&branchNumber=${params.branchNumber}`,
         );
         if (!response.ok) {
           setDishError(response.status === 404 ? "not_found" : "error");
@@ -138,6 +142,7 @@ export default function DishDetailPage() {
           dish: adaptDish(foundItem),
           section: sectionName,
           customFields: parseCustomFields(foundItem),
+          isOutOfStock: foundItem.is_out_of_stock ?? false,
         });
         setDishLoading(false);
       } catch (error) {
@@ -414,6 +419,10 @@ export default function DishDetailPage() {
   const handleAddToCart = async (e?: React.MouseEvent): Promise<boolean> => {
     e?.stopPropagation();
     if (!dishData || !isFormValid) return false;
+    if (dishData.isOutOfStock) {
+      setShowOutOfStockModal(true);
+      return false;
+    }
     if (!isOpen) {
       setShowClosedModal(true);
       return false;
@@ -616,6 +625,11 @@ export default function DishDetailPage() {
         restaurantName={restaurant?.name}
         restaurantLogo={restaurant?.logo_url}
       />
+      <OutOfStockModal
+        isOpen={showOutOfStockModal}
+        onClose={() => setShowOutOfStockModal(false)}
+        itemName={dish.name}
+      />
 
       {/* Slider de imágenes */}
       <div className="absolute top-0 left-0 w-full h-96 md:h-112 lg:h-128 z-0">
@@ -646,6 +660,14 @@ export default function DishDetailPage() {
             </div>
           )}
         </div>
+
+        {dishData?.isOutOfStock && (
+          <div className="absolute bottom-22 z-10">
+            <span className="bg-red-600 text-white text-xs md:text-sm font-bold px-3 py-1 tracking-wide">
+              AGOTADO
+            </span>
+          </div>
+        )}
 
         {dish.images.length > 1 && (
           <div className="absolute bottom-12 md:bottom-16 lg:bottom-20 left-0 right-0 flex justify-center gap-2 md:gap-3 z-10">
@@ -1107,13 +1129,17 @@ export default function DishDetailPage() {
                 onClick={handleAddToCartAndReturn}
                 disabled={!isFormValid}
                 className={`flex-1 text-white py-3.5 md:py-4 lg:py-5 rounded-2xl flex items-center justify-center ${
-                  isFormValid
-                    ? "bg-linear-to-r from-[#34808C] to-[#173E44] active:scale-95 transition-transform"
-                    : "bg-gray-400 cursor-not-allowed opacity-60"
+                  dishData?.isOutOfStock
+                    ? "bg-gray-400 cursor-pointer active:scale-95 transition-transform"
+                    : isFormValid
+                      ? "bg-linear-to-r from-[#34808C] to-[#173E44] active:scale-95 transition-transform"
+                      : "bg-gray-400 cursor-not-allowed opacity-60"
                 }`}
               >
                 <span className="text-base md:text-lg font-medium">
-                  Agregar • ${(totalPrice * dishQuantity).toFixed(2)} MXN
+                  {dishData?.isOutOfStock
+                    ? "Agotado"
+                    : `Agregar • $${(totalPrice * dishQuantity).toFixed(2)} MXN`}
                 </span>
               </button>
             </div>

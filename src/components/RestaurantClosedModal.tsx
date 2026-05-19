@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { getNextOpeningTime } from "../utils/restaurantHours";
 import { OpeningHours } from "../utils/restaurantHours";
 
@@ -37,9 +38,9 @@ export default function RestaurantClosedModal({
 
   const nextOpeningTime = getNextOpeningTime(openingHours);
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50"
+      className="fixed inset-0 z-99999 flex items-end justify-center bg-black/50"
       onClick={onClose}
     >
       <div
@@ -102,6 +103,7 @@ export default function RestaurantClosedModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -6,6 +6,9 @@ import type { LastOrderDish } from "../../services/taporders.service";
 import { useCart, CartItem } from "../../context/CartContext";
 import type { MenuItemData } from "../../interfaces/menuItemData";
 import { useTableNavigation } from "../../hooks/useTableNavigation";
+import { useRestaurant } from "../../context/RestaurantContext";
+import RestaurantClosedModal from "../RestaurantClosedModal";
+import OutOfStockModal from "../OutOfStockModal";
 
 interface ReorderModalProps {
   isOpen: boolean;
@@ -16,6 +19,13 @@ interface ReorderModalProps {
 function ReorderModal({ isOpen, onClose, items }: ReorderModalProps) {
   const { state: cartState, addItem, removeItem, updateQuantity } = useCart();
   const { navigateWithTable } = useTableNavigation();
+  const { isOpen: restaurantIsOpen, restaurant, menu } = useRestaurant();
+
+  const [showClosedModal, setShowClosedModal] = useState(false);
+  const [showOutOfStockModal, setShowOutOfStockModal] = useState(false);
+  const [outOfStockItemName, setOutOfStockItemName] = useState<
+    string | undefined
+  >(undefined);
 
   const preModalItemIds = useRef<Set<number>>(new Set());
   useEffect(() => {
@@ -35,6 +45,16 @@ function ReorderModal({ isOpen, onClose, items }: ReorderModalProps) {
     return result;
   }, [items]);
 
+  const outOfStockIds = useMemo(() => {
+    const ids = new Set<number>();
+    for (const section of menu ?? []) {
+      for (const item of section.items ?? []) {
+        if (item.is_out_of_stock) ids.add(item.id);
+      }
+    }
+    return ids;
+  }, [menu]);
+
   const getCartItem = (menuItemId: number): CartItem | undefined =>
     cartState.items.find((i) => i.id === menuItemId);
 
@@ -51,6 +71,15 @@ function ReorderModal({ isOpen, onClose, items }: ReorderModalProps) {
   };
 
   const handleCardTap = async (item: LastOrderDish) => {
+    if (!restaurantIsOpen) {
+      setShowClosedModal(true);
+      return;
+    }
+    if (outOfStockIds.has(item.menu_item_id)) {
+      setOutOfStockItemName(item.item);
+      setShowOutOfStockModal(true);
+      return;
+    }
     const cartItem = getCartItem(item.menu_item_id);
     if (!cartItem || cartItem.quantity === 0) {
       const menuItem: MenuItemData = {
@@ -82,6 +111,15 @@ function ReorderModal({ isOpen, onClose, items }: ReorderModalProps) {
 
   const handleIncrement = async (e: React.MouseEvent, item: LastOrderDish) => {
     e.stopPropagation();
+    if (!restaurantIsOpen) {
+      setShowClosedModal(true);
+      return;
+    }
+    if (outOfStockIds.has(item.menu_item_id)) {
+      setOutOfStockItemName(item.item);
+      setShowOutOfStockModal(true);
+      return;
+    }
     const cartItem = getCartItem(item.menu_item_id);
     if (!cartItem) {
       await handleCardTap(item);
@@ -123,188 +161,213 @@ function ReorderModal({ isOpen, onClose, items }: ReorderModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 bg-black/25 backdrop-blur-xs z-999 flex items-center justify-center"
-      onClick={handleClose}
-    >
+    <>
+      <RestaurantClosedModal
+        isOpen={showClosedModal}
+        onClose={() => setShowClosedModal(false)}
+        openingHours={restaurant?.opening_hours}
+        restaurantName={restaurant?.name}
+        restaurantLogo={restaurant?.logo_url}
+      />
+      <OutOfStockModal
+        isOpen={showOutOfStockModal}
+        onClose={() => setShowOutOfStockModal(false)}
+        itemName={outOfStockItemName}
+      />
       <div
-        className="relative bg-[#173E44]/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl max-h-[85vh] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-0 bg-black/25 backdrop-blur-xs z-999 flex items-center justify-center"
+        onClick={handleClose}
       >
-        {/* Header */}
-        <div className="shrink-0">
-          <div className="w-full flex justify-end">
-            <button
-              onClick={handleClose}
-              className="p-2 md:p-3 lg:p-4 hover:bg-white/10 rounded-lg md:rounded-xl transition-colors mt-3 md:mt-4 lg:mt-5 mr-3 md:mr-4 lg:mr-5"
-            >
-              <X className="w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 text-white" />
-            </button>
+        <div
+          className="relative bg-[#173E44]/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl max-h-[85vh] flex flex-col"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="shrink-0">
+            <div className="w-full flex justify-end">
+              <button
+                onClick={handleClose}
+                className="p-2 md:p-3 lg:p-4 hover:bg-white/10 rounded-lg md:rounded-xl transition-colors mt-3 md:mt-4 lg:mt-5 mr-3 md:mr-4 lg:mr-5"
+              >
+                <X className="w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 text-white" />
+              </button>
+            </div>
+            <div className="px-6 md:px-8 lg:px-10 pb-4 md:pb-5 flex flex-col">
+              <h2 className="text-lg md:text-xl lg:text-2xl text-white font-semibold leading-snug">
+                Reordenar
+              </h2>
+              <p className="text-sm text-white mt-0.5">
+                Selecciona los artículos que deseas volver a ordenar
+              </p>
+            </div>
+            <div className="border-t border-white/20" />
           </div>
-          <div className="px-6 md:px-8 lg:px-10 pb-4 md:pb-5 flex flex-col">
-            <h2 className="text-lg md:text-xl lg:text-2xl text-white font-semibold leading-snug">
-              Reordenar
-            </h2>
-            <p className="text-sm text-white mt-0.5">
-              Selecciona los artículos que deseas volver a ordenar
-            </p>
-          </div>
-          <div className="border-t border-white/20" />
-        </div>
 
-        {/* Items list */}
-        <div className="flex-1 overflow-y-auto px-6 md:px-8 lg:px-10 py-4 md:py-5">
-          {uniqueItems.length === 0 ? (
-            <p className="text-white/70 text-base md:text-lg text-center py-8">
-              No hay artículos disponibles para reordenar
-            </p>
-          ) : (
-            <div className="space-y-3 md:space-y-4">
-              {uniqueItems.map((item) => {
-                const cartItem = getCartItem(item.menu_item_id);
-                const qty = cartItem?.quantity ?? 0;
-                const isSelected = qty > 0;
+          {/* Items list */}
+          <div className="flex-1 overflow-y-auto px-6 md:px-8 lg:px-10 py-4 md:py-5">
+            {uniqueItems.length === 0 ? (
+              <p className="text-white/70 text-base md:text-lg text-center py-8">
+                No hay artículos disponibles para reordenar
+              </p>
+            ) : (
+              <div className="space-y-3 md:space-y-4">
+                {uniqueItems.map((item) => {
+                  const cartItem = getCartItem(item.menu_item_id);
+                  const qty = cartItem?.quantity ?? 0;
+                  const isSelected = qty > 0;
+                  const itemIsOutOfStock = outOfStockIds.has(item.menu_item_id);
 
-                const customFields = item.custom_fields as
-                  | Array<{
-                      fieldId: string;
-                      fieldName: string;
-                      selectedOptions: Array<{
-                        optionId: string;
-                        optionName: string;
-                        price: number;
-                        quantity?: number;
-                      }>;
-                    }>
-                  | null
-                  | undefined;
+                  const customFields = item.custom_fields as
+                    | Array<{
+                        fieldId: string;
+                        fieldName: string;
+                        selectedOptions: Array<{
+                          optionId: string;
+                          optionName: string;
+                          price: number;
+                          quantity?: number;
+                        }>;
+                      }>
+                    | null
+                    | undefined;
 
-                return (
-                  <div
-                    key={item.menu_item_id}
-                    onClick={() => handleCardTap(item)}
-                    className={`flex items-center gap-3 md:gap-4 rounded-xl md:rounded-2xl p-3 md:p-4 border cursor-pointer transition-all duration-200 ${
-                      isSelected
-                        ? "bg-white/10 border-[#eab3f4]/70"
-                        : "bg-white/5 border-white/10"
-                    }`}
-                  >
-                    {/* Checkbox */}
+                  return (
                     <div
-                      className="shrink-0 self-center"
-                      onClick={(e) => handleToggle(e, item)}
+                      key={item.menu_item_id}
+                      onClick={() => handleCardTap(item)}
+                      className={`flex items-center gap-3 md:gap-4 rounded-xl md:rounded-2xl p-3 md:p-4 border transition-all duration-200 ${
+                        itemIsOutOfStock
+                          ? "opacity-50 cursor-not-allowed bg-white/5 border-white/10"
+                          : isSelected
+                            ? "cursor-pointer bg-white/10 border-[#eab3f4]/70"
+                            : "cursor-pointer bg-white/5 border-white/10"
+                      }`}
                     >
+                      {/* Checkbox */}
                       <div
-                        className={`size-4 md:size-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
-                          isSelected
-                            ? "bg-[#eab3f4] border-[#eab3f4]"
-                            : "bg-transparent border-white/40"
-                        }`}
+                        className="shrink-0 self-center"
+                        onClick={(e) => handleToggle(e, item)}
                       >
-                        {isSelected && (
-                          <div className="size-1.5 md:size-2 rounded-full bg-white" />
+                        <div
+                          className={`size-4 md:size-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+                            isSelected
+                              ? "bg-[#eab3f4] border-[#eab3f4]"
+                              : "bg-transparent border-white/40"
+                          }`}
+                        >
+                          {isSelected && (
+                            <div className="size-1.5 md:size-2 rounded-full bg-white" />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Image */}
+                      <div className="shrink-0 relative">
+                        <div className="size-16 md:size-20 rounded-sm overflow-hidden bg-gray-300">
+                          {item.images?.length > 0 && item.images[0] ? (
+                            <img
+                              src={item.images[0]}
+                              alt={item.item}
+                              className={`w-full h-full object-cover${itemIsOutOfStock ? " blur-sm" : ""}`}
+                            />
+                          ) : (
+                            <img
+                              src="/logos/logo-short-green.webp"
+                              alt="Logo Even"
+                              className={`w-full h-full object-contain p-2${itemIsOutOfStock ? " blur-sm" : ""}`}
+                            />
+                          )}
+                        </div>
+                        {itemIsOutOfStock && (
+                          <div className="absolute bottom-0.5 left-0.5">
+                            <span className="bg-red-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full tracking-wide">
+                              AGOTADO
+                            </span>
+                          </div>
                         )}
                       </div>
-                    </div>
 
-                    {/* Image */}
-                    <div className="shrink-0">
-                      <div className="size-16 md:size-20 rounded-sm overflow-hidden bg-gray-300">
-                        {item.images?.length > 0 && item.images[0] ? (
-                          <img
-                            src={item.images[0]}
-                            alt={item.item}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <img
-                            src="/logos/logo-short-green.webp"
-                            alt="Logo Even"
-                            className="w-full h-full object-contain p-2"
-                          />
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-base md:text-lg text-white font-medium capitalize">
+                          {item.item}
+                        </h3>
+                        {customFields && customFields.length > 0 && (
+                          <div className="text-xs md:text-sm text-gray-400 space-y-0.5 mt-0.5">
+                            {customFields.map((field, idx) => (
+                              <div key={idx}>
+                                {field.selectedOptions.map((opt, optIdx) => (
+                                  <p key={optIdx}>
+                                    {opt.optionName}
+                                    {opt.price > 0 &&
+                                      ` $${opt.price.toFixed(2)}`}
+                                  </p>
+                                ))}
+                              </div>
+                            ))}
+                          </div>
                         )}
+                        <p className="text-xs md:text-sm text-white/60 mt-1">
+                          ${(item.price + (item.extra_price || 0)).toFixed(2)}
+                        </p>
                       </div>
-                    </div>
 
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-base md:text-lg text-white font-medium capitalize">
-                        {item.item}
-                      </h3>
-                      {customFields && customFields.length > 0 && (
-                        <div className="text-xs md:text-sm text-gray-400 space-y-0.5 mt-0.5">
-                          {customFields.map((field, idx) => (
-                            <div key={idx}>
-                              {field.selectedOptions.map((opt, optIdx) => (
-                                <p key={optIdx}>
-                                  {opt.optionName}
-                                  {opt.price > 0 && ` $${opt.price.toFixed(2)}`}
-                                </p>
-                              ))}
-                            </div>
-                          ))}
+                      {/* Quantity controls */}
+                      {isSelected && (
+                        <div
+                          className="flex items-center shrink-0 self-center"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            onClick={(e) => handleDecrement(e, item)}
+                            disabled={cartState.isLoading}
+                            className="flex items-center justify-center size-7 md:size-8 rounded-full hover:bg-white/10 transition-colors disabled:opacity-30"
+                          >
+                            <Minus className="size-4 md:size-5 text-white" />
+                          </button>
+                          <span className="text-base md:text-lg text-white w-6 text-center">
+                            {qty}
+                          </span>
+                          <button
+                            onClick={(e) => handleIncrement(e, item)}
+                            disabled={cartState.isLoading}
+                            className="flex items-center justify-center size-7 md:size-8 rounded-full hover:bg-white/10 transition-colors disabled:opacity-30"
+                          >
+                            <Plus className="size-4 md:size-5 text-white" />
+                          </button>
                         </div>
                       )}
-                      <p className="text-xs md:text-sm text-white/60 mt-1">
-                        ${(item.price + (item.extra_price || 0)).toFixed(2)}
-                      </p>
                     </div>
-
-                    {/* Quantity controls */}
-                    {isSelected && (
-                      <div
-                        className="flex items-center shrink-0 self-center"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <button
-                          onClick={(e) => handleDecrement(e, item)}
-                          disabled={cartState.isLoading}
-                          className="flex items-center justify-center size-7 md:size-8 rounded-full hover:bg-white/10 transition-colors disabled:opacity-30"
-                        >
-                          <Minus className="size-4 md:size-5 text-white" />
-                        </button>
-                        <span className="text-base md:text-lg text-white w-6 text-center">
-                          {qty}
-                        </span>
-                        <button
-                          onClick={(e) => handleIncrement(e, item)}
-                          disabled={cartState.isLoading}
-                          className="flex items-center justify-center size-7 md:size-8 rounded-full hover:bg-white/10 transition-colors disabled:opacity-30"
-                        >
-                          <Plus className="size-4 md:size-5 text-white" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="shrink-0 px-6 md:px-8 lg:px-10 py-4 md:py-5 border-t border-white/20">
-          {hasSelection && (
-            <p className="text-white/70 text-sm md:text-base text-right mb-3">
-              Subtotal:{" "}
-              <span className="text-white font-semibold">
-                ${subtotal.toFixed(2)}
-              </span>
-            </p>
-          )}
-          <button
-            onClick={handleConfirm}
-            disabled={!hasSelection || cartState.isLoading || isNavigating}
-            className="w-full bg-linear-to-r from-[#34808C] to-[#173E44] text-white rounded-full py-3 md:py-4 text-base md:text-lg font-medium transition-all active:scale-95 disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center gap-2"
-          >
-            {(cartState.isLoading || isNavigating) && (
-              <span className="size-4 md:size-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                  );
+                })}
+              </div>
             )}
-            Ordenar
-          </button>
+          </div>
+
+          {/* Footer */}
+          <div className="shrink-0 px-6 md:px-8 lg:px-10 py-4 md:py-5 border-t border-white/20">
+            {hasSelection && (
+              <p className="text-white/70 text-sm md:text-base text-right mb-3">
+                Subtotal:{" "}
+                <span className="text-white font-semibold">
+                  ${subtotal.toFixed(2)}
+                </span>
+              </p>
+            )}
+            <button
+              onClick={handleConfirm}
+              disabled={!hasSelection || cartState.isLoading || isNavigating}
+              className="w-full bg-linear-to-r from-[#34808C] to-[#173E44] text-white rounded-full py-3 md:py-4 text-base md:text-lg font-medium transition-all active:scale-95 disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center gap-2"
+            >
+              {(cartState.isLoading || isNavigating) && (
+                <span className="size-4 md:size-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+              )}
+              Ordenar
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

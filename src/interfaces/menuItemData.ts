@@ -25,6 +25,7 @@ export interface MenuItem {
   discount: number;
   custom_fields: CustomField[];
   is_available: boolean;
+  is_out_of_stock?: boolean;
   display_order: number;
   created_at: string;
   updated_at: string;
