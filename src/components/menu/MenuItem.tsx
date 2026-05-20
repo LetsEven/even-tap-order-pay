@@ -224,29 +224,38 @@ function MenuItem({ item, onRestaurantClosed }: MenuItemProps) {
       >
         <div className="flex items-center gap-4 md:gap-5 lg:gap-6">
           {/* Image */}
-          <div className="shrink-0 cursor-pointer">
-            <div className="relative size-36 md:size-40 lg:size-44 bg-gray-300 rounded-xl md:rounded-2xl flex items-center justify-center hover:scale-105 transition-transform duration-200">
+          <div className="relative shrink-0 cursor-pointer size-36 md:size-40 lg:size-44">
+            <div className="size-full bg-gray-300 rounded-xl md:rounded-2xl flex items-center justify-center hover:scale-105 transition-transform duration-200 overflow-hidden">
               {adaptedItem.images[0] ? (
                 <img
                   src={adaptedItem.images[0]}
                   alt="Dish preview"
+                  loading="lazy"
                   className={`w-full h-full object-cover rounded-xl md:rounded-2xl`}
                 />
               ) : (
                 <img
-                  src={"/logos/logo-short-green.webp"}
+                  src="/logos/logo-short-green.webp"
                   alt="Logo Even"
+                  loading="lazy"
                   className={`size-18 md:size-20 lg:size-22 object-contain`}
                 />
               )}
-              {isOutOfStock && (
-                <div className="absolute bottom-2 left-0">
-                  <span className="bg-red-600 text-white text-[12px] md:text-xs font-bold px-2 py-1 tracking-wide">
-                    AGOTADO
-                  </span>
-                </div>
-              )}
             </div>
+            {adaptedItem.discount && (
+              <div className="absolute top-0 left-0 rounded-tl-xl md:rounded-tl-2xl overflow-hidden">
+                <span className="block bg-red-600 text-white text-[11px] md:text-xs font-bold px-2 pt-1 pb-0.5 tracking-wide">
+                  {adaptedItem.discount}% OFF
+                </span>
+              </div>
+            )}
+            {isOutOfStock && (
+              <div className="absolute bottom-0 right-0 rounded-br-xl md:rounded-br-2xl overflow-hidden">
+                <span className="block bg-red-600 text-white text-[12px] md:text-xs font-bold px-2 py-0.5 tracking-wide">
+                  AGOTADO
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Content */}

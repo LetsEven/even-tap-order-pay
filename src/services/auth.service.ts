@@ -291,7 +291,7 @@ class AuthService {
         };
       }
 
-      const response = await fetch(`${API_URL}/profiles/me`, {
+      let response = await fetch(`${API_URL}/profiles/me`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -299,6 +299,22 @@ class AuthService {
         },
         body: JSON.stringify(updates),
       });
+
+      if (response.status === 401) {
+        const newToken = await this.handleTokenRefresh();
+        if (newToken) {
+          response = await fetch(`${API_URL}/profiles/me`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${newToken}`,
+            },
+            body: JSON.stringify(updates),
+          });
+        } else {
+          return { success: false, error: "Error al renovar la sesión" };
+        }
+      }
 
       const data = await response.json();
 
