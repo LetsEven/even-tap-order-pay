@@ -23,6 +23,13 @@ export interface AddPaymentMethodRequest {
   cvv: string;
 }
 
+export interface CartItemForPayment {
+  name: string;
+  price: number;
+  quantity: number;
+  extraPrice?: number;
+}
+
 export interface ProcessPaymentRequest {
   paymentMethodId: string;
   amount: number;
@@ -31,6 +38,9 @@ export interface ProcessPaymentRequest {
   orderId?: string;
   tableNumber?: string;
   restaurantId?: string;
+  baseAmount?: number;
+  tipAmount?: number;
+  items?: CartItemForPayment[];
 }
 
 export interface PaymentHistory {
