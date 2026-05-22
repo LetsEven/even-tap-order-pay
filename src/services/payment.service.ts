@@ -31,6 +31,13 @@ export interface AddPaymentMethodRequest {
   cardholderName: string;
 }
 
+export interface CartItemForPayment {
+  name: string;
+  price: number;
+  quantity: number;
+  extraPrice?: number;
+}
+
 export interface ProcessPaymentRequest {
   paymentMethodId: string;
   amount: number;
@@ -40,6 +47,9 @@ export interface ProcessPaymentRequest {
   tableNumber: string;
   restaurantId: string;
   installments?: number;
+  baseAmount?: number;
+  tipAmount?: number;
+  items?: CartItemForPayment[];
 }
 
 export interface PaymentHistory {
@@ -152,6 +162,9 @@ class PaymentService {
     tableNumber?: string;
     restaurantId?: string;
     customerName?: string;
+    baseAmount?: number;
+    tipAmount?: number;
+    items?: CartItemForPayment[];
   }): Promise<ApiResponse<{ orderId: string }>> {
     return this.request("/payments/apple-pay/order", {
       method: "POST",
@@ -166,6 +179,9 @@ class PaymentService {
     tableNumber?: string;
     restaurantId?: string;
     customerName?: string;
+    baseAmount?: number;
+    tipAmount?: number;
+    items?: CartItemForPayment[];
   }): Promise<ApiResponse<{ orderId: string }>> {
     return this.request("/payments/google-pay/order", {
       method: "POST",

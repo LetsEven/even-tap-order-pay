@@ -241,6 +241,14 @@ export default function CardSelectionPage() {
             guestNameRef.current ||
             cartUserNameRef.current ||
             undefined,
+          baseAmount,
+          tipAmount,
+          items: cartState.items.map((i) => ({
+            name: i.name,
+            price: i.price,
+            quantity: i.quantity || 1,
+            extraPrice: (i.extraPrice || 0) * (i.quantity || 1),
+          })),
         });
 
         const appleOrderId =
@@ -327,6 +335,14 @@ export default function CardSelectionPage() {
             guestNameRef.current ||
             cartUserNameRef.current ||
             undefined,
+          baseAmount,
+          tipAmount,
+          items: cartState.items.map((i) => ({
+            name: i.name,
+            price: i.price,
+            quantity: i.quantity || 1,
+            extraPrice: (i.extraPrice || 0) * (i.quantity || 1),
+          })),
         });
 
         const googleOrderId =
@@ -632,6 +648,14 @@ export default function CardSelectionPage() {
         tableNumber: tableNumber,
         restaurantId,
         installments: selectedMSI || undefined,
+        baseAmount,
+        tipAmount,
+        items: items.map((i) => ({
+          name: i.name,
+          price: i.price,
+          quantity: i.quantity || 1,
+          extraPrice: (i.extraPrice || 0) * (i.quantity || 1),
+        })),
       });
 
       if (!paymentResult.success) {
