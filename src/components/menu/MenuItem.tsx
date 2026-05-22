@@ -242,7 +242,7 @@ function MenuItem({ item, onRestaurantClosed }: MenuItemProps) {
                 />
               )}
             </div>
-            {adaptedItem.discount && (
+            {adaptedItem.discount > 0 && (
               <div className="absolute top-0 left-0 rounded-tl-xl md:rounded-tl-2xl overflow-hidden">
                 <span className="block bg-red-600 text-white text-[11px] md:text-xs font-bold px-2 pt-1 pb-0.5 tracking-wide">
                   {adaptedItem.discount}% OFF
