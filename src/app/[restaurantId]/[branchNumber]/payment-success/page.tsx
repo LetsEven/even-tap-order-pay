@@ -590,10 +590,13 @@ export default function PaymentSuccessPage() {
                       Mesa {paymentDetails?.tableNumber || state.tableNumber}
                     </p>
                     <p className="text-xs md:text-sm text-white/70 mt-1">
-                      {new Date().toLocaleTimeString("es-MX", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {(orderCreatedAt || new Date()).toLocaleTimeString(
+                        "es-MX",
+                        {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        },
+                      )}
                     </p>
                   </div>
                 </div>
@@ -623,7 +626,7 @@ export default function PaymentSuccessPage() {
                       <Calendar className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-blue-600" />
                     </div>
                     <span className="text-sm md:text-base lg:text-lg">
-                      {new Date()
+                      {(orderCreatedAt || new Date())
                         .toLocaleDateString("es-MX", {
                           day: "2-digit",
                           month: "2-digit",
@@ -744,9 +747,16 @@ export default function PaymentSuccessPage() {
                   </button>
                 )}
               </div>
-              <span className="text-lg md:text-xl lg:text-2xl font-medium text-white">
-                ${amount.toFixed(2)} MXN
-              </span>
+              {paymentDetails?.installments ? (
+                <span className="text-lg md:text-xl lg:text-2xl font-medium text-white">
+                  {paymentDetails.installments}x $
+                  {(amount / paymentDetails.installments).toFixed(2)} MXN
+                </span>
+              ) : (
+                <span className="text-lg md:text-xl lg:text-2xl font-medium text-white">
+                  ${amount.toFixed(2)} MXN
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -977,6 +987,22 @@ export default function PaymentSuccessPage() {
                       {(
                         (paymentDetails?.evenCommissionClient || 0) +
                         (paymentDetails?.ivaEvenClient || 0)
+                      ).toFixed(2)}{" "}
+                      MXN
+                    </span>
+                  </div>
+                )}
+
+                {paymentDetails?.installments && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-black font-medium text-base md:text-lg lg:text-xl">
+                      + Financiamiento ({paymentDetails.installments} meses)
+                    </span>
+                    <span className="text-black font-medium text-base md:text-lg lg:text-xl">
+                      $
+                      {(
+                        (paymentDetails.totalAmountCharged || 0) -
+                        (paymentDetails.installmentBaseAmount || 0)
                       ).toFixed(2)}{" "}
                       MXN
                     </span>
