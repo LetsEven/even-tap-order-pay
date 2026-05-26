@@ -43,6 +43,19 @@ export interface ProcessPaymentRequest {
   items?: CartItemForPayment[];
 }
 
+export interface MsiOption {
+  months: number;
+  rate: number;
+  minAmount: number;
+  fixedInstallments: boolean;
+}
+
+export interface MsiConfig {
+  isActive: boolean;
+  visaMc: MsiOption[];
+  amex: MsiOption[];
+}
+
 export interface PaymentHistory {
   id: string;
   amount: number;

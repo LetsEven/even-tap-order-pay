@@ -17,6 +17,7 @@ import { paymentService } from "@/services/payment.service";
 import { calculateCommissions } from "@/utils/commissionCalculator";
 import { usePaymentProvider } from "@/hooks/usePaymentProvider";
 import { useAgentStatus } from "@/hooks/useAgentStatus";
+import { useMsiConfig } from "@/hooks/useMsiConfig";
 
 export default function CardSelectionPage() {
   const {
@@ -27,6 +28,7 @@ export default function CardSelectionPage() {
   const restaurantId = restaurantIdNum.toString();
   const { provider, isLoadingProvider } = usePaymentProvider(restaurantId);
   const { isAgentRequired } = useAgentStatus(restaurantIdNum, branchNumber);
+  const { msiConfig } = useMsiConfig();
 
   const { state: cartState, clearCart, orderNotes, setOrderNotes } = useCart();
   const { navigateWithTable, tableNumber } = useTableNavigation();
@@ -94,6 +96,7 @@ export default function CardSelectionPage() {
     },
   );
   const [isGooglePayProcessing, setIsGooglePayProcessing] = useState(false);
+  const [googlePayToken, setGooglePayToken] = useState<string | null>(null);
   const [googlePayPaymentId, setGooglePayPaymentId] = useState<string | null>(
     null,
   );
@@ -377,7 +380,8 @@ export default function CardSelectionPage() {
         googlePaySDK.on("success", (event: any) => {
           sessionStorage.removeItem("even-current-order-id");
           sessionStorage.removeItem("even-current-payment-key");
-          setGooglePayPaymentId(event?.detail?.id || googleOrderId);
+          setGooglePayToken(event?.detail?.token || null);
+          setGooglePayPaymentId(event?.detail?.activity_id || googleOrderId);
           setIsGooglePayProcessing(true);
           setCompletedOrderItems([...cartItemsRef.current]);
           setCompletedUserName(
@@ -507,19 +511,24 @@ export default function CardSelectionPage() {
 
     const saveAndFinalize = (
       tapOrderId: string,
+      paymentId: string,
+      transactionId: string,
       cardLast4: string,
       cardBrand: string,
       paymentMethodId: string | null,
     ) => {
       const userName = profile?.firstName || cartState.userName || "Usuario";
+      const chargedAmount = selectedMSI ? displayTotal : totalAmount;
       const data = {
         orderId: tapOrderId,
-        paymentId: tapOrderId,
-        transactionId: tapOrderId,
-        totalAmountCharged: totalAmount,
-        amount: totalAmount,
+        paymentId,
+        transactionId,
+        totalAmountCharged: chargedAmount,
+        amount: chargedAmount,
         baseAmount,
         tipAmount,
+        installments: selectedMSI || null,
+        installmentBaseAmount: selectedMSI ? totalAmount : null,
         evenCommissionClient,
         ivaEvenClient,
         evenCommissionTotal,
@@ -577,7 +586,14 @@ export default function CardSelectionPage() {
         }
 
         const orderId = result.data.order.id;
-        saveAndFinalize(orderId, "AP", "apple", null);
+        saveAndFinalize(
+          orderId,
+          `apple-pay-${orderId}`,
+          orderId,
+          "AP",
+          "apple",
+          null,
+        );
         setOrderNotes("");
         await clearCart();
         setCompletedOrderId(orderId);
@@ -591,6 +607,7 @@ export default function CardSelectionPage() {
           payment_method_id: null,
           payment_source: "google_pay",
           ecartpay_order_id: googlePayPaymentId,
+          google_pay_token: googlePayToken,
         });
 
         if (!result.success || !result.data?.order) {
@@ -602,7 +619,14 @@ export default function CardSelectionPage() {
         }
 
         const orderId = result.data.order.id;
-        saveAndFinalize(orderId, "GP", "google", null);
+        saveAndFinalize(
+          orderId,
+          `google-pay-${orderId}`,
+          orderId,
+          "GP",
+          "google",
+          null,
+        );
         setOrderNotes("");
         await clearCart();
         setCompletedOrderId(orderId);
@@ -631,7 +655,14 @@ export default function CardSelectionPage() {
         }
 
         const orderId = result.data.order.id;
-        saveAndFinalize(orderId, "1234", "amex", null);
+        saveAndFinalize(
+          orderId,
+          `pick-go-${orderId}`,
+          orderId,
+          "1234",
+          "amex",
+          null,
+        );
         setOrderNotes("");
         await clearCart();
         setCompletedOrderId(orderId);
@@ -650,12 +681,14 @@ export default function CardSelectionPage() {
         installments: selectedMSI || undefined,
         baseAmount,
         tipAmount,
-        items: items.map((i) => ({
-          name: i.name,
-          price: i.price,
-          quantity: i.quantity || 1,
-          extraPrice: (i.extraPrice || 0) * (i.quantity || 1),
-        })),
+        items: selectedMSI
+          ? undefined
+          : items.map((i) => ({
+              name: i.name,
+              price: i.price,
+              quantity: i.quantity || 1,
+              extraPrice: (i.extraPrice || 0) * (i.quantity || 1),
+            })),
       });
 
       if (!paymentResult.success) {
@@ -666,8 +699,10 @@ export default function CardSelectionPage() {
 
       const confirmResult = await tapOrderService.confirmOrder({
         ...commonBody,
+        total_amount_charged: selectedMSI ? displayTotal : totalAmount,
         payment_method_id: selectedPaymentMethodId,
         payment_source: "saved_card",
+        ecartpay_order_id: (paymentResult as any).payment?.id ?? null,
         installments: selectedMSI || null,
       });
 
@@ -685,6 +720,8 @@ export default function CardSelectionPage() {
       );
       saveAndFinalize(
         orderId,
+        paymentResult.data?.paymentId || `tap-order-${orderId}`,
+        paymentResult.data?.transactionId || orderId,
         selectedMethod?.lastFourDigits || "****",
         selectedMethod?.cardBrand || "visa",
         selectedPaymentMethodId,
@@ -696,9 +733,20 @@ export default function CardSelectionPage() {
       sessionStorage.removeItem("even-current-order-id");
       sessionStorage.removeItem("even-current-payment-key");
       setCompletedOrderId(null);
-      setErrorMessage(
-        error instanceof Error ? error.message : "Error desconocido",
-      );
+      const rawMessage =
+        error instanceof Error ? error.message : "Error desconocido";
+      const errorTranslations: Record<string, string> = {
+        "Transaction rejected by your bank, please try another card.":
+          "Tu banco rechazó la transacción. Por favor intenta con otra tarjeta.",
+        "Insufficient funds":
+          "Fondos insuficientes. Por favor intenta con otra tarjeta.",
+        "Card expired":
+          "Tu tarjeta está vencida. Por favor agrega una tarjeta vigente.",
+        "Invalid card number": "Número de tarjeta inválido.",
+        "An unknown error occurred":
+          "Ocurrió un error al procesar el pago. Por favor intenta de nuevo.",
+      };
+      setErrorMessage(errorTranslations[rawMessage] ?? rawMessage);
       setShowAnimation(false);
     } finally {
       setIsProcessing(false);
@@ -729,25 +777,7 @@ export default function CardSelectionPage() {
       (pm) => pm.id === selectedPaymentMethodId,
     );
     const cardBrand = selectedMethod?.cardBrand;
-    const msiOptions =
-      cardBrand === "amex"
-        ? [
-            { months: 3, rate: 3.25 },
-            { months: 6, rate: 6.25 },
-            { months: 9, rate: 8.25 },
-            { months: 12, rate: 10.25 },
-            { months: 15, rate: 13.25 },
-            { months: 18, rate: 15.25 },
-            { months: 21, rate: 17.25 },
-            { months: 24, rate: 19.25 },
-          ]
-        : [
-            { months: 3, rate: 4.26 },
-            { months: 6, rate: 7.3 },
-            { months: 9, rate: 8.5 },
-            { months: 12, rate: 13.0 },
-            { months: 18, rate: 18.25 },
-          ];
+    const msiOptions = cardBrand === "amex" ? msiConfig.amex : msiConfig.visaMc;
     const selectedOption = msiOptions.find((opt) => opt.months === selectedMSI);
     if (!selectedOption) return totalAmount;
     return totalAmount / (1 - (selectedOption.rate / 100) * 1.16);
@@ -997,7 +1027,9 @@ export default function CardSelectionPage() {
                     const selectedMethod = allPaymentMethods.find(
                       (pm) => pm.id === selectedPaymentMethodId,
                     );
-                    return selectedMethod?.cardType === "credit" ? (
+                    return selectedMethod?.cardType === "credit" &&
+                      msiConfig.isActive &&
+                      totalAmount >= 300 ? (
                       <div
                         className="py-2 cursor-pointer"
                         onClick={() => setShowPaymentOptionsModal(true)}
@@ -1300,24 +1332,7 @@ export default function CardSelectionPage() {
                   );
                   const cardBrand = selectedMethod?.cardBrand;
                   const msiOptions =
-                    cardBrand === "amex"
-                      ? [
-                          { months: 3, rate: 3.25, minAmount: 300 },
-                          { months: 6, rate: 6.25, minAmount: 600 },
-                          { months: 9, rate: 8.25, minAmount: 900 },
-                          { months: 12, rate: 10.25, minAmount: 1200 },
-                          { months: 15, rate: 13.25, minAmount: 1800 },
-                          { months: 18, rate: 15.25, minAmount: 1800 },
-                          { months: 21, rate: 17.25, minAmount: 1800 },
-                          { months: 24, rate: 19.25, minAmount: 1800 },
-                        ]
-                      : [
-                          { months: 3, rate: 4.26, minAmount: 300 },
-                          { months: 6, rate: 7.3, minAmount: 600 },
-                          { months: 9, rate: 8.5, minAmount: 900 },
-                          { months: 12, rate: 13.0, minAmount: 1200 },
-                          { months: 18, rate: 18.25, minAmount: 1800 },
-                        ];
+                    cardBrand === "amex" ? msiConfig.amex : msiConfig.visaMc;
                   const availableOptions = msiOptions.filter(
                     (o) => totalAmount >= o.minAmount,
                   );

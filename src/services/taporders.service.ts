@@ -156,6 +156,7 @@ export interface ConfirmTapOrderData {
   ecartpay_order_id?: string | null;
   transaction_by?: string | null;
   installments?: number | null;
+  google_pay_token?: string | null;
   // comisiones (el backend las recalcula, se envían como referencia)
   iva_tip?: number;
   even_commission_total?: number;
