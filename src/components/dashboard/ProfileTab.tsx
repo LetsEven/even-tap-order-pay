@@ -63,7 +63,6 @@ export default function ProfileTab({ onLogout }: ProfileTabProps = {}) {
 
       try {
         const response = await authService.getMyProfile();
-        console.log("📊 getMyProfile response:", response);
 
         // El backend puede devolver data.data.profile o data.profile
         const responseData = (response as any).data;
@@ -71,7 +70,6 @@ export default function ProfileTab({ onLogout }: ProfileTabProps = {}) {
           responseData?.data?.profile || responseData?.profile;
 
         if (response.success && profileData) {
-          console.log("✅ Profile data loaded:", profileData);
           setFirstName(profileData.firstName || "");
           setLastName(profileData.lastName || "");
           setPhone(profileData.phone || "");

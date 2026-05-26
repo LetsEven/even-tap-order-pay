@@ -1,4 +1,5 @@
 import { requestWithAuth } from "./request-helper";
+import type { MsiConfig } from "@/types/payment.types";
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -25,10 +26,10 @@ export interface PaymentMethod {
 }
 
 export interface AddPaymentMethodRequest {
+  fullName: string;
   cardNumber: string;
-  expiryDate: string;
+  expDate: string;
   cvv: string;
-  cardholderName: string;
 }
 
 export interface CartItemForPayment {
@@ -85,29 +86,9 @@ class PaymentService {
   async addPaymentMethod(
     paymentData: AddPaymentMethodRequest,
   ): Promise<ApiResponse<{ paymentMethod: PaymentMethod }>> {
-    // Obtener email del usuario autenticado o usar un email temporal para guests
-    let userEmail = "guest@letseven.io"; // Fallback
-
-    if (typeof window !== "undefined") {
-      // Intentar obtener email del localStorage (si está disponible)
-      const storedEmail = localStorage.getItem("even_user_email");
-      if (storedEmail) {
-        userEmail = storedEmail;
-      }
-    }
-
-    // Mapear los campos al formato esperado por el backend
-    const backendPayload = {
-      fullName: paymentData.cardholderName,
-      email: userEmail,
-      cardNumber: paymentData.cardNumber,
-      expDate: paymentData.expiryDate,
-      cvv: paymentData.cvv,
-    };
-
     return this.request("/payment-methods", {
       method: "POST",
-      body: JSON.stringify(backendPayload),
+      body: JSON.stringify(paymentData),
     });
   }
 
@@ -197,6 +178,10 @@ class PaymentService {
       method: "POST",
       body: JSON.stringify({ guestId }),
     });
+  }
+
+  async getMsiConfiguration(): Promise<ApiResponse<MsiConfig>> {
+    return this.request("/payments/installment-config", { method: "GET" });
   }
 }
 
