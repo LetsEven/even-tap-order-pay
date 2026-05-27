@@ -19,8 +19,7 @@ export default function ProfileTab({ onLogout }: ProfileTabProps = {}) {
   const [lastName, setLastName] = useState("");
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [phone, setPhone] = useState("");
-  const [birthDate, setBirthDate] = useState("");
-  const [gender, setGender] = useState("");
+  const [age, setAge] = useState<number | "">();
   const [photoUrl, setPhotoUrl] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -36,11 +35,10 @@ export default function ProfileTab({ onLogout }: ProfileTabProps = {}) {
 
     // Código de país (ej: +52)
     if (cleaned.length > 10) {
-      const countryCode = cleaned.slice(0, cleaned.length - 10);
       const areaCode = cleaned.slice(-10, -7);
       const firstPart = cleaned.slice(-7, -4);
       const lastPart = cleaned.slice(-4);
-      return `+${countryCode} ${areaCode} ${firstPart} ${lastPart}`;
+      return `${areaCode} ${firstPart} ${lastPart}`;
     }
 
     return phoneNumber;
@@ -73,8 +71,12 @@ export default function ProfileTab({ onLogout }: ProfileTabProps = {}) {
           setFirstName(profileData.firstName || "");
           setLastName(profileData.lastName || "");
           setPhone(profileData.phone || "");
-          setBirthDate(profileData.birthDate || "");
-          setGender(profileData.gender || "");
+          setAge(
+            profileData.birthDate
+              ? new Date().getUTCFullYear() -
+                  new Date(profileData.birthDate).getUTCFullYear()
+              : undefined,
+          );
           setPhotoUrl(profileData.photoUrl || "");
         } else {
           console.warn("⚠️ No profile data in response:", response);
@@ -90,15 +92,15 @@ export default function ProfileTab({ onLogout }: ProfileTabProps = {}) {
   }, []);
 
   const handleUpdateProfile = async () => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !age) return;
 
     setIsUpdating(true);
     try {
+      const birthYear = new Date().getFullYear() - Number(age);
       const response = await authService.updateMyProfile({
         firstName,
         lastName,
-        birthDate: birthDate || undefined,
-        gender: gender as "male" | "female" | "other" | undefined,
+        birthDate: `${birthYear}-01-01`,
       });
 
       if (response.success) {
@@ -234,19 +236,8 @@ export default function ProfileTab({ onLogout }: ProfileTabProps = {}) {
         </div>
       </div>
 
-      {/* Email or Phone */}
-      <div className="space-y-2 mb-4 md:mb-5 lg:mb-6">
-        <label className="gap-1.5 md:gap-2 flex items-center text-sm md:text-base lg:text-lg text-gray-700">
-          <Phone className="size-3.5 md:size-4 lg:size-5" />
-          Teléfono
-        </label>
-        <div className="w-full px-4 md:px-5 lg:px-6 py-3 md:py-4 lg:py-5 bg-gray-100 border border-gray-300 rounded-lg text-gray-600 text-base md:text-lg lg:text-xl">
-          {formatPhoneNumber(profile.phone) || "No disponible"}
-        </div>
-      </div>
-
+      {/* Fila 1: Nombre + Apellido */}
       <div className="flex gap-3 md:gap-4 lg:gap-5 mb-4 md:mb-5 lg:mb-6">
-        {/* Nombre */}
         <div className="space-y-2 flex-1">
           <label className="gap-1.5 md:gap-2 flex items-center text-sm md:text-base lg:text-lg text-gray-700">
             <User className="size-3.5 md:size-4 lg:size-5" />
@@ -261,8 +252,6 @@ export default function ProfileTab({ onLogout }: ProfileTabProps = {}) {
             disabled={isUpdating || !isAuthenticated}
           />
         </div>
-
-        {/* Apellido */}
         <div className="space-y-2 flex-1">
           <label className="gap-1.5 md:gap-2 flex items-center text-sm md:text-base lg:text-lg text-gray-700">
             <User className="size-3.5 md:size-4 lg:size-5" />
@@ -279,64 +268,38 @@ export default function ProfileTab({ onLogout }: ProfileTabProps = {}) {
         </div>
       </div>
 
-      <div className="flex gap-2 md:gap-4 lg:gap-5 mb-6 md:mb-8 lg:mb-10">
-        {/* Fecha de nacimiento */}
+      {/* Fila 2: Teléfono + Edad */}
+      <div className="flex gap-3 md:gap-4 lg:gap-5 mb-6 md:mb-8 lg:mb-10">
         <div className="space-y-2 flex-1 min-w-0">
           <label className="gap-1.5 md:gap-2 flex items-center text-sm md:text-base lg:text-lg text-gray-700">
-            Fecha de nacimiento
+            <Phone className="size-3.5 md:size-4 lg:size-5" />
+            Teléfono
           </label>
-          <input
-            type="date"
-            value={birthDate}
-            onChange={(e) => setBirthDate(e.target.value)}
-            max={new Date().toISOString().split("T")[0]}
-            placeholder="dd/mm/aaaa"
-            className="cursor-pointer w-full px-2 md:px-5 lg:px-6 py-3 md:py-4 lg:py-5 border text-black text-base md:text-lg lg:text-xl border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-teal-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed [&::-webkit-calendar-picker-indicator]:cursor-pointer appearance-none bg-white"
-            style={{
-              WebkitAppearance: "none",
-              MozAppearance: "textfield",
-            }}
-            disabled={isUpdating || !isAuthenticated}
-            lang="es-MX"
-          />
-        </div>
-
-        {/* Genero */}
-        <div className="space-y-2 flex-1 min-w-0">
-          <label className="gap-1.5 md:gap-2 flex items-center text-sm md:text-base lg:text-lg text-gray-700">
-            Género
-          </label>
-          <div className="relative">
-            <select
-              value={gender}
-              onChange={(e) => setGender(e.target.value)}
-              className="cursor-pointer w-full px-2 md:px-5 lg:px-6 py-3 md:py-4 lg:py-5 border text-black text-base md:text-lg lg:text-xl border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-teal-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed appearance-none bg-white pr-10"
-              style={{
-                WebkitAppearance: "none",
-                MozAppearance: "none",
-              }}
-              disabled={isUpdating || !isAuthenticated}
-            >
-              <option value="male">Masculino</option>
-              <option value="female">Femenino</option>
-              <option value="other">Otro</option>
-            </select>
-            {/* Custom dropdown arrow */}
-            <div className="pointer-events-none absolute inset-y-0 right-2 md:right-5 lg:right-6 flex items-center">
-              <svg
-                className="h-5 w-5 text-gray-400"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
+          <div className="w-full px-4 md:px-5 lg:px-6 py-3 md:py-4 lg:py-5 bg-gray-100 border border-gray-300 rounded-lg text-gray-600 text-base md:text-lg lg:text-xl truncate">
+            {formatPhoneNumber(phone) || "No disponible"}
           </div>
+        </div>
+        <div className="space-y-2 flex-1 min-w-0">
+          <label className="gap-1.5 md:gap-2 flex items-center text-sm md:text-base lg:text-lg text-gray-700">
+            Edad
+          </label>
+          <select
+            value={age ?? ""}
+            onChange={(e) =>
+              setAge(e.target.value === "" ? undefined : Number(e.target.value))
+            }
+            className="cursor-pointer w-full px-4 md:px-5 lg:px-6 py-3 md:py-4 lg:py-5 border text-black text-base md:text-lg lg:text-xl border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-teal-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed bg-white"
+            disabled={isUpdating || !isAuthenticated}
+          >
+            <option value="" disabled>
+              Selecciona...
+            </option>
+            {Array.from({ length: 59 }, (_, i) => i + 12).map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

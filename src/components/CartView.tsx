@@ -26,14 +26,15 @@ export default function CartView() {
     if (!isLoading && isAuthenticated) {
       setIsSubmitting(true);
       try {
-        navigateWithTable("/card-selection");
+        navigateWithTable("/order-confirm");
       } catch (error) {
         console.error("Error submitting order:", error);
       } finally {
         setIsSubmitting(false);
       }
     } else {
-      navigateWithTable("/auth-selection");
+      sessionStorage.setItem("authFromPaymentFlow", "true");
+      navigateWithTable("/auth");
     }
   };
 

@@ -155,7 +155,7 @@ function ReorderModal({ isOpen, onClose, items }: ReorderModalProps) {
 
   const handleConfirm = () => {
     setIsNavigating(true);
-    navigateWithTable("/card-selection");
+    navigateWithTable("/order-confirm");
   };
 
   if (!isOpen) return null;
