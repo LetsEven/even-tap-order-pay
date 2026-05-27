@@ -29,11 +29,11 @@ export default function Home() {
       restaurantParam || storedRestaurant || DEFAULT_RESTAURANT_ID;
 
     if (isAuthenticated && storedTable) {
-      // User signed in/up from cart (CartView), redirect to card-selection
+      // User signed in/up from cart (CartView), redirect to order-confirm
       sessionStorage.removeItem("pendingTableRedirect");
       sessionStorage.removeItem("pendingRestaurantId");
       router.replace(
-        `/${restaurantId}/${DEFAULT_BRANCH_NUMBER}/card-selection?table=${storedTable}`,
+        `/${restaurantId}/${DEFAULT_BRANCH_NUMBER}/order-confirm?table=${storedTable}`,
       );
       return;
     }
@@ -50,12 +50,12 @@ export default function Home() {
     }
 
     if (isAuthenticated && storedTable && authFromPaymentFlow) {
-      // User signed up during payment flow, redirect to card-selection
+      // User signed up during payment flow, redirect to order-confirm
       sessionStorage.removeItem("pendingTableRedirect");
       sessionStorage.removeItem("authFromPaymentFlow");
       sessionStorage.removeItem("pendingRestaurantId");
       router.replace(
-        `/${restaurantId}/${DEFAULT_BRANCH_NUMBER}/card-selection?table=${storedTable}`,
+        `/${restaurantId}/${DEFAULT_BRANCH_NUMBER}/order-confirm?table=${storedTable}`,
       );
       return;
     }

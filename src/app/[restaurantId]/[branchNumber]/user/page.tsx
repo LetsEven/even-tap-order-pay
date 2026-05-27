@@ -80,8 +80,8 @@ export default function UserPage() {
         // Guardar el nombre del usuario en el contexto del carrito y en localStorage (persiste recarga)
         setCartUserName(userName.trim());
         setGuestName(userName.trim());
-        // Navegar a card-selection
-        navigateWithTable("/card-selection");
+        // Navegar a order-confirm
+        navigateWithTable("/order-confirm");
       } catch (error) {
         console.error("Error submitting order:", error);
         // Si hay error, ocultar la animación

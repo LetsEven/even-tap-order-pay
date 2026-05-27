@@ -5,6 +5,7 @@ import { useTableNavigation } from "@/hooks/useTableNavigation";
 import { usePayment } from "@/context/PaymentContext";
 import { useValidateAccess } from "@/hooks/useValidateAccess";
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useGuest } from "@/context/GuestContext";
 import MenuHeaderBack from "@/components/headers/MenuHeaderBack";
@@ -35,6 +36,7 @@ export default function CardSelectionPage() {
   const { paymentMethods, deletePaymentMethod } = usePayment();
   const { user, profile } = useAuth();
   const { guestId, guestName } = useGuest();
+  const searchParams = useSearchParams();
 
   const isDev = process.env.NODE_ENV === "development";
 
@@ -56,10 +58,10 @@ export default function CardSelectionPage() {
   const baseAmount = cartState.totalPrice;
   const MINIMUM_AMOUNT = 20;
 
-  // Propina
-  const [tipPercentage, setTipPercentage] = useState(0);
-  const [customTip, setCustomTip] = useState("");
-  const [showCustomTipInput, setShowCustomTipInput] = useState(false);
+  // Propina desde URL
+  const tipAmountFromParam = parseFloat(searchParams.get("tipAmount") || "0");
+  const tipAmount = tipAmountFromParam;
+
   const [showTotalModal, setShowTotalModal] = useState(false);
   const [showPaymentOptionsModal, setShowPaymentOptionsModal] = useState(false);
   const [selectedMSI, setSelectedMSI] = useState<number | null>(null);
@@ -128,12 +130,6 @@ export default function CardSelectionPage() {
   >([]);
   const [completedUserName, setCompletedUserName] = useState<string>("");
 
-  const calculateTipAmount = () => {
-    if (customTip && parseFloat(customTip) > 0) return parseFloat(customTip);
-    return (baseAmount * tipPercentage) / 100;
-  };
-  const tipAmount = calculateTipAmount();
-
   const commissions = calculateCommissions(baseAmount, tipAmount);
   const {
     ivaTip,
@@ -147,16 +143,6 @@ export default function CardSelectionPage() {
     evenRestaurantCharge,
     totalAmountCharged: totalAmount,
   } = commissions;
-
-  const handleTipPercentage = (percentage: number) => {
-    setTipPercentage(percentage);
-    setCustomTip("");
-  };
-
-  const handleCustomTipChange = (value: string) => {
-    setCustomTip(value);
-    setTipPercentage(0);
-  };
 
   useEffect(() => {
     if (!selectedPaymentMethodId && allPaymentMethods.length > 0) {
@@ -911,76 +897,6 @@ export default function CardSelectionPage() {
                       ${baseAmount.toFixed(2)} MXN
                     </span>
                   </div>
-                </div>
-
-                {/* Selección de propina */}
-                <div className="mb-4">
-                  <div className="flex items-center gap-4 mb-3">
-                    <span className="text-black font-medium text-base md:text-lg lg:text-xl whitespace-nowrap">
-                      Propina
-                    </span>
-                    <div className="grid grid-cols-5 gap-2 flex-1">
-                      {[0, 10, 15, 20].map((percentage) => (
-                        <button
-                          key={percentage}
-                          onClick={() => {
-                            handleTipPercentage(percentage);
-                            setShowCustomTipInput(false);
-                          }}
-                          className={`py-1 md:py-1.5 rounded-full border border-[#8e8e8e]/40 text-black transition-colors cursor-pointer ${
-                            tipPercentage === percentage && !showCustomTipInput
-                              ? "bg-[#eab3f4] text-white"
-                              : "bg-[#f9f9f9] hover:border-gray-400"
-                          }`}
-                        >
-                          {percentage === 0 ? "0%" : `${percentage}%`}
-                        </button>
-                      ))}
-                      <button
-                        onClick={() => {
-                          setShowCustomTipInput(true);
-                          setTipPercentage(0);
-                        }}
-                        className={`py-1 md:py-1.5 rounded-full border border-[#8e8e8e]/40 text-black transition-colors cursor-pointer ${
-                          showCustomTipInput
-                            ? "bg-[#eab3f4] text-white"
-                            : "bg-[#f9f9f9] hover:border-gray-400"
-                        }`}
-                      >
-                        $
-                      </button>
-                    </div>
-                  </div>
-
-                  {showCustomTipInput && (
-                    <div className="flex flex-col gap-2 mb-3">
-                      <div className="relative w-full">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-black text-sm">
-                          $
-                        </span>
-                        <input
-                          type="number"
-                          value={customTip}
-                          onChange={(e) =>
-                            handleCustomTipChange(e.target.value)
-                          }
-                          placeholder="0.00"
-                          step="0.01"
-                          min="0"
-                          autoFocus
-                          className="w-full pl-8 pr-4 py-1 md:py-1.5 border border-[#8e8e8e]/40 rounded-full focus:outline-none focus:ring focus:ring-gray-400 text-black text-center bg-[#f9f9f9] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {tipAmount > 0 && (
-                    <div className="flex justify-end items-center mt-2 text-sm">
-                      <span className="text-[#eab3f4] font-medium">
-                        +${tipAmount.toFixed(2)} MXN
-                      </span>
-                    </div>
-                  )}
                 </div>
 
                 {/* Alerta de mínimo */}

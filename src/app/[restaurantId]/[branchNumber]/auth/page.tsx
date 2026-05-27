@@ -8,6 +8,7 @@ import { authService } from "@/services/auth.service";
 import { useRestaurant } from "@/context/RestaurantContext";
 import { useAuth } from "@/context/AuthContext";
 import { useTableNavigation } from "@/hooks/useTableNavigation";
+import { useGuest } from "@/context/GuestContext";
 
 type Step = "phone" | "verify" | "profile";
 
@@ -37,6 +38,7 @@ export default function AuthPage() {
     createOrUpdateProfile: updateProfile,
     refreshProfile,
   } = useAuth();
+  const { guestName } = useGuest();
 
   const restaurantId = params?.restaurantId as string;
   const branchNumber = params?.branchNumber as string;
@@ -50,8 +52,7 @@ export default function AuthPage() {
   const [otp, setOtp] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [birthDate, setBirthDate] = useState("");
-  const [gender, setGender] = useState("");
+  const [age, setAge] = useState<number | "">("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [countdown, setCountdown] = useState(0);
@@ -213,8 +214,7 @@ export default function AuthPage() {
       // User signed in from MenuView settings, redirect to dashboard
       navigateWithTable("/dashboard");
     } else if (authFromPaymentFlow && tableNumber) {
-      // User signed up during payment flow, redirect to payment-options
-      navigateWithTable("/card-selection");
+      navigateWithTable("/order-confirm");
     } else {
       // Default redirect to menu
       navigateWithTable("/order");
@@ -321,22 +321,20 @@ export default function AuthPage() {
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (age === "") return;
     setError("");
     setLoading(true);
 
     try {
+      const birthYear = new Date().getUTCFullYear() - Number(age);
       const response = await updateProfile({
         firstName,
         lastName,
-        birthDate,
-        gender: gender as "male" | "female" | "other",
+        birthDate: `${birthYear}-01-01`,
       });
 
       if (response.success) {
-        // Refresh profile data to get the updated information
         await refreshProfile();
-
-        // Redirect based on context
         handleAuthRedirect();
       } else {
         setError(response.error || "Error al guardar el perfil");
@@ -481,14 +479,6 @@ export default function AuthPage() {
                   />
                 </div>
               </div>
-              <p className="text-gray-300 text-xs">
-                Ejemplo:{" "}
-                {countryCode === "+52"
-                  ? "500 555 0006"
-                  : countryCode === "+1"
-                    ? "500 555 0006"
-                    : "123 456 789"}
-              </p>
             </div>
 
             <button
@@ -498,6 +488,18 @@ export default function AuthPage() {
             >
               {loading ? "Enviando..." : "Enviar código"}
             </button>
+
+            <div className="text-center pt-1">
+              <button
+                type="button"
+                onClick={() =>
+                  navigateWithTable(guestName ? "/order-confirm" : "/user")
+                }
+                className="text-white/70 hover:text-white text-sm underline underline-offset-2 transition-colors"
+              >
+                Continuar como invitado
+              </button>
+            </div>
           </form>
         )}
 
@@ -564,7 +566,6 @@ export default function AuthPage() {
         {/* Profile Completion Step */}
         {step === "profile" && (
           <form onSubmit={handleProfileSubmit} className="space-y-4">
-            {/* Name Fields */}
             <div className="grid grid-cols-2 gap-3">
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400 pointer-events-none" />
@@ -578,59 +579,43 @@ export default function AuthPage() {
                   disabled={loading}
                 />
               </div>
-
               <input
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Apellido"
                 className="h-[48px] w-full px-3 text-gray-600 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0a8b9b] appearance-none"
-                required
                 disabled={loading}
               />
             </div>
 
-            {/* Birth Date */}
             <div>
               <label className="block text-sm font-medium text-white mb-1">
-                Fecha de nacimiento
-              </label>
-              <input
-                type="date"
-                value={birthDate}
-                onChange={(e) => setBirthDate(e.target.value)}
-                max={new Date().toISOString().split("T")[0]}
-                className="h-[48px] w-full px-3 text-gray-600 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0a8b9b] appearance-none"
-                disabled={loading}
-                required
-              />
-            </div>
-
-            {/* Gender */}
-            <div>
-              <label className="block text-sm font-medium text-white mb-1">
-                Género
+                Edad
               </label>
               <select
-                value={gender}
-                onChange={(e) => setGender(e.target.value)}
+                required
+                value={age}
+                onChange={(e) =>
+                  setAge(e.target.value === "" ? "" : Number(e.target.value))
+                }
                 className="h-[48px] w-full px-3 text-gray-600 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0a8b9b] cursor-pointer appearance-none"
                 disabled={loading}
-                required
               >
-                <option value="">Selecciona...</option>
-                <option value="male">Masculino</option>
-                <option value="female">Femenino</option>
-                <option value="other">Otro</option>
+                <option value="" disabled>
+                  Selecciona tu edad
+                </option>
+                {Array.from({ length: 59 }, (_, i) => i + 12).map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
               </select>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
-              disabled={
-                loading || !firstName || !lastName || !birthDate || !gender
-              }
+              disabled={loading || !firstName || age === ""}
               className="w-full bg-black hover:bg-stone-950 text-white py-3 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
             >
               {loading ? "Guardando..." : "Continuar"}
