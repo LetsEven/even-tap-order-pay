@@ -116,6 +116,22 @@ body {
   animation: bounce-in 0.5s ease-out forwards;
 }
 
+@keyframes pulse-button-pink {
+  0% {
+    box-shadow: 0 0 0 0 rgba(234, 179, 244, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(234, 179, 244, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(234, 179, 244, 0);
+  }
+}
+
+.animate-pulse-button-pink {
+  animation: pulse-button-pink 1.5s ease-out infinite;
+}
+
 /* OrderAnimation styles */
 @keyframes expand-circle {
   0% {

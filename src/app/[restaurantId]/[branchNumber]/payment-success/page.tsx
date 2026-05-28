@@ -507,7 +507,7 @@ export default function PaymentSuccessPage() {
               <button
                 onClick={handleReorder}
                 disabled={!reorderItems.length}
-                className="w-full flex items-center justify-center gap-2 md:gap-3 lg:gap-4 text-white py-3 md:py-4 lg:py-5 rounded-full cursor-pointer transition-all active:scale-90 bg-[#eab3f4] text-base md:text-lg lg:text-xl disabled:opacity-70 font-medium"
+                className="w-full flex items-center justify-center gap-2 md:gap-3 lg:gap-4 text-white py-3 md:py-4 lg:py-5 rounded-full cursor-pointer transition-all active:scale-90 bg-[#eab3f4] text-base md:text-lg lg:text-xl disabled:opacity-70 animate-pulse-button-pink font-medium"
               >
                 <RefreshCw
                   className="size-5 md:size-6 lg:size-7"
