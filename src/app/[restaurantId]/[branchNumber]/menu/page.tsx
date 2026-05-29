@@ -5,11 +5,20 @@ import Loader from "@/components/UI/Loader";
 import { useRestaurant } from "@/context/RestaurantContext";
 import { useValidateAccess } from "@/hooks/useValidateAccess";
 import ValidationError from "@/components/ValidationError";
-import React from "react";
+import React, { useEffect } from "react";
 
 const MenuPage = () => {
   const { validationError, tableNumber } = useValidateAccess();
   const { restaurant, loading, error } = useRestaurant();
+
+  useEffect(() => {
+    if (restaurant?.name) {
+      document.title = restaurant.name + " | Tap Order & Pay";
+      return () => {
+        document.title = "Even Tap Order & Pay";
+      };
+    }
+  }, [restaurant?.name]);
 
   // Mostrar loader mientras carga
   if (loading) {
