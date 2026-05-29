@@ -3,6 +3,10 @@ import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { useRestaurant } from "../context/RestaurantContext";
 import { useTable } from "../context/TableContext";
 import { restaurantService } from "../services/restaurant.service";
+import {
+  getValidationFromCache,
+  setValidationCache,
+} from "../utils/validationCache";
 
 export function useValidateAccess() {
   const router = useRouter();
@@ -47,13 +51,44 @@ export function useValidateAccess() {
 
       // Validar que el restaurante, sucursal y mesa existen y que el servicio "tap-order-and-pay" esté disponible
       try {
+        const restId = parseInt(restaurantId);
+        const branchNum = parseInt(branchNumber);
+        const tableNum = parseInt(tableNumber);
+        const service = "tap-order-pay";
+
+        const cachedResult = getValidationFromCache(
+          restId,
+          branchNum,
+          tableNum,
+          service,
+        );
+        if (cachedResult !== null) {
+          if (!cachedResult.valid) {
+            setValidationError(cachedResult.error || "VALIDATION_ERROR");
+          } else {
+            setValidationError(null);
+          }
+          setIsValidating(false);
+          return;
+        }
+
         const validation =
           await restaurantService.validateRestaurantBranchTable(
-            parseInt(restaurantId),
-            parseInt(branchNumber),
-            parseInt(tableNumber),
-            "tap-order-pay",
+            restId,
+            branchNum,
+            tableNum,
+            service,
           );
+
+        if (validation.valid) {
+          setValidationCache(
+            restId,
+            branchNum,
+            tableNum,
+            { valid: true },
+            service,
+          );
+        }
 
         if (!validation.valid) {
           console.error("❌ Validation failed:", validation.error);
