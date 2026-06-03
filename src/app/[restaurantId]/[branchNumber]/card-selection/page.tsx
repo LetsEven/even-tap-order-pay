@@ -128,10 +128,15 @@ export default function CardSelectionPage() {
 
   useEffect(() => {
     if (!restaurantId || !branchNumber) return;
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-    fetch(`${API_BASE}/restaurants/${restaurantId}/${branchNumber}/order-flow-status`)
+    const API_BASE =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+    fetch(
+      `${API_BASE}/restaurants/${restaurantId}/${branchNumber}/order-flow-status`,
+    )
       .then((r) => r.json())
-      .then(({ data }) => { if (data?.is_high_demand) setShowHighDemandBanner(true); })
+      .then(({ data }) => {
+        if (data?.is_high_demand) setShowHighDemandBanner(true);
+      })
       .catch(() => {});
   }, [restaurantId, branchNumber]);
 
@@ -238,11 +243,11 @@ export default function CardSelectionPage() {
           amount: totalAmount,
           currency: "MXN",
           restaurantId: restaurantId,
-          customerName:
-            profileRef.current?.firstName ||
-            guestNameRef.current ||
-            cartUserNameRef.current ||
-            undefined,
+          customerName: profileRef.current
+            ? [profileRef.current.firstName, profileRef.current.lastName]
+                .filter(Boolean)
+                .join(" ") || undefined
+            : guestNameRef.current || cartUserNameRef.current || undefined,
           baseAmount,
           tipAmount,
           items: cartState.items.map((i) => ({
@@ -289,10 +294,11 @@ export default function CardSelectionPage() {
           setIsApplePayProcessing(true);
           setCompletedOrderItems([...cartItemsRef.current]);
           setCompletedUserName(
-            profileRef.current?.firstName ||
-              guestNameRef.current ||
-              cartUserNameRef.current ||
-              "Usuario",
+            profileRef.current
+              ? [profileRef.current.firstName, profileRef.current.lastName]
+                  .filter(Boolean)
+                  .join(" ") || "Usuario"
+              : guestNameRef.current || cartUserNameRef.current || "Usuario",
           );
           setShowAnimation(true);
         });
@@ -332,11 +338,11 @@ export default function CardSelectionPage() {
           amount: totalAmount,
           currency: "MXN",
           restaurantId: restaurantId,
-          customerName:
-            profileRef.current?.firstName ||
-            guestNameRef.current ||
-            cartUserNameRef.current ||
-            undefined,
+          customerName: profileRef.current
+            ? [profileRef.current.firstName, profileRef.current.lastName]
+                .filter(Boolean)
+                .join(" ") || undefined
+            : guestNameRef.current || cartUserNameRef.current || undefined,
           baseAmount,
           tipAmount,
           items: cartState.items.map((i) => ({
@@ -384,10 +390,11 @@ export default function CardSelectionPage() {
           setIsGooglePayProcessing(true);
           setCompletedOrderItems([...cartItemsRef.current]);
           setCompletedUserName(
-            profileRef.current?.firstName ||
-              guestNameRef.current ||
-              cartUserNameRef.current ||
-              "Usuario",
+            profileRef.current
+              ? [profileRef.current.firstName, profileRef.current.lastName]
+                  .filter(Boolean)
+                  .join(" ") || "Usuario"
+              : guestNameRef.current || cartUserNameRef.current || "Usuario",
           );
           setShowAnimation(true);
         });
@@ -425,10 +432,10 @@ export default function CardSelectionPage() {
     }
     setCompletedOrderItems([...cartState.items]);
     setCompletedUserName(
-      profile?.firstName ||
-        guestNameRef.current ||
-        cartState.userName ||
-        "Usuario",
+      profile
+        ? [profile.firstName, profile.lastName].filter(Boolean).join(" ") ||
+            "Usuario"
+        : guestNameRef.current || cartState.userName || "Usuario",
     );
     setShowAnimation(true);
   };
@@ -450,8 +457,10 @@ export default function CardSelectionPage() {
     }
 
     const userId = user?.id || guestId || null;
-    const customerName =
-      profile?.firstName || guestName || cartState.userName || "Invitado";
+    const customerName = profile
+      ? [profile.firstName, profile.lastName].filter(Boolean).join(" ") ||
+        "Invitado"
+      : guestName || cartState.userName || "Invitado";
     const customerEmail = profile?.email || user?.email || null;
     const customerPhone = user?.phone || null;
     const isGuest = !user?.id && !!guestId;
@@ -496,7 +505,7 @@ export default function CardSelectionPage() {
       tip_amount: tipAmount,
       total_amount_charged: totalAmount,
       currency: "MXN",
-      transaction_by: profile?.firstName || customerName,
+      transaction_by: customerName,
       iva_tip: ivaTip,
       even_commission_total: evenCommissionTotal,
       even_commission_client: evenCommissionClient,
@@ -516,7 +525,10 @@ export default function CardSelectionPage() {
       cardBrand: string,
       paymentMethodId: string | null,
     ) => {
-      const userName = profile?.firstName || cartState.userName || "Usuario";
+      const userName = profile
+        ? [profile.firstName, profile.lastName].filter(Boolean).join(" ") ||
+          "Usuario"
+        : guestName || cartState.userName || "Usuario";
       const chargedAmount = selectedMSI ? displayTotal : totalAmount;
       const data = {
         orderId: tapOrderId,
