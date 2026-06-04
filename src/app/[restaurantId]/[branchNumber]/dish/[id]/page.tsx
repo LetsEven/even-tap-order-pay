@@ -801,10 +801,10 @@ export default function DishDetailPage() {
                               const has = sel && sel.length > 0;
                               return (
                                 <div
-                                  className={`rounded px-2 py-1 ${has ? "bg-green-100" : "bg-gray-100"}`}
+                                  className={`rounded px-2 py-1 ${has ? "bg-gray-100" : "bg-green-100"}`}
                                 >
                                   <span
-                                    className={`text-sm md:text-base lg:text-lg font-normal ${has ? "text-green-600" : "text-gray-500"}`}
+                                    className={`text-sm md:text-base lg:text-lg font-normal ${has ? "text-gray-500" : "text-green-600"}`}
                                   >
                                     Obligatorio
                                   </span>

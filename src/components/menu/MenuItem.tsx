@@ -129,6 +129,7 @@ function MenuItem({ item, onRestaurantClosed }: MenuItemProps) {
         }
       } else {
         // Si no hay último item, navegar a la página de detalle
+        setIsPulsing(true);
         navigateWithTable(`/dish/${adaptedItem.id}`);
       }
       return;
