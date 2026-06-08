@@ -179,7 +179,7 @@ function ReorderModal({ isOpen, onClose, items }: ReorderModalProps) {
         onClick={handleClose}
       >
         <div
-          className="relative bg-[#173E44]/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl max-h-[85vh] flex flex-col"
+          className="relative bg-[#173E44]/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl max-h-[65vh] flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
