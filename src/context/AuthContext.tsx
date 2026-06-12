@@ -81,40 +81,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           // Si ya expiró o expira en menos de 5 minutos, refrescar ahora
           if (timeUntilExpiry < 300) {
-            try {
-              const refreshResponse = await authService.refreshToken();
-              if (refreshResponse.success && refreshResponse.data?.session) {
-                const newToken = refreshResponse.data.session.access_token;
-                authService.setAuthToken(newToken);
-                const profileOk = await loadProfileWithValidation();
-                if (profileOk) {
-                  setUser(currentUser);
-                } else {
-                  await performLogout();
-                }
-              } else {
-                if (timeUntilExpiry <= 0) {
-                  await performLogout();
-                } else {
-                  const profileOk = await loadProfileWithValidation();
-                  if (profileOk) {
-                    setUser(currentUser);
-                  } else {
-                    await performLogout();
-                  }
-                }
-              }
-            } catch (error) {
-              if (timeUntilExpiry > 0) {
-                const profileOk = await loadProfileWithValidation();
-                if (profileOk) {
-                  setUser(currentUser);
-                } else {
-                  await performLogout();
-                }
-              } else {
-                await performLogout();
-              }
+            const refreshResponse = await authService.refreshToken();
+            if (refreshResponse.success && refreshResponse.data?.session) {
+              authService.setAuthToken(
+                refreshResponse.data.session.access_token,
+              );
+            } else if (refreshResponse.status === 401) {
+              // El servidor rechazó el refresh token — sesión inválida
+              await performLogout();
+              setIsLoading(false);
+              return;
+            }
+            // Refresh exitoso, o error de red/5xx (sesión se conserva y se
+            // reintenta vía visibility/online/retry de getMyProfile)
+            const profileOk = await loadProfileWithValidation();
+            if (profileOk) {
+              setUser(currentUser);
+            } else {
+              await performLogout();
             }
             setIsLoading(false);
             return;
@@ -169,30 +153,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           // Si ya expiró o expira en menos de 10 minutos, refrescar
           if (timeUntilExpiry < 600) {
-            try {
-              const refreshResponse = await authService.refreshToken();
-              if (refreshResponse.success && refreshResponse.data?.session) {
-                const newToken = refreshResponse.data.session.access_token;
-                authService.setAuthToken(newToken);
-              } else {
-                // Solo cerrar sesión si el token ya expiró
-                const nowCheck = Math.floor(Date.now() / 1000);
-                if (parseInt(expiresAt) <= nowCheck) {
-                  console.error(
-                    "❌ Refresh failed and token expired, logging out user",
-                  );
-                  await performLogout();
-                } else {
-                  console.warn(
-                    "⚠️ Refresh failed on visibility change but token still valid",
-                  );
-                }
-              }
-            } catch (error) {
-              // Error de red - no cerrar sesión
-              console.error(
-                "❌ Network error refreshing on visibility change:",
-                error,
+            const refreshResponse = await authService.refreshToken();
+            if (refreshResponse.success && refreshResponse.data?.session) {
+              authService.setAuthToken(
+                refreshResponse.data.session.access_token,
+              );
+            } else if (refreshResponse.status === 401) {
+              // El servidor rechazó el refresh token — sesión inválida
+              console.error("❌ Refresh token rejected, logging out user");
+              await performLogout();
+            } else {
+              // Error de red o del servidor — conservar la sesión; se
+              // reintentará en el próximo visibility/online/timer
+              console.warn(
+                "⚠️ Transient refresh failure on visibility change, keeping session",
               );
             }
           }
