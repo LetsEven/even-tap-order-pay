@@ -252,10 +252,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      // Solo cerrar sesión si definitivamente no hay token.
-      // handleTokenRefresh ya hace redirect si el servidor rechaza el token,
-      // así que llegar aquí con otro error significa falla de red transitoria.
-      if (response.error === "No estás autenticado") {
+      // Cerrar sesión si no hay token o si el servidor rechazó el refresh
+      // (la sesión murió de verdad). Otros errores son fallas de red
+      // transitorias y conservan la sesión para reintentar luego.
+      if (
+        response.error === "No estás autenticado" ||
+        response.error === "Sesión expirada"
+      ) {
         return false;
       }
 
