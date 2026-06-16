@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { DM_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import { headers } from "next/headers";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
@@ -12,80 +12,20 @@ import { PaymentProvider } from "@/context/PaymentContext";
 import { PepperProvider } from "@/context/PepperContext";
 import Script from "next/script";
 
-const helveticaNeue = localFont({
-  src: [
-    {
-      path: "../../public/fonts/helvetica-neue/HelveticaNeueUltraLight.otf",
-      weight: "200",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/helvetica-neue/HelveticaNeueUltraLightItalic.otf",
-      weight: "200",
-      style: "italic",
-    },
-    {
-      path: "../../public/fonts/helvetica-neue/HelveticaNeueLight.otf",
-      weight: "300",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/helvetica-neue/HelveticaNeueLightItalic.otf",
-      weight: "300",
-      style: "italic",
-    },
-    {
-      path: "../../public/fonts/helvetica-neue/HelveticaNeueRoman.otf",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/helvetica-neue/HelveticaNeueItalic.ttf",
-      weight: "400",
-      style: "italic",
-    },
-    {
-      path: "../../public/fonts/helvetica-neue/HelveticaNeueMedium.otf",
-      weight: "500",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/helvetica-neue/HelveticaNeueMediumItalic.otf",
-      weight: "500",
-      style: "italic",
-    },
-    {
-      path: "../../public/fonts/helvetica-neue/HelveticaNeueBold.otf",
-      weight: "600",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/helvetica-neue/HelveticaNeueBoldItalic.otf",
-      weight: "600",
-      style: "italic",
-    },
-    {
-      path: "../../public/fonts/helvetica-neue/HelveticaNeueHeavy.otf",
-      weight: "700",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/helvetica-neue/HelveticaNeueHeavyItalic.otf",
-      weight: "700",
-      style: "italic",
-    },
-    {
-      path: "../../public/fonts/helvetica-neue/HelveticaNeueBlack.otf",
-      weight: "800",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/helvetica-neue/HelveticaNeueBlackItalic.otf",
-      weight: "800",
-      style: "italic",
-    },
-  ],
-  variable: "--font-helvetica-neue",
+// DM Mono — voz funcional de Even (UI, body, labels, datos)
+const dmMono = DM_Mono({
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+  variable: "--font-dm-mono",
+  display: "swap",
+});
+
+// Plus Jakarta Sans — display (sustituto provisional de Noka para headlines)
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+  variable: "--font-jakarta",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -94,11 +34,11 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: "/logos/logo-short-green.webp",
+        url: "/brand/even-asterisk-evergreen.svg",
         media: "(prefers-color-scheme: light)",
       },
       {
-        url: "/logos/logo-short-white.webp",
+        url: "/brand/even-asterisk-grass.svg",
         media: "(prefers-color-scheme: dark)",
       },
     ],
@@ -117,8 +57,8 @@ export default async function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`${helveticaNeue.variable} antialiased`}
-        style={{ fontFamily: "var(--font-helvetica-neue)" }}
+        className={`${dmMono.variable} ${jakarta.variable} antialiased`}
+        style={{ fontFamily: "var(--font-dm-mono)" }}
       >
         <Script
           src="https://ecartpay.com/sdk/pay.js"

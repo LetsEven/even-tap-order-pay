@@ -347,7 +347,7 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-new bg-linear-to-br from-[#0a8b9b] to-[#153f43] flex flex-col justify-center items-center px-4">
+    <div className="min-h-new brand-evergreen flex flex-col justify-center items-center px-4">
       {/* Back Button */}
       <button
         onClick={() => {
@@ -378,12 +378,11 @@ export default function AuthPage() {
       </button>
 
       <div className="relative z-10 w-full max-w-md">
-        {/* Logo */}
         <div className="mb-8 text-center">
           <img
-            src="/logos/logo-short-green.webp"
-            alt="Even Logo"
-            className="size-18 mx-auto mb-4"
+            src="/brand/even-wordmark-grass.svg"
+            alt="even"
+            className="w-32 md:w-36 h-auto mx-auto mb-6"
           />
           <h1 className="text-2xl font-medium text-white">
             {step === "phone"
@@ -418,7 +417,7 @@ export default function AuthPage() {
                   <button
                     type="button"
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="h-[48px] w-[90px] px-3 text-gray-700 font-medium bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0a8b9b] focus:border-transparent cursor-pointer hover:border-gray-400 transition-colors flex items-center justify-between gap-1.5"
+                    className="h-[48px] w-[90px] px-3 text-gray-700 font-medium bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#023828] focus:border-transparent cursor-pointer hover:border-gray-400 transition-colors flex items-center justify-between gap-1.5"
                     disabled={loading}
                   >
                     <div className="flex items-center gap-1.5">
@@ -472,7 +471,7 @@ export default function AuthPage() {
                       setPhoneNumber(value);
                       setPhoneNumberDisplay(formatPhoneInput(value));
                     }}
-                    className="h-[48px] w-full pl-10 pr-3 text-gray-600 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0a8b9b] focus:border-transparent"
+                    className="h-[48px] w-full pl-10 pr-3 text-gray-600 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#023828] focus:border-transparent"
                     placeholder="Número de teléfono"
                     disabled={loading}
                     maxLength={14}
@@ -484,7 +483,7 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={loading || !phoneNumber || phoneNumber.length < 8}
-              className="w-full bg-black hover:bg-stone-950 text-white py-3 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[#82E657] text-[#023828] hover:opacity-90 py-3 rounded-full font-medium transition-opacity disabled:bg-[#82E657]/30 disabled:text-[#023828]/40 disabled:cursor-not-allowed"
             >
               {loading ? "Enviando..." : "Enviar código"}
             </button>
@@ -513,7 +512,7 @@ export default function AuthPage() {
               value={otp}
               onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
               placeholder="000000"
-              className="w-full px-3 py-3 text-gray-600 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0a8b9b] text-center tracking-widest text-2xl"
+              className="w-full px-3 py-3 text-gray-600 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#023828] text-center tracking-widest text-2xl"
               required
               disabled={loading}
               autoFocus
@@ -523,7 +522,7 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={loading || otp.length !== 6}
-              className="w-full bg-black hover:bg-stone-950 text-white py-3 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[#82E657] text-[#023828] hover:opacity-90 py-3 rounded-full font-medium transition-opacity disabled:bg-[#82E657]/30 disabled:text-[#023828]/40 disabled:cursor-not-allowed"
             >
               {loading ? "Verificando..." : "Verificar código"}
             </button>
@@ -574,7 +573,7 @@ export default function AuthPage() {
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder="Nombre"
-                  className="h-[48px] w-full pl-10 pr-3 text-gray-600 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0a8b9b] appearance-none"
+                  className="h-[48px] w-full pl-10 pr-3 text-gray-600 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#023828] appearance-none"
                   required
                   disabled={loading}
                 />
@@ -584,7 +583,7 @@ export default function AuthPage() {
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Apellido"
-                className="h-[48px] w-full px-3 text-gray-600 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0a8b9b] appearance-none"
+                className="h-[48px] w-full px-3 text-gray-600 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#023828] appearance-none"
                 disabled={loading}
               />
             </div>
@@ -599,7 +598,7 @@ export default function AuthPage() {
                 onChange={(e) =>
                   setAge(e.target.value === "" ? "" : Number(e.target.value))
                 }
-                className="h-[48px] w-full px-3 text-gray-600 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0a8b9b] cursor-pointer appearance-none"
+                className="h-[48px] w-full px-3 text-gray-600 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#023828] cursor-pointer appearance-none"
                 disabled={loading}
               >
                 <option value="" disabled>
@@ -616,7 +615,7 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={loading || !firstName || age === ""}
-              className="w-full bg-black hover:bg-stone-950 text-white py-3 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+              className="w-full bg-[#82E657] text-[#023828] hover:opacity-90 py-3 rounded-full font-medium transition-opacity disabled:bg-[#82E657]/30 disabled:text-[#023828]/40 disabled:cursor-not-allowed mt-6"
             >
               {loading ? "Guardando..." : "Continuar"}
             </button>

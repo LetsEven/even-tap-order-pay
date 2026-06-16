@@ -76,34 +76,30 @@ export default function Home() {
   }, [router, searchParams, isAuthenticated, isLoading]);
 
   return (
-    <div className="min-h-new bg-linear-to-br from-[#0a8b9b] to-[#153f43] flex flex-col">
-      <div className="flex-1 flex flex-col items-center justify-center px-5 md:px-8 lg:px-10 pb-12 md:py-10 lg:py-12">
-        <div className="w-full max-w-md">
-          {/* Logo and QR Code side by side */}
-          <div className="mb-6 md:mb-8 lg:mb-10 text-center">
-            <div className="flex items-center justify-center gap-4 md:gap-6 lg:gap-8 mb-4 md:mb-5 lg:mb-6">
-              <img
-                src="/logos/logo-short-green.webp"
-                alt="Even Logo"
-                className="size-16 md:size-20 lg:size-24"
-              />
-            </div>
-            <h1 className="text-white text-xl md:text-2xl lg:text-3xl font-medium mb-2 md:mb-3 lg:mb-4">
-              Bienvenido a Even
-            </h1>
-            <p className="text-white/80 text-sm md:text-base lg:text-lg">
-              Por favor tapee la tarjeta o escanee el código QR de su mesa para
-              comenzar
-            </p>
-          </div>
+    <div className="min-h-new brand-evergreen flex flex-col">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-12 md:py-10 lg:py-12">
+        <div className="w-full max-w-md flex flex-col items-center text-center">
+          {/* Wordmark — identificador primario de marca */}
+          <img
+            src="/brand/even-wordmark-grass.svg"
+            alt="even"
+            className="w-44 md:w-52 lg:w-60 h-auto mb-10 md:mb-12 lg:mb-14"
+          />
 
-          {/* Additional Info */}
-          <div className="mt-6 md:mt-7 lg:mt-8 text-center">
-            <p className="text-white/70 text-xs md:text-sm lg:text-base">
-              Encontrará la tarjeta en su mesa. Cada tarjeta tiene un código
-              único para acceder al menú digital.
-            </p>
-          </div>
+          <h1 className="text-even-offwhite text-3xl md:text-4xl lg:text-5xl font-semibold leading-tight mb-4 md:mb-5">
+            Bienvenido
+          </h1>
+
+          <p className="text-even-offwhite/85 text-sm md:text-base lg:text-lg leading-relaxed max-w-sm">
+            Tapee la tarjeta o escanee el{" "}
+            <span className="even-highlight">código QR de su mesa</span> para
+            comenzar.
+          </p>
+
+          <p className="mt-8 md:mt-10 text-even-offwhite/55 text-xs md:text-sm lg:text-base leading-relaxed max-w-xs">
+            Encontrará la tarjeta en su mesa. Cada una tiene un código único para
+            acceder al menú digital.
+          </p>
         </div>
       </div>
     </div>

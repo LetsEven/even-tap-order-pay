@@ -244,7 +244,7 @@ export default function AuthView({ onClose }: AuthViewProps) {
           {/* Logo */}
           <div className="mb-8 text-center">
             <img
-              src="/logos/logo-short-green.webp"
+              src="/brand/even-asterisk-evergreen.svg"
               alt="Even Logo"
               className="size-16 mx-auto mb-4"
             />
@@ -280,7 +280,7 @@ export default function AuthView({ onClose }: AuthViewProps) {
                     <button
                       type="button"
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                      className="h-[48px] w-[90px] px-3 text-gray-700 font-medium bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0a8b9b] cursor-pointer flex items-center justify-between gap-1.5"
+                      className="h-[48px] w-[90px] px-3 text-gray-700 font-medium bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#023828] cursor-pointer flex items-center justify-between gap-1.5"
                       disabled={loading}
                     >
                       <div className="flex items-center gap-1.5">
@@ -331,7 +331,7 @@ export default function AuthView({ onClose }: AuthViewProps) {
                         setPhoneNumber(value);
                         setPhoneNumberDisplay(formatPhoneInput(value));
                       }}
-                      className="h-[48px] w-full pl-10 pr-3 text-gray-700 bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0a8b9b]"
+                      className="h-[48px] w-full pl-10 pr-3 text-gray-700 bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#023828]"
                       placeholder="Número de teléfono"
                       disabled={loading}
                       maxLength={14}
@@ -359,7 +359,7 @@ export default function AuthView({ onClose }: AuthViewProps) {
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
                 placeholder="000000"
-                className="w-full px-3 py-3 text-gray-700 bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0a8b9b] text-center tracking-widest text-2xl"
+                className="w-full px-3 py-3 text-gray-700 bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#023828] text-center tracking-widest text-2xl"
                 required
                 disabled={loading}
                 autoFocus
@@ -415,7 +415,7 @@ export default function AuthView({ onClose }: AuthViewProps) {
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     placeholder="Nombre"
-                    className="h-[48px] w-full pl-10 pr-3 text-gray-700 bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0a8b9b]"
+                    className="h-[48px] w-full pl-10 pr-3 text-gray-700 bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#023828]"
                     required
                     disabled={loading}
                   />
@@ -425,7 +425,7 @@ export default function AuthView({ onClose }: AuthViewProps) {
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder="Apellido"
-                  className="h-[48px] w-full px-3 text-gray-700 bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0a8b9b]"
+                  className="h-[48px] w-full px-3 text-gray-700 bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#023828]"
                   disabled={loading}
                 />
               </div>
@@ -439,7 +439,7 @@ export default function AuthView({ onClose }: AuthViewProps) {
                   onChange={(e) =>
                     setAge(e.target.value === "" ? "" : Number(e.target.value))
                   }
-                  className="h-[48px] w-full px-3 text-gray-700 bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0a8b9b] cursor-pointer"
+                  className="h-[48px] w-full px-3 text-gray-700 bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#023828] cursor-pointer"
                   disabled={loading}
                 >
                   <option value="" disabled>

@@ -107,11 +107,11 @@ export default function UserPage() {
   }
 
   return (
-    <div className="min-h-new bg-linear-to-br from-[#0a8b9b] to-[#153f43] flex flex-col">
+    <div className="min-h-new brand-evergreen flex flex-col">
       <MenuHeaderBack />
 
       <div className="px-4 md:px-6 lg:px-8 w-full flex-1 flex flex-col">
-        <div className="left-4 right-4 bg-linear-to-tl from-[#0a8b9b] to-[#1d727e] rounded-t-4xl translate-y-7 z-0">
+        <div className="left-4 right-4 bg-[#023828] rounded-t-4xl translate-y-7 z-0">
           <div className="py-6 md:py-8 lg:py-10 px-8 md:px-10 lg:px-12 flex flex-col justify-center">
             <h2 className="font-medium text-white text-3xl md:text-4xl lg:text-5xl leading-7 md:leading-9 lg:leading-tight mt-2 md:mt-3 mb-6 md:mb-8">
               Ingresa tu nombre para continuar
@@ -149,10 +149,10 @@ export default function UserPage() {
           <button
             onClick={handleProceedToOrder}
             disabled={!userName.trim()}
-            className={`w-full py-3 md:py-4 lg:py-5 rounded-full transition-all active:scale-90 text-white cursor-pointer text-base md:text-lg lg:text-xl ${
+            className={`w-full py-3 md:py-4 lg:py-5 rounded-full transition-all active:scale-90 text-[#023828] cursor-pointer text-base md:text-lg lg:text-xl ${
               userName.trim() && !isSubmitting
-                ? "bg-linear-to-r from-[#34808C] to-[#173E44]"
-                : "bg-linear-to-r from-[#34808C] to-[#173E44] opacity-50 cursor-not-allowed"
+                ? "bg-[#82E657]"
+                : "bg-[#82E657] opacity-50 cursor-not-allowed"
             }`}
           >
             {isSubmitting ? (

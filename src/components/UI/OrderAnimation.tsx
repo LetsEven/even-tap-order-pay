@@ -167,7 +167,7 @@ const OrderAnimation = ({
                 {/* Logo container */}
                 <div className="size-20 md:size-24 lg:size-28 flex items-center justify-center rounded-full relative z-10">
                   <img
-                    src="/logos/logo-short-green.webp"
+                    src="/brand/even-asterisk-evergreen.svg"
                     alt="Even Logo"
                     className="size-14 md:size-16 lg:size-20 grayscale opacity-50"
                   />
@@ -187,7 +187,7 @@ const OrderAnimation = ({
                     <div className="size-10 md:size-12 lg:size-14 rounded-full border border-gray-400 bg-gray-100 overflow-hidden shrink-0">
                       <img
                         src={
-                          restaurant?.logo_url || "/logos/logo-short-green.webp"
+                          restaurant?.logo_url || "/brand/even-asterisk-evergreen.svg"
                         }
                         alt={displayRestaurant}
                         className="object-cover w-full h-full"
@@ -214,7 +214,7 @@ const OrderAnimation = ({
                         className="size-10 md:size-12 lg:size-14 rounded-full object-cover border border-gray-400 shrink-0"
                       />
                     ) : (
-                      <div className="size-10 md:size-12 lg:size-14 rounded-full border border-gray-400 bg-linear-to-br from-[#0a8b9b] to-[#153f43] flex items-center justify-center shrink-0">
+                      <div className="size-10 md:size-12 lg:size-14 rounded-full border border-gray-400 bg-[#023828] flex items-center justify-center shrink-0">
                         <span className="text-white text-base md:text-lg lg:text-xl font-bold">
                           {displayName.charAt(0).toUpperCase()}
                         </span>
@@ -252,7 +252,7 @@ const OrderAnimation = ({
                               />
                             ) : (
                               <img
-                                src="/logos/logo-short-green.webp"
+                                src="/brand/even-asterisk-evergreen.svg"
                                 alt="Logo Even"
                                 className="size-6 md:size-8 lg:size-10 object-contain"
                               />
@@ -317,14 +317,14 @@ const OrderAnimation = ({
 
       {/* Success screen */}
       {animationState === "success" && (
-        <div className="fixed inset-0 z-9999 bg-green-500 overflow-hidden">
+        <div className="fixed inset-0 z-9999 bg-[#82E657] overflow-hidden">
           <div className="h-dvh p-8 flex flex-col">
             <div className="flex flex-col flex-1">
               {/* Checkmark */}
               <div className="mb-6 md:mb-8 lg:mb-10 mt-8 md:mt-12 lg:mt-14 animate-simple-fade-in">
                 <div className="size-20 md:size-24 lg:size-28 rounded-full bg-white flex items-center justify-center">
                   <svg
-                    className="size-14 md:size-16 lg:size-20 text-green-500"
+                    className="size-14 md:size-16 lg:size-20 text-[#023828]"
                     fill="none"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -338,7 +338,7 @@ const OrderAnimation = ({
               </div>
 
               {/* Success message */}
-              <div className="text-white text-3xl md:text-5xl lg:text-6xl font-medium mb-8 md:mb-12 lg:mb-14 mr-16 md:mr-28 lg:mr-32 animate-simple-fade-in">
+              <div className="text-[#023828] text-3xl md:text-5xl lg:text-6xl font-medium mb-8 md:mb-12 lg:mb-14 mr-16 md:mr-28 lg:mr-32 animate-simple-fade-in">
                 Tu pedido fue creado con éxito
               </div>
             </div>

@@ -286,11 +286,11 @@ function AddCardContent() {
         />
       )}
 
-      <div className="min-h-dvh bg-linear-to-br from-[#0a8b9b] to-[#153f43] flex flex-col">
+      <div className="min-h-dvh brand-evergreen flex flex-col">
         <MenuHeaderBack />
 
         <div className="px-4 w-full flex-1 flex flex-col justify-end">
-          <div className="left-4 right-4 bg-linear-to-tl from-[#0a8b9b] to-[#1d727e] rounded-t-4xl translate-y-7 z-0">
+          <div className="left-4 right-4 bg-[#023828] rounded-t-4xl translate-y-7 z-0">
             <div className="pt-6 pb-12 px-8 flex flex-col justify-center">
               <h2 className="font-medium text-white text-3xl leading-7 mt-2 mb-2">
                 Agrega tu tarjeta para continuar
@@ -305,19 +305,19 @@ function AddCardContent() {
             <div className="min-h-full bg-white rounded-t-4xl flex-1 z-5 flex flex-col px-6 py-6">
               {/* Test Card Helper */}
               {process.env.NODE_ENV === "development" && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <div className="bg-[#82E657]/10 border border-[#82E657]/40 rounded-lg p-4 mb-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-blue-800 font-medium text-sm">
+                      <p className="text-[#023828] font-medium text-sm">
                         Development Mode
                       </p>
-                      <p className="text-blue-600 text-xs">
+                      <p className="text-[#023828]/70 text-xs">
                         Use eCartpay test card data
                       </p>
                     </div>
                     <button
                       onClick={fillTestCard}
-                      className="px-3 py-2 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors"
+                      className="px-3 py-2 bg-[#023828] text-white text-xs rounded-md hover:opacity-90 transition-opacity"
                     >
                       Fill Test Card
                     </button>
@@ -437,7 +437,7 @@ function AddCardContent() {
               <button
                 onClick={handleSave}
                 disabled={isLoading}
-                className="bg-black hover:bg-stone-950 w-full text-white py-3 rounded-full cursor-pointer transition-colors mt-8 disabled:bg-stone-600 disabled:cursor-not-allowed"
+                className="bg-[#82E657] text-[#023828] hover:opacity-90 w-full py-3 rounded-full cursor-pointer transition-opacity mt-8 font-medium disabled:bg-[#82E657]/30 disabled:text-[#023828]/40 disabled:cursor-not-allowed"
               >
                 {isLoading ? "Guardando..." : "Guardar"}
               </button>

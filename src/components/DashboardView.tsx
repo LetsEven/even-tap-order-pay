@@ -38,14 +38,14 @@ export default function DashboardView({
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="min-h-dvh bg-linear-to-br from-[#0a8b9b] to-[#153f43] flex flex-col">
+      <div className="min-h-dvh brand-evergreen flex flex-col">
         <div className="flex-1 flex flex-col items-center justify-center px-5 md:px-8 lg:px-10 pb-12 md:py-10 lg:py-12">
           <div className="w-full max-w-md">
             <div className="mb-6 md:mb-8 lg:mb-10 text-center">
               <img
-                src="/logos/logo-short-green.webp"
-                alt="Even Logo"
-                className="size-16 md:size-20 lg:size-24 mx-auto mb-4 md:mb-5 lg:mb-6"
+                src="/brand/even-asterisk-grass.svg"
+                alt="Even"
+                className="size-24 md:size-28 lg:size-32 mx-auto mb-6 md:mb-8"
               />
               <h1 className="text-white text-xl md:text-2xl lg:text-3xl font-medium mb-2 md:mb-3 lg:mb-4">
                 Acceso denegado
@@ -60,9 +60,9 @@ export default function DashboardView({
                 onClick={() => navigateWithTable("/auth")}
                 className="w-full bg-white hover:bg-gray-50 text-black py-4 md:py-5 lg:py-6 px-4 md:px-5 lg:px-6 rounded-xl md:rounded-2xl transition-all duration-200 flex items-center gap-3 md:gap-4 lg:gap-5 active:scale-95"
               >
-                <div className="bg-linear-to-r from-[#34808C] to-[#173E44] p-2 md:p-2.5 lg:p-3 rounded-full group-hover:scale-110 transition-transform">
+                <div className="bg-[#82E657] p-2 md:p-2.5 lg:p-3 rounded-full group-hover:scale-110 transition-transform">
                   <svg
-                    className="size-5 md:size-6 lg:size-7 text-white"
+                    className="size-5 md:size-6 lg:size-7 text-[#023828]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -105,14 +105,14 @@ export default function DashboardView({
 
   return (
     <div
-      className={`flex flex-col overflow-y-auto ${onClose ? "h-full" : "h-dvh bg-linear-to-br from-[#0a8b9b] to-[#153f43]"}`}
+      className={`flex flex-col overflow-y-auto ${onClose ? "h-full" : "h-dvh brand-evergreen"}`}
     >
       <DashboardHeader onClose={onClose} />
 
       <div className="px-4 md:px-6 lg:px-8 w-full flex-1 flex flex-col">
         {/* Welcome Header */}
         <div
-          className={`left-4 right-4 rounded-t-4xl translate-y-7 z-0 ${onClose ? "bg-black/5" : "bg-linear-to-tl from-[#0a8b9b] to-[#1d727e]"}`}
+          className={`left-4 right-4 rounded-t-4xl translate-y-7 z-0 ${onClose ? "bg-black/5" : "bg-[#023828]"}`}
         >
           <div className="py-6 md:py-8 lg:py-10 px-8 md:px-10 lg:px-12 flex flex-col justify-center pb-12 md:pb-14 lg:pb-16">
             <h1

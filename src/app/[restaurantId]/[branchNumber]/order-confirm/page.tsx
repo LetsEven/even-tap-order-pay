@@ -55,7 +55,7 @@ export default function OrderConfirmPage() {
 
   if (isLoadingInitial) {
     return (
-      <div className="min-h-dvh bg-linear-to-br from-[#0a8b9b] to-[#153f43] flex flex-col">
+      <div className="min-h-dvh brand-evergreen flex flex-col">
         <div className="fixed top-0 left-0 right-0 z-50">
           <MenuHeaderBack />
         </div>
@@ -63,7 +63,7 @@ export default function OrderConfirmPage() {
 
         <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center">
           <div className="flex flex-col relative px-4 md:px-6 lg:px-8 w-full">
-            <div className="bg-linear-to-tl from-[#0a8b9b] to-[#1d727e] rounded-t-4xl translate-y-7 z-0">
+            <div className="bg-[#023828] rounded-t-4xl translate-y-7 z-0">
               <div className="py-6 px-8 flex flex-col justify-center">
                 <div className="h-8 w-2/3 bg-white/20 rounded-full mt-2 mb-6 animate-pulse" />
               </div>
@@ -105,7 +105,7 @@ export default function OrderConfirmPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-linear-to-br from-[#0a8b9b] to-[#153f43] flex flex-col">
+    <div className="min-h-dvh brand-evergreen flex flex-col">
       {/* Header fijo */}
       <div className="fixed top-0 left-0 right-0 z-50">
         <MenuHeaderBack />
@@ -115,7 +115,7 @@ export default function OrderConfirmPage() {
       {/* Tarjeta anclada al fondo */}
       <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center">
         <div className="flex flex-col relative px-4 md:px-6 lg:px-8 w-full">
-          <div className="bg-linear-to-tl from-[#0a8b9b] to-[#1d727e] rounded-t-4xl translate-y-7 z-0">
+          <div className="bg-[#023828] rounded-t-4xl translate-y-7 z-0">
             <div className="py-6 px-8 flex flex-col justify-center">
               <h1 className="font-medium text-white text-3xl leading-7 mt-2 mb-6">
                 Confirmar pedido
@@ -152,7 +152,7 @@ export default function OrderConfirmPage() {
                       }}
                       className={`py-1 md:py-1.5 rounded-full border border-[#8e8e8e]/40 text-black transition-colors cursor-pointer ${
                         tipPercentage === percentage && !showCustomTipInput
-                          ? "bg-[#eab3f4] text-white"
+                          ? "bg-[#82E657] text-[#023828]"
                           : "bg-[#f9f9f9] hover:border-gray-400"
                       }`}
                     >
@@ -166,7 +166,7 @@ export default function OrderConfirmPage() {
                     }}
                     className={`py-1 md:py-1.5 rounded-full border border-[#8e8e8e]/40 text-black transition-colors cursor-pointer ${
                       showCustomTipInput
-                        ? "bg-[#eab3f4] text-white"
+                        ? "bg-[#82E657] text-[#023828]"
                         : "bg-[#f9f9f9] hover:border-gray-400"
                     }`}
                   >
@@ -197,7 +197,7 @@ export default function OrderConfirmPage() {
 
               {tipAmount > 0 && (
                 <div className="flex justify-end items-center mt-2 text-sm">
-                  <span className="text-[#eab3f4] font-medium">
+                  <span className="text-[#82E657] font-medium">
                     +${tipAmount.toFixed(2)} MXN
                   </span>
                 </div>
@@ -230,10 +230,10 @@ export default function OrderConfirmPage() {
             <button
               onClick={handleContinue}
               disabled={isUnderMinimum}
-              className={`w-full text-white py-3 rounded-full cursor-pointer transition-all active:scale-90 ${
+              className={`w-full text-[#023828] py-3 rounded-full cursor-pointer transition-all active:scale-90 ${
                 isUnderMinimum
-                  ? "bg-linear-to-r from-[#34808C] to-[#173E44] opacity-50 cursor-not-allowed"
-                  : "bg-linear-to-r from-[#34808C] to-[#173E44] animate-pulse-button"
+                  ? "bg-[#82E657] opacity-50 cursor-not-allowed"
+                  : "bg-[#82E657] animate-pulse-button"
               }`}
             >
               Continuar

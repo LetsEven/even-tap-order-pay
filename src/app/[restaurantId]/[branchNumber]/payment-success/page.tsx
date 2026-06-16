@@ -416,19 +416,19 @@ export default function PaymentSuccessPage() {
   };
 
   return (
-    <div className="min-h-dvh overflow-hidden bg-linear-to-br from-[#0a8b9b] to-[#153f43] flex flex-col">
+    <div className="min-h-dvh overflow-hidden bg-[#023828] flex flex-col">
       {/* Success Icon */}
       <div className="flex-1 flex justify-center items-center">
         <img
-          src="/logos/logo-short-green.webp"
-          alt="Even Logo"
+          src="/brand/even-asterisk-grass.svg"
+          alt="Even"
           className="size-20 md:size-28 lg:size-32 animate-logo-fade-in"
         />
       </div>
 
       <div className="px-4 md:px-6 lg:px-8 w-full animate-slide-up">
         <div className="flex-1 flex flex-col">
-          <div className="left-4 right-4 bg-linear-to-tl from-[#0a8b9b] to-[#1d727e] rounded-t-4xl translate-y-7 z-0">
+          <div className="left-4 right-4 bg-[#023828] rounded-t-4xl translate-y-7 z-0">
             <div className="py-6 md:py-8 lg:py-10 px-8 md:px-10 lg:px-12 flex flex-col justify-center items-center mb-6 md:mb-8 lg:mb-10 mt-2 md:mt-4 lg:mt-6 gap-2 md:gap-3 lg:gap-4">
               <h1 className="font-medium text-white text-3xl md:text-4xl lg:text-5xl leading-7 md:leading-9 lg:leading-tight">
                 ¡Gracias por tu pedido!
@@ -486,7 +486,7 @@ export default function PaymentSuccessPage() {
                 {rating > 0 && !hasRated && (
                   <button
                   onClick={handleSubmitRating}
-                  className="px-5 md:px-6 py-1.5 md:py-2 bg-linear-to-r from-[#34808C] to-[#173E44] hover:from-[#2a6d77] hover:to-[#12323a] text-white text-sm md:text-base font-medium rounded-full transition-all duration-300 hover:scale-90 hover:shadow-lg animate-fade-in"
+                  className="px-5 md:px-6 py-1.5 md:py-2 bg-[#82E657] text-[#023828] text-sm md:text-base font-medium rounded-full transition-all duration-300 hover:scale-90 hover:shadow-lg animate-fade-in"
                   aria-label="Enviar calificación"
                   >
                     Enviar
@@ -507,7 +507,7 @@ export default function PaymentSuccessPage() {
               <button
                 onClick={handleReorder}
                 disabled={!reorderItems.length}
-                className="w-full flex items-center justify-center gap-2 md:gap-3 lg:gap-4 text-white py-3 md:py-4 lg:py-5 rounded-full cursor-pointer transition-all active:scale-90 bg-[#eab3f4] text-base md:text-lg lg:text-xl disabled:opacity-70 animate-pulse-button-pink font-medium"
+                className="w-full flex items-center justify-center gap-2 md:gap-3 lg:gap-4 text-[#023828] py-3 md:py-4 lg:py-5 rounded-full cursor-pointer transition-all active:scale-90 bg-[#82E657] text-base md:text-lg lg:text-xl disabled:opacity-70 animate-pulse-button font-medium"
               >
                 <RefreshCw
                   className="size-5 md:size-6 lg:size-7"
@@ -518,7 +518,7 @@ export default function PaymentSuccessPage() {
 
               <button
                 onClick={handleBackToMenu}
-                className="w-full text-white py-3 md:py-4 lg:py-5 rounded-full cursor-pointer transition-all active:scale-90 bg-linear-to-r from-[#34808C] to-[#173E44] text-base md:text-lg lg:text-xl"
+                className="w-full text-[#023828] py-3 md:py-4 lg:py-5 rounded-full cursor-pointer transition-all active:scale-90 bg-[#82E657] text-base md:text-lg lg:text-xl"
               >
                 Ir al menú
               </button>
@@ -558,7 +558,7 @@ export default function PaymentSuccessPage() {
           onClick={() => setIsTicketModalOpen(false)}
         >
           <div
-            className="bg-[#173E44]/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl z-999 max-h-[77vh] flex flex-col"
+            className="bg-[#023828]/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl z-999 max-h-[77vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header - Fixed */}
@@ -622,8 +622,8 @@ export default function PaymentSuccessPage() {
                     </div>
                   )}
                   <div className="flex items-center gap-2 md:gap-3 lg:gap-4 text-white/90">
-                    <div className="bg-blue-100 p-2 md:p-2.5 lg:p-3 rounded-xl flex items-center justify-center">
-                      <Calendar className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-blue-600" />
+                    <div className="bg-[#C3FEFF] p-2 md:p-2.5 lg:p-3 rounded-xl flex items-center justify-center">
+                      <Calendar className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-[#023828]" />
                     </div>
                     <span className="text-sm md:text-base lg:text-lg">
                       {(orderCreatedAt || new Date())
@@ -769,7 +769,7 @@ export default function PaymentSuccessPage() {
           onClick={() => setIsStatusModalOpen(false)}
         >
           <div
-            className="bg-[#173E44]/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl z-999 max-h-[85vh] flex flex-col"
+            className="bg-[#023828]/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl z-999 max-h-[85vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header - Fixed */}
@@ -854,7 +854,7 @@ export default function PaymentSuccessPage() {
                             />
                           ) : (
                             <img
-                              src={"/logos/logo-short-green.webp"}
+                              src={"/brand/even-asterisk-evergreen.svg"}
                               alt="Logo Even"
                               className="size-12 md:size-14 lg:size-16 object-contain"
                             />
@@ -1021,7 +1021,7 @@ export default function PaymentSuccessPage() {
           onClick={() => setIsRegisterModalOpen(false)}
         >
           <div
-            className="bg-[#173E44]/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl z-999 flex flex-col justify-center py-12 md:py-16 lg:py-20 min-h-[70vh] animate-slide-up"
+            className="bg-[#023828]/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl z-999 flex flex-col justify-center py-12 md:py-16 lg:py-20 min-h-[70vh] animate-slide-up"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
@@ -1037,7 +1037,7 @@ export default function PaymentSuccessPage() {
             {/* Logo */}
             <div className="px-6 md:px-8 lg:px-10 flex items-center justify-center mb-6 md:mb-8 lg:mb-10">
               <img
-                src="/logos/logo-short-white.webp"
+                src="/brand/even-asterisk-white.svg"
                 alt="Even Logo"
                 className="size-20 md:size-24 lg:size-28"
               />
@@ -1060,8 +1060,8 @@ export default function PaymentSuccessPage() {
                 onClick={handleSignUp}
                 className="w-full bg-white hover:bg-gray-50 text-black py-4 md:py-5 lg:py-6 px-4 md:px-5 lg:px-6 rounded-xl md:rounded-2xl transition-all duration-200 flex items-center gap-3 md:gap-4 lg:gap-5 active:scale-95"
               >
-                <div className="bg-linear-to-r from-[#34808C] to-[#173E44] p-2 md:p-2.5 lg:p-3 rounded-full group-hover:scale-110 transition-transform">
-                  <LogIn className="size-5 md:size-6 lg:size-7 text-white" />
+                <div className="bg-[#82E657] p-2 md:p-2.5 lg:p-3 rounded-full group-hover:scale-110 transition-transform">
+                  <LogIn className="size-5 md:size-6 lg:size-7 text-[#023828]" />
                 </div>
                 <div className="flex-1 text-left">
                   <h2 className="text-base md:text-lg lg:text-xl font-medium mb-0.5 md:mb-1">

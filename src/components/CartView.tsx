@@ -39,11 +39,11 @@ export default function CartView() {
   };
 
   return (
-    <div className="min-h-dvh bg-linear-to-br from-[#0a8b9b] to-[#153f43] flex flex-col">
+    <div className="min-h-dvh brand-evergreen flex flex-col">
       <MenuHeaderBack />
 
       <div className="px-4 md:px-6 lg:px-8 w-full flex-1 flex flex-col">
-        <div className="left-4 right-4 bg-linear-to-tl from-[#0a8b9b] to-[#1d727e] rounded-t-4xl translate-y-7 z-0">
+        <div className="left-4 right-4 bg-[#023828] rounded-t-4xl translate-y-7 z-0">
           {cartState.items.length === 0 ? (
             <div className="py-6 md:py-8 lg:py-10 px-8 md:px-10 lg:px-12 flex flex-col justify-center">
               <h1 className="text-[#e0e0e0] text-xl md:text-2xl lg:text-3xl font-medium">
@@ -110,14 +110,14 @@ export default function CartView() {
                                   <img
                                     src={
                                       item.images[0] ||
-                                      "/logos/logo-short-green.webp"
+                                      "/brand/even-asterisk-evergreen.svg"
                                     }
                                     alt="Dish preview"
                                     className="w-full h-full object-cover rounded-sm md:rounded-md"
                                   />
                                 ) : (
                                   <img
-                                    src="/logos/logo-short-green.webp"
+                                    src="/brand/even-asterisk-evergreen.svg"
                                     alt="Logo Even"
                                     className="size-18 md:size-20 lg:size-22 object-contain"
                                   />
@@ -256,10 +256,10 @@ export default function CartView() {
                   <button
                     onClick={handleOrder}
                     disabled={isSubmitting || cartState.isLoading}
-                    className={`py-3 md:py-4 lg:py-5 text-white rounded-full cursor-pointer font-normal h-fit flex items-center justify-center text-base md:text-lg lg:text-xl active:scale-95 transition-transform ${
+                    className={`py-3 md:py-4 lg:py-5 text-[#023828] rounded-full cursor-pointer font-normal h-fit flex items-center justify-center text-base md:text-lg lg:text-xl active:scale-95 transition-transform ${
                       isSubmitting || cartState.isLoading
-                        ? "bg-linear-to-r from-[#34808C] to-[#173E44] opacity-50 cursor-not-allowed px-10 md:px-12 lg:px-14"
-                        : "bg-linear-to-r from-[#34808C] to-[#173E44] px-20 md:px-24 lg:px-28 animate-pulse-button"
+                        ? "bg-[#82E657] opacity-50 cursor-not-allowed px-10 md:px-12 lg:px-14"
+                        : "bg-[#82E657] px-20 md:px-24 lg:px-28 animate-pulse-button"
                     }`}
                   >
                     {isSubmitting || cartState.isLoading

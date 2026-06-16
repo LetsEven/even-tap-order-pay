@@ -518,15 +518,10 @@ export default function DishDetailPage() {
   // Si hubo error cargando el platillo
   if (dishError === "error") {
     return (
-      <div className="min-h-new bg-linear-to-br from-[#0a8b9b] to-[#153f43] flex flex-col">
+      <div className="min-h-new brand-evergreen flex flex-col">
         <div className="flex-1 flex flex-col items-center justify-center px-5 md:px-8 lg:px-10 pb-12 md:py-10 lg:py-12">
           <div className="w-full max-w-md">
             <div className="mb-6 md:mb-8 lg:mb-10 text-center">
-              <img
-                src="/logos/logo-short-green.webp"
-                alt="Even Logo"
-                className="size-16 md:size-20 lg:size-24 mx-auto mb-4 md:mb-5 lg:mb-6"
-              />
               <div className="bg-red-500/20 p-3 md:p-4 lg:p-5 rounded-full w-fit mx-auto mb-4 md:mb-5 lg:mb-6">
                 <AlertCircle className="size-10 md:size-12 lg:size-14 text-white" />
               </div>
@@ -542,8 +537,8 @@ export default function DishDetailPage() {
                 onClick={() => router.push("/")}
                 className="w-full bg-white hover:bg-gray-50 text-black py-4 md:py-5 lg:py-6 px-4 md:px-5 lg:px-6 rounded-xl md:rounded-2xl transition-all duration-200 flex items-center gap-3 md:gap-4 lg:gap-5 active:scale-95"
               >
-                <div className="bg-linear-to-r from-[#34808C] to-[#173E44] p-2 md:p-2.5 lg:p-3 rounded-full">
-                  <Home className="size-5 md:size-6 lg:size-7 text-white" />
+                <div className="bg-[#82E657] p-2 md:p-2.5 lg:p-3 rounded-full">
+                  <Home className="size-5 md:size-6 lg:size-7 text-[#023828]" />
                 </div>
                 <div className="flex-1 text-left">
                   <h2 className="text-base md:text-lg lg:text-xl font-medium mb-0.5 md:mb-1">
@@ -569,15 +564,10 @@ export default function DishDetailPage() {
   // Si el platillo no fue encontrado o no hay datos
   if (dishError === "not_found" || !dishData) {
     return (
-      <div className="min-h-new bg-linear-to-br from-[#0a8b9b] to-[#153f43] flex flex-col">
+      <div className="min-h-new brand-evergreen flex flex-col">
         <div className="flex-1 flex flex-col items-center justify-center px-5 md:px-8 lg:px-10 pb-12 md:py-10 lg:py-12">
           <div className="w-full max-w-md">
             <div className="mb-6 md:mb-8 lg:mb-10 text-center">
-              <img
-                src="/logos/logo-short-green.webp"
-                alt="Even Logo"
-                className="size-16 md:size-20 lg:size-24 mx-auto mb-4 md:mb-5 lg:mb-6"
-              />
               <h1 className="text-white text-xl md:text-2xl lg:text-3xl font-medium mb-2 md:mb-3 lg:mb-4">
                 Platillo no encontrado
               </h1>
@@ -590,8 +580,8 @@ export default function DishDetailPage() {
                 onClick={() => navigateWithTable("/menu")}
                 className="w-full bg-white hover:bg-gray-50 text-black py-4 md:py-5 lg:py-6 px-4 md:px-5 lg:px-6 rounded-xl md:rounded-2xl transition-all duration-200 flex items-center gap-3 md:gap-4 lg:gap-5 active:scale-95"
               >
-                <div className="bg-linear-to-r from-[#34808C] to-[#173E44] p-2 md:p-2.5 lg:p-3 rounded-full">
-                  <Home className="size-5 md:size-6 lg:size-7 text-white" />
+                <div className="bg-[#82E657] p-2 md:p-2.5 lg:p-3 rounded-full">
+                  <Home className="size-5 md:size-6 lg:size-7 text-[#023828]" />
                 </div>
                 <div className="flex-1 text-left">
                   <h2 className="text-base md:text-lg lg:text-xl font-medium mb-0.5 md:mb-1">
@@ -653,7 +643,7 @@ export default function DishDetailPage() {
           ) : (
             <div className="absolute top-0 left-0 w-full h-full bg-gray-300 flex items-center justify-center">
               <img
-                src="/logos/logo-short-green.webp"
+                src="/brand/even-asterisk-evergreen.svg"
                 alt="Logo"
                 className="w-32 md:w-40 lg:w-48 h-32 md:h-40 lg:h-48 object-contain"
               />
@@ -858,7 +848,7 @@ export default function DishDetailPage() {
                                 ).reduce((s, n) => s + n, 0);
                                 if (total > 0)
                                   return (
-                                    <span className="text-[#eab3f4] text-sm md:text-base mt-1">
+                                    <span className="text-[#82E657] text-sm md:text-base mt-1">
                                       {total} producto(s) seleccionado(s)
                                     </span>
                                   );
@@ -887,7 +877,7 @@ export default function DishDetailPage() {
                                   ] as string[]) || [];
                                 const max = field.maxSelections || 1;
                                 return sel.length > 0 ? (
-                                  <span className="text-[#eab3f4] text-sm md:text-base mt-1">
+                                  <span className="text-[#82E657] text-sm md:text-base mt-1">
                                     {sel.length} producto(s) seleccionado(s)
                                   </span>
                                 ) : (
@@ -924,7 +914,7 @@ export default function DishDetailPage() {
                                     handleDropdownChange(field.id, option.id)
                                   }
                                   className={`flex items-center justify-between gap-2 md:gap-3 cursor-pointer py-4 md:py-5 px-4 md:px-6 hover:bg-[#f9f9f9] transition-colors duration-200 ${
-                                    isSelected ? "bg-[#eab3f4]/10" : ""
+                                    isSelected ? "bg-[#82E657]/10" : ""
                                   } ${index !== (field.options?.length ?? 0) - 1 ? "border-b border-[#8e8e8e]/20" : ""}`}
                                 >
                                   <div className="flex flex-col">
@@ -932,7 +922,7 @@ export default function DishDetailPage() {
                                       {option.name}
                                     </span>
                                     {option.price > 0 && (
-                                      <span className="text-[#eab3f4] font-medium text-sm md:text-base lg:text-lg">
+                                      <span className="text-[#82E657] font-medium text-sm md:text-base lg:text-lg">
                                         +${option.price}
                                       </span>
                                     )}
@@ -975,7 +965,7 @@ export default function DishDetailPage() {
                                         {option.name}
                                       </span>
                                       {option.price > 0 && (
-                                        <span className="text-[#eab3f4] font-medium text-sm md:text-base lg:text-lg">
+                                        <span className="text-[#82E657] font-medium text-sm md:text-base lg:text-lg">
                                           +${option.price}
                                         </span>
                                       )}
@@ -990,7 +980,7 @@ export default function DishDetailPage() {
                                           )
                                         }
                                         disabled={qty <= 0}
-                                        className="w-8 h-8 md:w-9 md:h-9 bg-[#f9f9f9] hover:bg-[#eab3f4]/20 rounded-full flex items-center justify-center border border-[#8e8e8e]/50 transition-colors duration-200 disabled:opacity-40"
+                                        className="w-8 h-8 md:w-9 md:h-9 bg-[#f9f9f9] hover:bg-[#82E657]/20 rounded-full flex items-center justify-center border border-[#8e8e8e]/50 transition-colors duration-200 disabled:opacity-40"
                                       >
                                         <span className="text-lg font-medium text-[#8e8e8e]">
                                           −
@@ -1007,7 +997,7 @@ export default function DishDetailPage() {
                                             qty + 1,
                                           )
                                         }
-                                        className="w-8 h-8 md:w-9 md:h-9 bg-[#f9f9f9] hover:bg-[#eab3f4]/20 rounded-full flex items-center justify-center border border-[#8e8e8e]/50 transition-colors duration-200"
+                                        className="w-8 h-8 md:w-9 md:h-9 bg-[#f9f9f9] hover:bg-[#82E657]/20 rounded-full flex items-center justify-center border border-[#8e8e8e]/50 transition-colors duration-200"
                                       >
                                         <span className="text-lg font-medium text-[#8e8e8e]">
                                           +
@@ -1036,14 +1026,14 @@ export default function DishDetailPage() {
                               return (
                                 <label
                                   key={option.id}
-                                  className={`flex items-center justify-between gap-2 md:gap-3 py-4 md:py-5 px-4 md:px-6 hover:bg-[#f9f9f9] transition-colors duration-200 ${isSelected ? "bg-[#eab3f4]/10" : ""} ${isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"} ${index !== (field.options?.length ?? 0) - 1 ? "border-b border-[#8e8e8e]/20" : ""}`}
+                                  className={`flex items-center justify-between gap-2 md:gap-3 py-4 md:py-5 px-4 md:px-6 hover:bg-[#f9f9f9] transition-colors duration-200 ${isSelected ? "bg-[#82E657]/10" : ""} ${isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"} ${index !== (field.options?.length ?? 0) - 1 ? "border-b border-[#8e8e8e]/20" : ""}`}
                                 >
                                   <div className="flex flex-col">
                                     <span className="text-black text-base md:text-lg lg:text-xl">
                                       {option.name}
                                     </span>
                                     {option.price > 0 && (
-                                      <span className="text-[#eab3f4] font-medium text-sm md:text-base lg:text-lg">
+                                      <span className="text-[#82E657] font-medium text-sm md:text-base lg:text-lg">
                                         +${option.price}
                                       </span>
                                     )}
@@ -1128,11 +1118,11 @@ export default function DishDetailPage() {
               <button
                 onClick={handleAddToCartAndReturn}
                 disabled={!isFormValid}
-                className={`flex-1 text-white py-3.5 md:py-4 lg:py-5 rounded-2xl flex items-center justify-center ${
+                className={`flex-1 text-[#023828] py-3.5 md:py-4 lg:py-5 rounded-2xl flex items-center justify-center ${
                   dishData?.isOutOfStock
                     ? "bg-gray-400 cursor-pointer active:scale-95 transition-transform"
                     : isFormValid
-                      ? "bg-linear-to-r from-[#34808C] to-[#173E44] active:scale-95 transition-transform"
+                      ? "bg-[#82E657] active:scale-95 transition-transform"
                       : "bg-gray-400 cursor-not-allowed opacity-60"
                 }`}
               >
@@ -1177,7 +1167,7 @@ export default function DishDetailPage() {
                 ) : (
                   <div className="size-20 md:size-24 lg:size-28 bg-gray-300 rounded-lg md:rounded-xl flex items-center justify-center">
                     <img
-                      src="/logos/logo-short-green.webp"
+                      src="/brand/even-asterisk-evergreen.svg"
                       alt="Logo"
                       className="size-16 md:size-20 lg:size-24 object-contain"
                     />
@@ -1229,7 +1219,7 @@ export default function DishDetailPage() {
                 <button
                   onClick={handleSubmitReview}
                   disabled={reviewRating === 0 || isSubmittingReview}
-                  className={`w-full text-white py-3 md:py-4 lg:py-5 rounded-full transition-colors text-base md:text-lg lg:text-xl bg-linear-to-r from-[#34808C] to-[#173E44] ${
+                  className={`w-full text-[#023828] py-3 md:py-4 lg:py-5 rounded-full transition-colors text-base md:text-lg lg:text-xl bg-[#82E657] ${
                     reviewRating === 0 || isSubmittingReview
                       ? "opacity-50 cursor-not-allowed"
                       : ""
@@ -1276,7 +1266,7 @@ export default function DishDetailPage() {
               </div>
               <button
                 onClick={() => setErrorMessage(null)}
-                className="w-full bg-linear-to-r from-[#34808C] to-[#173E44] text-white py-3 rounded-full text-base"
+                className="w-full bg-[#82E657] text-[#023828] py-3 rounded-full text-base"
               >
                 Entendido
               </button>

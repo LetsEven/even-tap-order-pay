@@ -40,9 +40,9 @@ export default function DashboardHeader({ onClose }: DashboardHeaderProps) {
         {/* Even Logo */}
         <div
           onClick={handleLogoClick}
-          className="absolute left-1/2 transform -translate-x-1/2 size-10 md:size-12 lg:size-14 active:scale-95 transition-transform duration-200"
+          className="absolute left-1/2 transform -translate-x-1/2 size-12 md:size-14 lg:size-16 active:scale-95 transition-transform duration-200"
         >
-          <img src="/logos/logo-short-green.webp" alt="Even Logo" />
+          <img src="/brand/even-asterisk-evergreen.svg" alt="Even Logo" />
         </div>
       </div>
     </header>

@@ -14,7 +14,7 @@ export default function AuthSelectionPage() {
   };
 
   return (
-    <div className="min-h-new bg-linear-to-br from-[#0a8b9b] to-[#153f43] flex flex-col">
+    <div className="min-h-new brand-evergreen flex flex-col">
       <MenuHeaderBack />
 
       <div className="flex-1 flex flex-col items-center justify-center px-5 md:px-8 lg:px-10 pb-12 md:py-10 lg:py-12">
@@ -36,8 +36,8 @@ export default function AuthSelectionPage() {
               onClick={handleContinue}
               className="w-full bg-white hover:bg-gray-50 text-black py-4 md:py-5 lg:py-6 px-4 md:px-5 lg:px-6 rounded-xl md:rounded-2xl transition-all duration-200 flex items-center gap-3 md:gap-4 lg:gap-5 active:scale-95"
             >
-              <div className="bg-linear-to-r from-[#34808C] to-[#173E44] p-2 md:p-2.5 lg:p-3 rounded-full group-hover:scale-110 transition-transform">
-                <LogIn className="size-5 md:size-6 lg:size-7 text-white" />
+              <div className="bg-[#82E657] p-2 md:p-2.5 lg:p-3 rounded-full group-hover:scale-110 transition-transform">
+                <LogIn className="size-5 md:size-6 lg:size-7 text-[#023828]" />
               </div>
               <div className="flex-1 text-left">
                 <h2 className="text-base md:text-lg lg:text-xl font-medium mb-0.5 md:mb-1">

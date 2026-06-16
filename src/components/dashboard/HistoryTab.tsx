@@ -124,7 +124,7 @@ export default function HistoryTab() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12 md:py-16 lg:py-20">
-        <Loader2 className="size-8 md:size-10 lg:size-12 animate-spin text-teal-600" />
+        <Loader2 className="size-8 md:size-10 lg:size-12 animate-spin text-[#299E66]" />
       </div>
     );
   }
@@ -192,7 +192,7 @@ export default function HistoryTab() {
                       className="size-16 md:size-20 lg:size-24 object-cover rounded-lg md:rounded-xl"
                     />
                   ) : (
-                    <div className="size-16 md:size-20 lg:size-24 bg-teal-100 rounded-lg md:rounded-xl flex items-center justify-center">
+                    <div className="size-16 md:size-20 lg:size-24 bg-[#82E657]/20 rounded-lg md:rounded-xl flex items-center justify-center">
                       <span className="text-2xl md:text-3xl lg:text-4xl">
                         🍽️
                       </span>
@@ -229,14 +229,14 @@ export default function HistoryTab() {
                     <span
                       className={`text-xs md:text-sm lg:text-base px-2 md:px-3 lg:px-4 py-1 md:py-1.5 lg:py-2 rounded-full font-medium truncate ${
                         order.orderType === "tap-order-and-pay"
-                          ? "bg-purple-100 text-purple-700"
+                          ? "bg-[#82E657]/20 text-[#023828]"
                           : order.orderType === "pick-and-go"
                             ? "bg-green-100 text-green-700"
                             : order.orderType === "room-service"
                               ? "bg-orange-100 text-orange-700"
                               : order.orderType === "tap-and-pay"
                                 ? "bg-yellow-100 text-yellow-600"
-                                : "bg-blue-100 text-blue-700"
+                                : "bg-[#C3FEFF] text-[#023828]"
                       }`}
                     >
                       {order.orderType === "tap-order-and-pay"
@@ -275,7 +275,7 @@ export default function HistoryTab() {
           }}
         >
           <div
-            className="bg-[#173E44]/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl z-999 max-h-[85vh] flex flex-col"
+            className="bg-[#023828]/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl z-999 max-h-[85vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header - Fixed */}
@@ -299,7 +299,7 @@ export default function HistoryTab() {
                       className="size-20 md:size-24 lg:size-28 object-cover rounded-lg md:rounded-xl"
                     />
                   ) : (
-                    <div className="size-20 md:size-24 lg:size-28 bg-teal-100 rounded-lg md:rounded-xl flex items-center justify-center">
+                    <div className="size-20 md:size-24 lg:size-28 bg-[#82E657]/20 rounded-lg md:rounded-xl flex items-center justify-center">
                       <span className="text-2xl md:text-3xl lg:text-4xl">
                         🍽️
                       </span>
@@ -329,8 +329,8 @@ export default function HistoryTab() {
                 </h3>
                 <div className="space-y-2 md:space-y-3 lg:space-y-4">
                   <div className="flex items-center gap-2 md:gap-3 lg:gap-4 text-white/90">
-                    <div className="bg-blue-100 p-2 md:p-2.5 lg:p-3 rounded-xl flex items-center justify-center">
-                      <Calendar className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-blue-600" />
+                    <div className="bg-[#C3FEFF] p-2 md:p-2.5 lg:p-3 rounded-xl flex items-center justify-center">
+                      <Calendar className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-[#023828]" />
                     </div>
                     <span className="text-sm md:text-base lg:text-lg">
                       {new Date(selectedOrderDetails.tableOrderDate)

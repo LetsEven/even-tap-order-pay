@@ -315,7 +315,7 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-[#0a8b9b] to-[#153f43] flex items-center justify-center">
+      <div className="min-h-screen brand-evergreen flex items-center justify-center">
         <div className="text-center px-6">
           <h1 className="text-2xl font-bold text-white mb-2">Error</h1>
           <p className="text-white">{error}</p>
@@ -326,7 +326,7 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
 
   if (!restaurant) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-[#0a8b9b] to-[#153f43] flex items-center justify-center">
+      <div className="min-h-screen brand-evergreen flex items-center justify-center">
         <div className="text-center px-6">
           <h1 className="text-2xl font-bold text-white mb-2">
             Restaurante no encontrado
@@ -423,7 +423,7 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
               {hasLastOrder && (
                 <button
                   onClick={handleReorder}
-                  className="bg-[#eab3f4] text-white border border-[#8e8e8e] rounded-full px-3 md:px-4 lg:px-5 py-1 md:py-1.5 text-sm md:text-lg lg:text-xl font-medium w-fit active:scale-90 transition-all flex items-center gap-1.5"
+                  className="bg-[#82E657] text-[#023828] border border-[#8e8e8e] rounded-full px-3 md:px-4 lg:px-5 py-1 md:py-1.5 text-sm md:text-lg lg:text-xl font-medium w-fit active:scale-90 transition-all flex items-center gap-1.5"
                 >
                   Reordenar
                   <RefreshCw className="size-4" />
@@ -494,7 +494,7 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
         <div className="fixed bottom-6 md:bottom-8 lg:bottom-10 left-0 right-0 z-50 flex justify-center">
           <button
             onClick={() => navigateWithTable("/cart")}
-            className="bg-linear-to-r from-[#34808C] to-[#173E44] text-white rounded-full px-6 md:px-8 lg:px-10 py-4 md:py-5 lg:py-6 shadow-lg flex items-center gap-3 md:gap-4 cursor-pointer transition-all hover:scale-105 animate-bounce-in active:scale-90"
+            className="bg-[#82E657] text-[#023828] rounded-full px-6 md:px-8 lg:px-10 py-4 md:py-5 lg:py-6 shadow-lg flex items-center gap-3 md:gap-4 cursor-pointer transition-all hover:scale-105 animate-bounce-in active:scale-90"
           >
             <ShoppingCart className="size-5 md:size-6 lg:size-7" />
             <span className="text-base md:text-lg lg:text-xl font-medium">
@@ -546,7 +546,7 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
               />
             </button>
             {totalItems > 0 && (
-              <div className="absolute -top-1 -right-1 bg-[#eab3f4] text-white rounded-full size-5 flex items-center justify-center text-xs font-normal">
+              <div className="absolute -top-1 -right-1 bg-[#82E657] text-[#023828] rounded-full size-5 flex items-center justify-center text-xs font-normal">
                 {totalItems}
               </div>
             )}
@@ -581,7 +581,7 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
           onClick={() => setIsStatusModalOpen(false)}
         >
           <div
-            className="bg-[#173E44]/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl z-999 max-h-[85vh] flex flex-col"
+            className="bg-[#023828]/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl z-999 max-h-[85vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -659,7 +659,7 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
                             />
                           ) : (
                             <img
-                              src="/logos/logo-short-green.webp"
+                              src="/brand/even-asterisk-evergreen.svg"
                               alt="Logo Even"
                               className="size-12 md:size-14 lg:size-16 object-contain"
                             />

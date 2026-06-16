@@ -2,13 +2,13 @@ import React from "react";
 
 const Loader = () => {
   return (
-    <div className="fixed inset-0 z-50 bg-linear-to-br from-[#0a8b9b] to-[#153f43] flex items-center justify-center">
+    <div className="fixed inset-0 z-50 bg-[#023828] flex items-center justify-center">
       <div className="text-center">
-        <div className="animate-pulse">
+        <div>
           <img
-            src="/logos/logo-short-green.webp"
-            alt="Even Logo"
-            className="size-24 justify-self-center"
+            src="/brand/even-asterisk-grass.svg"
+            alt="Even"
+            className="asterisk-spin w-28 h-28 md:w-36 md:h-36 justify-self-center"
           />
         </div>
       </div>

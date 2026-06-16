@@ -55,7 +55,7 @@ export default function CardsTab() {
         {/* Loading State */}
         {isLoading ? (
           <div className="flex items-center justify-center py-12 md:py-16 lg:py-20">
-            <Loader2 className="size-8 md:size-10 lg:size-12 animate-spin text-teal-600" />
+            <Loader2 className="size-8 md:size-10 lg:size-12 animate-spin text-[#299E66]" />
           </div>
         ) : (
           <>
@@ -66,13 +66,13 @@ export default function CardsTab() {
                   key={method.id}
                   className={`relative border rounded-full py-1.5 md:py-2 lg:py-2.5 px-5 md:px-6 lg:px-8 ${
                     method.isDefault
-                      ? "border-teal-300 bg-teal-50"
+                      ? "border-[#82E657] bg-[#82E657]/10"
                       : "border-black/50 bg-[#f9f9f9]"
                   }`}
                 >
                   {/* Default Badge */}
                   {method.isDefault && (
-                    <div className="absolute -top-2 md:-top-2.5 lg:-top-3 left-4 md:left-5 lg:left-6 bg-teal-600 text-white text-xs md:text-sm lg:text-base px-2 md:px-3 lg:px-4 py-1 md:py-1.5 lg:py-2 rounded-full">
+                    <div className="absolute -top-2 md:-top-2.5 lg:-top-3 left-4 md:left-5 lg:left-6 bg-[#82E657] text-[#023828] text-xs md:text-sm lg:text-base px-2 md:px-3 lg:px-4 py-1 md:py-1.5 lg:py-2 rounded-full">
                       Por defecto
                     </div>
                   )}
@@ -106,7 +106,7 @@ export default function CardsTab() {
                         <button
                           onClick={() => handleSetDefault(method.id)}
                           disabled={settingDefaultId === method.id}
-                          className="text-gray-400 hover:text-teal-600 transition-colors disabled:opacity-50 cursor-pointer"
+                          className="text-gray-400 hover:text-[#299E66] transition-colors disabled:opacity-50 cursor-pointer"
                           title="Establecer como predeterminada"
                         >
                           {settingDefaultId === method.id ? (
@@ -119,7 +119,7 @@ export default function CardsTab() {
 
                       {method.isDefault && (
                         <div
-                          className="text-teal-600"
+                          className="text-[#299E66]"
                           title="Tarjeta predeterminada"
                         >
                           <Star className="size-5 md:size-6 lg:size-7 fill-current" />

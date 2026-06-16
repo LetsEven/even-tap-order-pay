@@ -236,7 +236,7 @@ function MenuItem({ item, onRestaurantClosed }: MenuItemProps) {
                 />
               ) : (
                 <img
-                  src="/logos/logo-short-green.webp"
+                  src="/brand/even-asterisk-evergreen.svg"
                   alt="Logo Even"
                   loading="lazy"
                   className={`size-18 md:size-20 lg:size-22 object-contain`}
@@ -266,7 +266,7 @@ function MenuItem({ item, onRestaurantClosed }: MenuItemProps) {
                 {adaptedItem.name}
               </h3>
               <div
-                className={`flex gap-1.5 md:gap-2 px-3 md:px-4 lg:px-5 py-0.5 md:py-1 h-fit rounded-full border items-center justify-center border-[#8e8e8e]/50 text-black transition-all ${isPulsing ? "bg-[#eab3f4]/50" : "bg-[#f9f9f9]"}`}
+                className={`flex gap-1.5 md:gap-2 px-3 md:px-4 lg:px-5 py-0.5 md:py-1 h-fit rounded-full border items-center justify-center border-[#8e8e8e]/50 text-black transition-all ${isPulsing ? "bg-[#82E657]/50" : "bg-[#f9f9f9]"}`}
                 onClick={(e) => e.stopPropagation()}
               >
                 <Minus

@@ -190,7 +190,7 @@ export default function ProfileTab({ onLogout }: ProfileTabProps = {}) {
   if (isLoading || !profile || isLoadingData) {
     return (
       <div className="flex items-center justify-center py-12 md:py-16 lg:py-20">
-        <Loader2 className="size-8 md:size-10 lg:size-12 animate-spin text-teal-600" />
+        <Loader2 className="size-8 md:size-10 lg:size-12 animate-spin text-[#299E66]" />
       </div>
     );
   }
@@ -200,7 +200,7 @@ export default function ProfileTab({ onLogout }: ProfileTabProps = {}) {
       {/* Profile Image */}
       <div className="flex flex-col items-center">
         <div className="relative group mb-4">
-          <div className="size-28 md:size-32 lg:size-36 rounded-full bg-gray-200 overflow-hidden border-2 md:border-4 border-teal-600 flex items-center justify-center">
+          <div className="size-28 md:size-32 lg:size-36 rounded-full bg-gray-200 overflow-hidden border-2 md:border-4 border-[#023828] flex items-center justify-center">
             {isAuthenticated && photoUrl ? (
               <img
                 src={photoUrl}
@@ -220,7 +220,7 @@ export default function ProfileTab({ onLogout }: ProfileTabProps = {}) {
           {isAuthenticated && (
             <label
               htmlFor="profile-image"
-              className="absolute bottom-0 right-0 bg-teal-600 text-white p-2 md:p-2.5 lg:p-3 rounded-full cursor-pointer hover:bg-teal-700 transition-colors"
+              className="absolute bottom-0 right-0 bg-[#82E657] text-[#023828] p-2 md:p-2.5 lg:p-3 rounded-full cursor-pointer hover:bg-[#74cf4e] transition-colors"
             >
               <Camera className="size-4 md:size-5 lg:size-6" />
               <input
@@ -310,7 +310,7 @@ export default function ProfileTab({ onLogout }: ProfileTabProps = {}) {
           className={`font-medium text-sm md:text-base lg:text-lg flex items-center gap-2 cursor-pointer ${
             isAuthenticated
               ? "text-red-600 hover:text-red-700"
-              : "text-teal-600 hover:text-teal-700"
+              : "text-[#299E66] hover:text-[#023828]"
           }`}
         >
           {isAuthenticated ? (

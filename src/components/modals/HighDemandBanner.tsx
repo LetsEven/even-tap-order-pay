@@ -14,7 +14,7 @@ export default function HighDemandBanner({ onDismiss }: Props) {
       onClick={onDismiss}
     >
       <div
-        className="relative bg-[#173E44]/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 rounded-4xl overflow-hidden animate-slide-up"
+        className="relative bg-[#023828]/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 rounded-4xl overflow-hidden animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
@@ -28,7 +28,7 @@ export default function HighDemandBanner({ onDismiss }: Props) {
         <div className="flex flex-col items-center px-8 pt-10 pb-8 gap-5">
           {/* Logo */}
           <img
-            src="/logos/logo-short-white.webp"
+            src="/brand/even-asterisk-white.svg"
             alt="Even"
             className="size-16"
           />
