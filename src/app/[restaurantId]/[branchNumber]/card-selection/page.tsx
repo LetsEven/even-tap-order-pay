@@ -20,6 +20,7 @@ import { calculateCommissions } from "@/utils/commissionCalculator";
 import { usePaymentProvider } from "@/hooks/usePaymentProvider";
 import { useAgentStatus } from "@/hooks/useAgentStatus";
 import { useMsiConfig } from "@/hooks/useMsiConfig";
+import { useRestaurant } from "@/context/RestaurantContext";
 
 export default function CardSelectionPage() {
   const {
@@ -31,6 +32,7 @@ export default function CardSelectionPage() {
   const { provider, isLoadingProvider } = usePaymentProvider(restaurantId);
   const { isAgentRequired } = useAgentStatus(restaurantIdNum, branchNumber);
   const { msiConfig } = useMsiConfig();
+  const { restaurant } = useRestaurant();
 
   const { state: cartState, clearCart, orderNotes, setOrderNotes } = useCart();
   const { navigateWithTable, tableNumber } = useTableNavigation();
@@ -309,7 +311,7 @@ export default function CardSelectionPage() {
           amount: totalAmount,
           currency: "MXN",
           countryCode: "MX",
-          label: "My Store",
+          label: restaurant?.name || "Even",
           buttonStyle: "black",
           buttonType: "pay",
           borderRadius: "8px",
@@ -930,7 +932,7 @@ export default function CardSelectionPage() {
 
                 {/* Alerta de mínimo */}
                 {isUnderMinimum && totalAmount > 0 && (
-                  <div className="bg-linear-to-br from-red-50 to-red-100 px-6 py-3 -mx-8 rounded-lg mb-4">
+                  <div className="bg-red-50 px-6 py-3 -mx-8 rounded-lg mb-4">
                     <div className="flex justify-center items-center gap-3">
                       <X className="size-6 text-red-500 shrink-0" />
                       <p className="text-red-700 font-medium text-base md:text-lg">
