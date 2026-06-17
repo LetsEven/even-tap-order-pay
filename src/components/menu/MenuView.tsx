@@ -352,8 +352,7 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
     <div className="min-h-screen bg-white relative">
       <img
         src={
-          restaurant.banner_url ||
-          "https://w0.peakpx.com/wallpaper/531/501/HD-wallpaper-coffee-espresso-latte-art-cup-food.jpg"
+          restaurant.banner_url || "/even/even-asterisk-evergreen.svg"
         }
         alt=""
         fetchPriority="high"
@@ -405,8 +404,7 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
             <div className="size-28 md:size-36 lg:size-40 rounded-full bg-gray-200 overflow-hidden border border-gray-400 shadow-sm">
               <img
                 src={
-                  restaurant.logo_url ||
-                  "https://t4.ftcdn.net/jpg/02/15/84/43/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg"
+                  restaurant.logo_url || "/even/even-asterisk-evergreen.svg"
                 }
                 alt="Profile Pic"
                 className="w-full h-full object-cover"

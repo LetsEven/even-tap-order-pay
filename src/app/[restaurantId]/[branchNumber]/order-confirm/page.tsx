@@ -206,7 +206,7 @@ export default function OrderConfirmPage() {
 
             {/* Alerta mínimo */}
             {isUnderMinimum && totalAmount > 0 && (
-              <div className="bg-linear-to-br from-red-50 to-red-100 px-6 py-3 -mx-8 rounded-lg mb-4">
+              <div className="bg-red-50 px-6 py-3 -mx-8 rounded-lg mb-4">
                 <div className="flex justify-center items-center gap-3">
                   <X className="size-6 text-red-500 shrink-0" />
                   <p className="text-red-700 font-medium text-base md:text-lg">
