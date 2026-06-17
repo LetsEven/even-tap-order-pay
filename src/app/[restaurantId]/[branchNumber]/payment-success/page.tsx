@@ -65,12 +65,9 @@ export default function PaymentSuccessPage() {
 
   // Try to get stored payment details
   const [paymentDetails, setPaymentDetails] = useState<any>(null);
-  const [rating, setRating] = useState(0);
-  const [hoveredRating, setHoveredRating] = useState(0);
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
-  const [hasRated, setHasRated] = useState(false);
   const [order, setOrder] = useState<TapOrder | null>(null);
   const [isLoadingOrder, setIsLoadingOrder] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -369,52 +366,6 @@ export default function PaymentSuccessPage() {
     }
   };
 
-  // Handle rating selection
-  const handleRatingClick = (starRating: number) => {
-    if (hasRated) {
-      return;
-    }
-    setRating(starRating);
-  };
-
-  // Handle rating submission
-  const handleSubmitRating = async () => {
-    if (hasRated || rating === 0) {
-      return;
-    }
-
-    if (!restaurantId) {
-      console.error("❌ No restaurant ID available");
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/restaurants/restaurant-reviews`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            restaurant_id: parseInt(restaurantId),
-            rating: rating,
-          }),
-        },
-      );
-
-      const data = await response.json();
-
-      if (data.success) {
-        setHasRated(true);
-      } else {
-        console.error("❌ Failed to submit restaurant review:", data.message);
-      }
-    } catch (error) {
-      console.error("❌ Error submitting restaurant review:", error);
-    }
-  };
-
   return (
     <div className="min-h-dvh overflow-hidden bg-[#023828] flex flex-col">
       {/* Success Icon */}
@@ -440,62 +391,6 @@ export default function PaymentSuccessPage() {
           </div>
 
           <div className="bg-white rounded-t-4xl relative z-10 flex flex-col min-h-80 justify-center px-6 md:px-8 lg:px-10 flex-1 py-8 md:py-10 lg:py-12">
-            {/* Rating Prompt */}
-            {/*<div className="text-center mb-8 md:mb-10 lg:mb-12">
-              <p className="text-xl md:text-2xl lg:text-3xl font-medium text-black mb-2 md:mb-3 lg:mb-4">
-                {hasRated
-                  ? "¡Gracias por tu calificación!"
-                  : "Califica tu experiencia en el restaurante"}
-              </p>
-              <div className="flex flex-col items-center gap-3 md:gap-3.5 lg:gap-4">
-                <div className="flex gap-1 md:gap-1.5 lg:gap-2">
-                  {[1, 2, 3, 4, 5].map((starIndex) => {
-                    const currentRating = hoveredRating || rating;
-                    const isFilled = currentRating >= starIndex;
-
-                    return (
-                      <div
-                        key={starIndex}
-                        className={`relative ${
-                          hasRated ? "cursor-default" : "cursor-pointer"
-                        }`}
-                        onMouseEnter={() =>
-                          !hasRated && setHoveredRating(starIndex)
-                        }
-                        onMouseLeave={() => !hasRated && setHoveredRating(0)}
-                        onClick={() =>
-                          !hasRated && handleRatingClick(starIndex)
-                        }
-                      >
-                        <svg
-                          className={`size-8 md:size-10 lg:size-12 transition-all ${
-                            isFilled ? "text-yellow-400" : "text-white"
-                          }`}
-                          fill="currentColor"
-                          stroke={isFilled ? "#facc15" : "black"}
-                          strokeWidth="1"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                        </svg>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {rating > 0 && !hasRated && (
-                  <button
-                  onClick={handleSubmitRating}
-                  className="px-5 md:px-6 py-1.5 md:py-2 bg-[#82E657] text-[#023828] text-sm md:text-base font-medium rounded-full transition-all duration-300 hover:scale-90 hover:shadow-lg animate-fade-in"
-                  aria-label="Enviar calificación"
-                  >
-                    Enviar
-                  </button>
-                )}
-              </div>
-            </div>
-                */}
-
             {/* Action Buttons */}
             <div
               className="space-y-3 md:space-y-4 lg:space-y-5"
@@ -1068,7 +963,7 @@ export default function PaymentSuccessPage() {
                     Crear cuenta
                   </h2>
                   <p className="text-xs md:text-sm lg:text-base text-gray-600">
-                    Registrate y ahorra tiempo en futuros pedidos
+                    Regístrate y ahorra tiempo en futuros pedidos
                   </p>
                 </div>
               </button>
