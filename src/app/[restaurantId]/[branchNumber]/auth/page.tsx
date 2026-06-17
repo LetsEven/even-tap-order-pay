@@ -393,7 +393,7 @@ export default function AuthPage() {
           </h1>
           <p className="text-gray-200 mt-2">
             {step === "phone"
-              ? "Te enviaremos un código de verificación para tu registro"
+              ? "Te enviaremos un código de verificación"
               : step === "verify"
                 ? `Enviamos un código al ${formatPhoneNumber(phone)}`
                 : "Cuéntanos un poco más sobre ti"}

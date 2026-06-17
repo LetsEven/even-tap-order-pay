@@ -257,7 +257,7 @@ export default function AuthView({ onClose }: AuthViewProps) {
             </h1>
             <p className="text-gray-500 mt-2 text-sm md:text-base">
               {step === "phone"
-                ? "Te enviaremos un código de verificación para tu registro"
+                ? "Te enviaremos un código de verificación"
                 : step === "verify"
                   ? `Enviamos un código al ${formatPhoneNumber(phone)}`
                   : "Cuéntanos un poco más sobre ti"}
