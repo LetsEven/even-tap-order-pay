@@ -250,12 +250,15 @@ class AuthService {
             },
           });
         } else {
-          // handleTokenRefresh ya hizo logout si el servidor rechazó el token.
-          // Si fue error de red, devolvemos un error genérico para que el
-          // llamador no cierre la sesión innecesariamente.
+          // handleTokenRefresh borra los tokens solo cuando el servidor
+          // rechaza el refresh (401). Si ya no hay token, la sesión murió de
+          // verdad → el llamador debe desloguear. Si sigue, fue error de red
+          // transitorio y no hay que cerrar la sesión.
           return {
             success: false,
-            error: "Error al renovar la sesión",
+            error: this.getAccessToken()
+              ? "Error al renovar la sesión"
+              : "Sesión expirada",
           };
         }
       }
@@ -316,7 +319,12 @@ class AuthService {
             body: JSON.stringify(updates),
           });
         } else {
-          return { success: false, error: "Error al renovar la sesión" };
+          return {
+            success: false,
+            error: this.getAccessToken()
+              ? "Error al renovar la sesión"
+              : "Sesión expirada",
+          };
         }
       }
 

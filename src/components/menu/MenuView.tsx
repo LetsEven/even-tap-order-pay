@@ -126,7 +126,7 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
   const [filter, setFilter] = useState("Todo");
   const [searchQuery, setSearchQuery] = useState("");
   const [, startTransition] = useTransition();
-  const { user, profile, isAuthenticated } = useAuth();
+  const { user, profile, isAuthenticated, logout } = useAuth();
   const { guestId } = useGuest();
   const { signUpData } = useUserData();
   const [activeOrder, setActiveOrder] = useState<
@@ -153,6 +153,18 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
     setTimeout(() => {
       setShowSettingsModal(false);
       setIsSettingsClosing(false);
+    }, 380);
+  };
+
+  // Logout desde el modal: primero cerrar con animación, luego limpiar la
+  // sesión. Si se limpia antes, el modal re-renderiza su contenido como
+  // AuthView/"Acceso denegado" durante la animación y se ve un flash.
+  const handleSettingsLogout = () => {
+    setIsSettingsClosing(true);
+    setTimeout(() => {
+      setShowSettingsModal(false);
+      setIsSettingsClosing(false);
+      logout();
     }, 380);
   };
 
@@ -733,7 +745,10 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
             <Suspense fallback={null}>
               {isAuthenticated && profile?.firstName ? (
                 <div className="flex-1 min-h-0">
-                  <DashboardView onClose={closeSettingsModal} />
+                  <DashboardView
+                    onClose={closeSettingsModal}
+                    onLogout={handleSettingsLogout}
+                  />
                 </div>
               ) : (
                 <AuthView onClose={closeSettingsModal} />

@@ -447,7 +447,8 @@ export default function DishDetailPage() {
     if (!dishData) return;
     setLocalQuantity((prev) => Math.max(0, prev - 1));
     const cartItem = cartState.items.find((ci) => ci.id === dishData.dish.id);
-    if (cartItem) await updateQuantity(dishData.dish.id, cartItem.quantity - 1);
+    if (cartItem?.cartItemId)
+      await updateQuantity(cartItem.cartItemId, cartItem.quantity - 1);
   };
 
   const currentQuantity = dishData
