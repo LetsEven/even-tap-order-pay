@@ -46,9 +46,9 @@ export default function DashboardView({
           <div className="w-full max-w-md">
             <div className="mb-6 md:mb-8 lg:mb-10 text-center">
               <img
-                src="/brand/even-asterisk-grass.svg"
+                src="/even/even-asterisk-grass.svg"
                 alt="Even"
-                className="size-24 md:size-28 lg:size-32 mx-auto mb-6 md:mb-8"
+                className="size-16 md:size-20 lg:size-24 mx-auto mb-6 md:mb-8"
               />
               <h1 className="text-white text-xl md:text-2xl lg:text-3xl font-medium mb-2 md:mb-3 lg:mb-4">
                 Acceso denegado
@@ -148,7 +148,7 @@ export default function DashboardView({
 
               <button
                 onClick={() => setActiveTab("profile")}
-                className={`relative px-3 md:px-4 lg:px-5 py-0.5 md:py-1 lg:py-1.5 rounded-full cursor-pointer whitespace-nowrap text-base md:text-lg lg:text-xl transition-colors duration-300 ${
+                className={`relative px-2 md:px-4 lg:px-5 py-0.5 md:py-1 lg:py-1.5 rounded-full cursor-pointer whitespace-nowrap text-sm md:text-lg lg:text-xl transition-colors duration-300 ${
                   activeTab === "profile"
                     ? "text-white"
                     : "text-gray-500 hover:bg-gray-100"
@@ -158,7 +158,7 @@ export default function DashboardView({
               </button>
               <button
                 onClick={() => setActiveTab("support")}
-                className={`relative px-3 md:px-4 lg:px-5 py-0.5 md:py-1 lg:py-1.5 rounded-full cursor-pointer whitespace-nowrap text-base md:text-lg lg:text-xl transition-colors duration-300 ${
+                className={`relative px-2 md:px-4 lg:px-5 py-0.5 md:py-1 lg:py-1.5 rounded-full cursor-pointer whitespace-nowrap text-sm md:text-lg lg:text-xl transition-colors duration-300 ${
                   activeTab === "support"
                     ? "text-white"
                     : "text-gray-500 hover:bg-gray-100"
@@ -168,7 +168,7 @@ export default function DashboardView({
               </button>
               <button
                 onClick={() => setActiveTab("history")}
-                className={`relative px-3 md:px-4 lg:px-5 py-0.5 md:py-1 lg:py-1.5 rounded-full cursor-pointer whitespace-nowrap text-base md:text-lg lg:text-xl transition-colors duration-300 ${
+                className={`relative px-2 md:px-4 lg:px-5 py-0.5 md:py-1 lg:py-1.5 rounded-full cursor-pointer whitespace-nowrap text-sm md:text-lg lg:text-xl transition-colors duration-300 ${
                   activeTab === "history"
                     ? "text-white"
                     : "text-gray-500 hover:bg-gray-100"
@@ -179,7 +179,7 @@ export default function DashboardView({
 
               <button
                 onClick={() => setActiveTab("cards")}
-                className={`relative px-3 md:px-4 lg:px-5 py-0.5 md:py-1 lg:py-1.5 rounded-full cursor-pointer whitespace-nowrap text-base md:text-lg lg:text-xl transition-colors duration-300 ${
+                className={`relative px-2 md:px-4 lg:px-5 py-0.5 md:py-1 lg:py-1.5 rounded-full cursor-pointer whitespace-nowrap text-sm md:text-lg lg:text-xl transition-colors duration-300 ${
                   activeTab === "cards"
                     ? "text-white"
                     : "text-gray-500 hover:bg-gray-100"
@@ -196,7 +196,7 @@ export default function DashboardView({
               <Suspense
                 fallback={
                   <div className="flex items-center justify-center py-12 md:py-16 lg:py-20">
-                    <Loader2 className="size-8 md:size-10 lg:size-12 animate-spin text-teal-600" />
+                    <Loader2 className="size-8 md:size-10 lg:size-12 animate-spin text-[#299E66]" />
                   </div>
                 }
               >
