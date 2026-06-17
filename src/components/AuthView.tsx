@@ -244,9 +244,9 @@ export default function AuthView({ onClose }: AuthViewProps) {
           {/* Logo */}
           <div className="mb-8 text-center">
             <img
-              src="/brand/even-asterisk-evergreen.svg"
-              alt="Even Logo"
-              className="size-16 mx-auto mb-4"
+              src="/brand/even-wordmark-evergreen.svg"
+              alt="even"
+              className="w-32 md:w-36 h-auto mx-auto mb-6"
             />
             <h1 className="text-2xl font-medium text-black/90">
               {step === "phone"
@@ -342,7 +342,7 @@ export default function AuthView({ onClose }: AuthViewProps) {
               <button
                 type="submit"
                 disabled={loading || !phoneNumber || phoneNumber.length < 8}
-                className="w-full bg-black hover:bg-stone-950 text-white py-3 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#82E657] text-[#023828] hover:opacity-90 py-3 rounded-full font-medium transition-opacity disabled:bg-[#82E657]/30 disabled:text-[#023828]/40 disabled:cursor-not-allowed"
               >
                 {loading ? "Enviando..." : "Enviar código"}
               </button>
@@ -368,7 +368,7 @@ export default function AuthView({ onClose }: AuthViewProps) {
               <button
                 type="submit"
                 disabled={loading || otp.length !== 6}
-                className="w-full bg-black hover:bg-stone-950 text-white py-3 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#82E657] text-[#023828] hover:opacity-90 py-3 rounded-full font-medium transition-opacity disabled:bg-[#82E657]/30 disabled:text-[#023828]/40 disabled:cursor-not-allowed"
               >
                 {loading ? "Verificando..." : "Verificar código"}
               </button>

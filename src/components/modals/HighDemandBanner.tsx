@@ -30,7 +30,7 @@ export default function HighDemandBanner({ onDismiss }: Props) {
           <img
             src="/brand/even-asterisk-white.svg"
             alt="Even"
-            className="size-16"
+            className="size-20 md:size-24"
           />
 
           {/* Text */}
