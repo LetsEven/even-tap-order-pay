@@ -153,7 +153,7 @@ const LoadingDots = () => (
 // Spinner SVG igual al de user/page.tsx
 const Spinner = () => (
   <svg
-    className="h-4 w-4 text-[#ebb2f4]"
+    className="h-4 w-4 text-[#299E66]"
     style={{ animation: "spin 1s linear infinite" }}
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
@@ -393,16 +393,16 @@ const OrderButton = ({
         : status === "loading"
           ? {
               background:
-                "linear-gradient(160deg, rgba(245,210,255,0.7) 0%, rgba(220,140,238,0.6) 100%)",
-              boxShadow: "0 2px 12px rgba(200,100,230,0.2)",
+                "linear-gradient(160deg, rgba(210,250,190,0.7) 0%, rgba(150,225,110,0.6) 100%)",
+              boxShadow: "0 2px 12px rgba(100,200,60,0.2)",
               border: "1px solid rgba(255,255,255,0.4)",
               backdropFilter: "blur(12px)",
             }
           : {
               background:
-                "linear-gradient(160deg, rgba(250,220,255,0.97) 0%, rgba(235,178,244,0.92) 40%, rgba(210,130,235,0.88) 100%)",
+                "linear-gradient(160deg, rgba(224,255,205,0.97) 0%, rgba(170,240,130,0.92) 40%, rgba(130,230,87,0.88) 100%)",
               boxShadow:
-                "0 6px 24px rgba(190,80,230,0.3), 0 1px 0 rgba(255,255,255,0.75) inset, 0 -1px 0 rgba(120,0,160,0.08) inset",
+                "0 6px 24px rgba(90,200,40,0.3), 0 1px 0 rgba(255,255,255,0.75) inset, 0 -1px 0 rgba(2,56,40,0.08) inset",
               border: "1px solid rgba(255,255,255,0.6)",
               backdropFilter: "blur(16px)",
             };
@@ -874,7 +874,7 @@ export default function ChatView({ onBack }: ChatViewProps) {
                   >
                     <div
                       className={`max-w-[80%] rounded-xl md:rounded-2xl px-4 md:px-5 lg:px-6 py-2 md:py-3 lg:py-4 text-black text-base md:text-lg lg:text-xl ${
-                        msg.role === "user" ? "bg-[#ebb2f4]" : "bg-white/60"
+                        msg.role === "user" ? "bg-[#82E657]" : "bg-white/60"
                       }`}
                     >
                       <MessageContent
@@ -933,7 +933,7 @@ export default function ChatView({ onBack }: ChatViewProps) {
             />
             <button
               onClick={handleSend}
-              className="text-[#ebb2f4] rounded-full transition-colors disabled:text-gray-400"
+              className="text-[#023828] rounded-full transition-colors disabled:text-gray-400"
               disabled={!message.trim() || isLoading}
             >
               <SendHorizontal className="size-6 md:size-7 lg:size-8 -rotate-90" />
