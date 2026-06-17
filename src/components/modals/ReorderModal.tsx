@@ -272,9 +272,9 @@ function ReorderModal({ isOpen, onClose, items }: ReorderModalProps) {
                             />
                           ) : (
                             <img
-                              src="/brand/even-asterisk-evergreen.svg"
+                              src="/even/even-asterisk-evergreen.svg"
                               alt="Logo Even"
-                              className={`w-full h-full object-contain p-2${itemIsOutOfStock ? " blur-sm" : ""}`}
+                              className={`size-10 md:size-12 object-contain${itemIsOutOfStock ? " blur-sm" : ""}`}
                             />
                           )}
                         </div>

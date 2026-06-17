@@ -244,9 +244,9 @@ export default function AuthView({ onClose }: AuthViewProps) {
           {/* Logo */}
           <div className="mb-8 text-center">
             <img
-              src="/brand/even-asterisk-evergreen.svg"
+              src="/even/even-asterisk-evergreen.svg"
               alt="Even"
-              className="size-24 md:size-28 mx-auto mb-6"
+              className="size-16 md:size-20 mx-auto mb-6"
             />
             <h1 className="text-2xl font-medium text-black/90">
               {step === "phone"

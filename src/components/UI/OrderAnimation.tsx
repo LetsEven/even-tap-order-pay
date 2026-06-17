@@ -167,9 +167,9 @@ const OrderAnimation = ({
                 {/* Logo container */}
                 <div className="size-20 md:size-24 lg:size-28 flex items-center justify-center rounded-full relative z-10">
                   <img
-                    src="/brand/even-asterisk-evergreen.svg"
+                    src="/even/even-asterisk-evergreen.svg"
                     alt="Even Logo"
-                    className="size-14 md:size-16 lg:size-20 grayscale opacity-50"
+                    className="size-12 md:size-14 lg:size-16 grayscale opacity-50"
                   />
                 </div>
               </div>
@@ -187,7 +187,7 @@ const OrderAnimation = ({
                     <div className="size-10 md:size-12 lg:size-14 rounded-full border border-gray-400 bg-gray-100 overflow-hidden shrink-0">
                       <img
                         src={
-                          restaurant?.logo_url || "/brand/even-asterisk-evergreen.svg"
+                          restaurant?.logo_url || "/even/even-asterisk-evergreen.svg"
                         }
                         alt={displayRestaurant}
                         className="object-cover w-full h-full"
@@ -252,9 +252,9 @@ const OrderAnimation = ({
                               />
                             ) : (
                               <img
-                                src="/brand/even-asterisk-evergreen.svg"
+                                src="/even/even-asterisk-evergreen.svg"
                                 alt="Logo Even"
-                                className="size-6 md:size-8 lg:size-10 object-contain"
+                                className="size-6 md:size-7 lg:size-8 object-contain"
                               />
                             )}
                           </div>

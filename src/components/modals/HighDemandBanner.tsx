@@ -28,9 +28,9 @@ export default function HighDemandBanner({ onDismiss }: Props) {
         <div className="flex flex-col items-center px-8 pt-10 pb-8 gap-5">
           {/* Logo */}
           <img
-            src="/brand/even-asterisk-white.svg"
+            src="/even/even-asterisk-white.svg"
             alt="Even"
-            className="size-20 md:size-24"
+            className="size-16 md:size-20"
           />
 
           {/* Text */}

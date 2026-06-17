@@ -24,8 +24,8 @@ export default function MenuHeaderBack() {
         </div>
 
         {/* Even Logo */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-16 md:size-18 lg:size-20">
-          <img src="/brand/even-asterisk-grass.svg" alt="Even" />
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-10 md:size-12 lg:size-14">
+          <img src="/even/even-asterisk-grass.svg" alt="Even" />
         </div>
 
         {/* Espacio para mantener el layout */}

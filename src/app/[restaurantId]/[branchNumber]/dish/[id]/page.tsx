@@ -644,9 +644,9 @@ export default function DishDetailPage() {
           ) : (
             <div className="absolute top-0 left-0 w-full h-full bg-gray-300 flex items-center justify-center">
               <img
-                src="/brand/even-asterisk-evergreen.svg"
+                src="/even/even-asterisk-evergreen.svg"
                 alt="Logo"
-                className="w-32 md:w-40 lg:w-48 h-32 md:h-40 lg:h-48 object-contain"
+                className="w-24 md:w-32 lg:w-40 h-24 md:h-32 lg:h-40 object-contain"
               />
             </div>
           )}
@@ -1168,9 +1168,9 @@ export default function DishDetailPage() {
                 ) : (
                   <div className="size-20 md:size-24 lg:size-28 bg-gray-300 rounded-lg md:rounded-xl flex items-center justify-center">
                     <img
-                      src="/brand/even-asterisk-evergreen.svg"
+                      src="/even/even-asterisk-evergreen.svg"
                       alt="Logo"
-                      className="size-16 md:size-20 lg:size-24 object-contain"
+                      className="size-12 md:size-14 lg:size-16 object-contain"
                     />
                   </div>
                 )}

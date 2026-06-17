@@ -34,11 +34,11 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: "/brand/even-asterisk-evergreen.svg",
+        url: "/even/even-asterisk-evergreen.svg",
         media: "(prefers-color-scheme: light)",
       },
       {
-        url: "/brand/even-asterisk-grass.svg",
+        url: "/even/even-asterisk-grass.svg",
         media: "(prefers-color-scheme: dark)",
       },
     ],

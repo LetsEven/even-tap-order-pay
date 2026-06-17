@@ -236,7 +236,7 @@ function MenuItem({ item, onRestaurantClosed }: MenuItemProps) {
                 />
               ) : (
                 <img
-                  src="/brand/even-asterisk-evergreen.svg"
+                  src="/even/even-asterisk-evergreen.svg"
                   alt="Logo Even"
                   loading="lazy"
                   className={`size-18 md:size-20 lg:size-22 object-contain`}

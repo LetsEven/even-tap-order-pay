@@ -420,9 +420,9 @@ export default function PaymentSuccessPage() {
       {/* Success Icon */}
       <div className="flex-1 flex justify-center items-center">
         <img
-          src="/brand/even-asterisk-grass.svg"
+          src="/even/even-asterisk-grass.svg"
           alt="Even"
-          className="size-20 md:size-28 lg:size-32 animate-logo-fade-in"
+          className="size-16 md:size-20 lg:size-24 animate-logo-fade-in"
         />
       </div>
 
@@ -854,7 +854,7 @@ export default function PaymentSuccessPage() {
                             />
                           ) : (
                             <img
-                              src={"/brand/even-asterisk-evergreen.svg"}
+                              src={"/even/even-asterisk-evergreen.svg"}
                               alt="Logo Even"
                               className="size-12 md:size-14 lg:size-16 object-contain"
                             />
@@ -1037,9 +1037,9 @@ export default function PaymentSuccessPage() {
             {/* Logo */}
             <div className="px-6 md:px-8 lg:px-10 flex items-center justify-center mb-6 md:mb-8 lg:mb-10">
               <img
-                src="/brand/even-asterisk-white.svg"
+                src="/even/even-asterisk-white.svg"
                 alt="Even Logo"
-                className="size-20 md:size-24 lg:size-28"
+                className="size-16 md:size-18 lg:size-20"
               />
             </div>
 

@@ -671,9 +671,9 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
                             />
                           ) : (
                             <img
-                              src="/brand/even-asterisk-evergreen.svg"
+                              src="/even/even-asterisk-evergreen.svg"
                               alt="Logo Even"
-                              className="size-12 md:size-14 lg:size-16 object-contain"
+                              className="size-10 md:size-12 lg:size-14 object-contain"
                             />
                           )}
                         </div>

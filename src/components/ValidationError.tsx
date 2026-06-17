@@ -56,9 +56,9 @@ export default function ValidationError({ errorType }: ValidationErrorProps) {
         <div className="w-full max-w-md">
           <div className="mb-6 md:mb-8 lg:mb-10 text-center">
             <img
-              src="/brand/even-asterisk-grass.svg"
+              src="/even/even-asterisk-grass.svg"
               alt="Even"
-              className="size-24 md:size-28 lg:size-32 mx-auto mb-6 md:mb-8"
+              className="size-16 md:size-20 lg:size-24 mx-auto mb-6 md:mb-8"
             />
             <h1 className="text-white text-xl md:text-2xl lg:text-3xl font-medium mb-2 md:mb-3 lg:mb-4">
               {errorInfo.title}
