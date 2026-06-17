@@ -83,6 +83,14 @@ function AddCardContent() {
     general?: string;
   }>({});
 
+  const handleBack = () => {
+    if (searchParams.get("returnTo") === "cards") {
+      navigateWithTable("/menu?dashboard=cards");
+    } else {
+      router.back();
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.currentTarget.blur();
@@ -173,8 +181,11 @@ function AddCardContent() {
         await refreshPaymentMethods();
 
         const fromSavedCards = document.referrer.includes("/saved-cards");
+        const returnTo = searchParams.get("returnTo");
 
-        if (fromSavedCards) {
+        if (returnTo === "cards") {
+          navigateWithTable("/menu?dashboard=cards");
+        } else if (fromSavedCards) {
           navigateWithTable("/saved-cards");
         } else {
           router.back();
@@ -287,7 +298,7 @@ function AddCardContent() {
       )}
 
       <div className="min-h-dvh brand-evergreen flex flex-col">
-        <MenuHeaderBack />
+        <MenuHeaderBack onBack={handleBack} />
 
         <div className="px-4 w-full flex-1 flex flex-col justify-end">
           <div className="left-4 right-4 bg-even-evergreen rounded-t-4xl translate-y-7 z-0">

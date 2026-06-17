@@ -298,7 +298,7 @@ function MenuItem({ item, onRestaurantClosed }: MenuItemProps) {
                 ))}
               </div>
             )}
-            <p className="text-base md:text-lg lg:text-xl line-clamp-3 leading-4 md:leading-5 lg:leading-6 bg-linear-to-b from-black to-black/30 bg-clip-text text-transparent">
+            <p className="text-base md:text-lg lg:text-xl line-clamp-3 leading-4 md:leading-5 lg:leading-6 bg-linear-to-b from-black to-black/30 bg-clip-text mt-1.5 md:mt-2.5">
               {adaptedItem.description}
             </p>
             <div className="flex items-center justify-between mt-2 md:mt-3">

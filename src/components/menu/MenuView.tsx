@@ -141,6 +141,9 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
   const [isPepperClosing, setIsPepperClosing] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [isSettingsClosing, setIsSettingsClosing] = useState(false);
+  const [dashboardInitialTab, setDashboardInitialTab] = useState<
+    "profile" | "cards" | "history" | "support"
+  >("profile");
   const [showClosedModal, setShowClosedModal] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
   const stickyTriggerRef = useRef<HTMLDivElement>(null);
@@ -153,8 +156,22 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
     setTimeout(() => {
       setShowSettingsModal(false);
       setIsSettingsClosing(false);
+      setDashboardInitialTab("profile");
     }, 380);
   };
+
+  // Abrir el dashboard en la pestaña de tarjetas cuando se regresa de agregar
+  // una tarjeta (?dashboard=cards). Se limpia el parámetro para que un refresh
+  // o reapertura del modal no lo vuelva a disparar.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("dashboard") === "cards") {
+      setDashboardInitialTab("cards");
+      setShowSettingsModal(true);
+      url.searchParams.delete("dashboard");
+      window.history.replaceState({}, "", url);
+    }
+  }, []);
 
   // Logout desde el modal: primero cerrar con animación, luego limpiar la
   // sesión. Si se limpia antes, el modal re-renderiza su contenido como
@@ -748,6 +765,7 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
                   <DashboardView
                     onClose={closeSettingsModal}
                     onLogout={handleSettingsLogout}
+                    initialTab={dashboardInitialTab}
                   />
                 </div>
               ) : (

@@ -96,11 +96,15 @@ export default function AuthView({ onClose }: AuthViewProps) {
     }
   }, [countdown]);
 
+  // Solo saltar a "profile" cuando no haya una operación en curso. Durante el
+  // login el `user` se setea antes de que `refreshProfile` traiga el perfil, y
+  // sin este guard se mostraría "Completa tu perfil" por un instante a usuarios
+  // que ya lo tienen completo.
   useEffect(() => {
-    if (user && !authProfile?.firstName) {
+    if (user && !authProfile?.firstName && !loading) {
       setStep("profile");
     }
-  }, [user, authProfile]);
+  }, [user, authProfile, loading]);
 
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();

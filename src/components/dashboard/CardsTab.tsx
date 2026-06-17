@@ -19,7 +19,7 @@ export default function CardsTab() {
   const [settingDefaultId, setSettingDefaultId] = useState<string | null>(null);
 
   const handleAddNewCard = () => {
-    navigateWithTable("/add-card");
+    navigateWithTable("/add-card?returnTo=cards");
   };
 
   const handleSetDefault = async (paymentMethodId: string) => {

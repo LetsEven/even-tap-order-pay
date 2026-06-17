@@ -59,6 +59,7 @@ export default function DishDetailPage() {
   const [dishQuantity, setDishQuantity] = useState(1);
   const [isPulsing, setIsPulsing] = useState(false);
   const [specialInstructions, setSpecialInstructions] = useState("");
+  const [notesOpen, setNotesOpen] = useState(false);
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>(
     {},
   );
@@ -1066,26 +1067,41 @@ export default function DishDetailPage() {
 
             {/* Comentarios */}
             <div className="text-black">
-              <span className="font-medium text-xl md:text-2xl lg:text-3xl">
-                ¿Algo que debamos saber?
-              </span>
-              <textarea
-                className="h-24 md:h-28 lg:h-32 text-base md:text-lg lg:text-xl w-full bg-surface border border-stroke-soft px-3 md:px-4 py-2 md:py-3 rounded-lg resize-none focus:outline-none mt-2 md:mt-3"
-                placeholder="Alergias, instrucciones especiales, comentarios..."
-                value={specialInstructions}
-                onChange={(e) => setSpecialInstructions(e.target.value)}
-                maxLength={60}
-                onBlur={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    e.currentTarget.blur();
-                  }
-                }}
-              />
-              <p className="text-right text-sm text-gray-400 mt-1">
-                {specialInstructions.length}/60
-              </p>
+              <div
+                className="flex justify-between items-center gap-3 cursor-pointer"
+                onClick={() => setNotesOpen((prev) => !prev)}
+              >
+                <h3 className="font-medium text-black text-xl md:text-2xl lg:text-3xl">
+                  ¿Algo que debamos saber?
+                </h3>
+                <div className="size-7 md:size-8 lg:size-9 shrink-0 bg-surface rounded-full flex items-center justify-center border border-stroke/50">
+                  <ChevronDown
+                    className={`size-5 md:size-6 lg:size-7 text-black transition-transform duration-250 ${notesOpen ? "rotate-180" : ""}`}
+                  />
+                </div>
+              </div>
+
+              {notesOpen && (
+                <div className="mt-3 md:mt-4 animate-in slide-in-from-top-2 duration-200">
+                  <textarea
+                    className="h-24 md:h-28 lg:h-32 text-base md:text-lg lg:text-xl w-full bg-surface border border-stroke-soft px-3 md:px-4 py-2 md:py-3 rounded-lg resize-none focus:outline-none"
+                    placeholder="Alergias, instrucciones especiales, comentarios..."
+                    value={specialInstructions}
+                    onChange={(e) => setSpecialInstructions(e.target.value)}
+                    maxLength={60}
+                    onBlur={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        e.currentTarget.blur();
+                      }
+                    }}
+                  />
+                  <p className="text-right text-sm text-gray-400 mt-1">
+                    {specialInstructions.length}/60
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Bottom bar */}

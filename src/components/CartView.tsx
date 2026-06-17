@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Minus, Plus, ShoppingBag } from "lucide-react";
+import { Minus, Plus, ShoppingBag, ChevronDown } from "lucide-react";
 import { useTable } from "../context/TableContext";
 import { useCart } from "../context/CartContext";
 import { useTableNavigation } from "../hooks/useTableNavigation";
@@ -20,6 +20,7 @@ export default function CartView() {
   const { navigateWithTable } = useTableNavigation();
   const { isAuthenticated, isLoading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const handleOrder = async () => {
@@ -206,42 +207,57 @@ export default function CartView() {
 
                   {/* Comentarios generales */}
                   <div className="text-black mt-6 md:mt-8">
-                    <span className="font-medium text-xl md:text-2xl lg:text-3xl">
-                      ¿Algo que debamos saber?
-                    </span>
-                    <textarea
-                      className="h-24 md:h-28 lg:h-32 text-base md:text-lg lg:text-xl w-full bg-surface border border-stroke-soft px-3 md:px-4 py-2 md:py-3 rounded-lg resize-none focus:outline-none mt-2 md:mt-3"
-                      placeholder="Alergias, instrucciones especiales, comentarios..."
-                      value={orderNotes}
-                      onChange={(e) => setOrderNotes(e.target.value)}
-                      maxLength={80}
-                      onBlur={(e) => {
-                        updateOrderNotes(e.target.value);
-                        setTimeout(() => {
-                          window.scrollTo({ top: 0, behavior: "smooth" });
-                          if (scrollContainerRef.current) {
-                            scrollContainerRef.current.scrollTop = 0;
-                          }
-                        }, 300);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          e.currentTarget.blur();
-                        }
-                      }}
-                      onFocus={(e) => {
-                        setTimeout(() => {
-                          e.target.scrollIntoView({
-                            behavior: "smooth",
-                            block: "center",
-                          });
-                        }, 200);
-                      }}
-                    />
-                    <p className="text-right text-sm text-muted mt-1">
-                      {orderNotes.length}/80
-                    </p>
+                    <div
+                      className="flex justify-between items-center gap-3 cursor-pointer"
+                      onClick={() => setNotesOpen((prev) => !prev)}
+                    >
+                      <h3 className="font-medium text-black text-xl md:text-2xl lg:text-3xl">
+                        ¿Algo que debamos saber?
+                      </h3>
+                      <div className="size-7 md:size-8 lg:size-9 shrink-0 bg-surface rounded-full flex items-center justify-center border border-stroke/50">
+                        <ChevronDown
+                          className={`size-5 md:size-6 lg:size-7 text-black transition-transform duration-250 ${notesOpen ? "rotate-180" : ""}`}
+                        />
+                      </div>
+                    </div>
+
+                    {notesOpen && (
+                      <div className="mt-3 md:mt-4 animate-in slide-in-from-top-2 duration-200">
+                        <textarea
+                          className="h-24 md:h-28 lg:h-32 text-base md:text-lg lg:text-xl w-full bg-surface border border-stroke-soft px-3 md:px-4 py-2 md:py-3 rounded-lg resize-none focus:outline-none"
+                          placeholder="Alergias, instrucciones especiales, comentarios..."
+                          value={orderNotes}
+                          onChange={(e) => setOrderNotes(e.target.value)}
+                          maxLength={80}
+                          onBlur={(e) => {
+                            updateOrderNotes(e.target.value);
+                            setTimeout(() => {
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                              if (scrollContainerRef.current) {
+                                scrollContainerRef.current.scrollTop = 0;
+                              }
+                            }, 300);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              e.currentTarget.blur();
+                            }
+                          }}
+                          onFocus={(e) => {
+                            setTimeout(() => {
+                              e.target.scrollIntoView({
+                                behavior: "smooth",
+                                block: "center",
+                              });
+                            }, 200);
+                          }}
+                        />
+                        <p className="text-right text-sm text-muted mt-1">
+                          {orderNotes.length}/80
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -257,8 +273,9 @@ export default function CartView() {
               >
                 <div className="w-full flex gap-3 md:gap-4 lg:gap-5 mt-6 md:mt-7 lg:mt-8 justify-between">
                   <div className="flex flex-col justify-center">
-                    <span className="text-gray-600 text-sm md:text-base lg:text-lg">
-                      {cartState.totalItems} artículos
+                    <span className="text-gray-600 text-sm md:text-base lg:text-lg whitespace-nowrap">
+                      {cartState.totalItems}{" "}
+                      {cartState.totalItems === 1 ? "artículo" : "artículos"}
                     </span>
                     <div className="flex items-center justify-center w-fit text-2xl md:text-3xl lg:text-4xl font-medium text-black text-center">
                       ${cartState.totalPrice.toFixed(2)}
@@ -270,7 +287,7 @@ export default function CartView() {
                     className={`py-3 md:py-4 lg:py-5 text-even-evergreen rounded-full cursor-pointer font-normal h-fit flex items-center justify-center text-base md:text-lg lg:text-xl active:scale-95 transition-transform ${
                       isSubmitting || cartState.isLoading
                         ? "bg-even-grass opacity-50 cursor-not-allowed px-10 md:px-12 lg:px-14"
-                        : "bg-even-grass px-20 md:px-24 lg:px-28 animate-pulse-button"
+                        : "bg-even-grass px-18 md:px-20 lg:px-24 animate-pulse-button"
                     }`}
                   >
                     {isSubmitting || cartState.isLoading

@@ -17,15 +17,17 @@ const SupportTab = lazy(() => import("./dashboard/SupportTab"));
 interface DashboardViewProps {
   onClose?: () => void;
   onLogout?: () => void;
+  initialTab?: "profile" | "cards" | "history" | "support";
 }
 
 export default function DashboardView({
   onClose,
   onLogout,
+  initialTab = "profile",
 }: DashboardViewProps = {}) {
   const [activeTab, setActiveTab] = useState<
     "profile" | "cards" | "history" | "support"
-  >("profile");
+  >(initialTab);
 
   const { user, isAuthenticated, isLoading, profile } = useAuth();
   const { navigateWithTable } = useTableNavigation();
@@ -148,7 +150,7 @@ export default function DashboardView({
 
               <button
                 onClick={() => setActiveTab("profile")}
-                className={`relative px-2 md:px-4 lg:px-5 py-0.5 md:py-1 lg:py-1.5 rounded-full cursor-pointer whitespace-nowrap text-sm md:text-lg lg:text-xl transition-colors duration-300 ${
+                className={`relative px-1.5 md:px-3 lg:px-4 py-0.5 md:py-1 lg:py-1.5 rounded-full cursor-pointer whitespace-nowrap text-xs md:text-sm lg:text-lg transition-colors duration-300 ${
                   activeTab === "profile"
                     ? "text-white"
                     : "text-gray-500 hover:bg-gray-100"
@@ -158,7 +160,7 @@ export default function DashboardView({
               </button>
               <button
                 onClick={() => setActiveTab("support")}
-                className={`relative px-2 md:px-4 lg:px-5 py-0.5 md:py-1 lg:py-1.5 rounded-full cursor-pointer whitespace-nowrap text-sm md:text-lg lg:text-xl transition-colors duration-300 ${
+                className={`relative px-1.5 md:px-3 lg:px-4 py-0.5 md:py-1 lg:py-1.5 rounded-full cursor-pointer whitespace-nowrap text-xs md:text-sm lg:text-lg transition-colors duration-300 ${
                   activeTab === "support"
                     ? "text-white"
                     : "text-gray-500 hover:bg-gray-100"
@@ -168,7 +170,7 @@ export default function DashboardView({
               </button>
               <button
                 onClick={() => setActiveTab("history")}
-                className={`relative px-2 md:px-4 lg:px-5 py-0.5 md:py-1 lg:py-1.5 rounded-full cursor-pointer whitespace-nowrap text-sm md:text-lg lg:text-xl transition-colors duration-300 ${
+                className={`relative px-1.5 md:px-3 lg:px-4 py-0.5 md:py-1 lg:py-1.5 rounded-full cursor-pointer whitespace-nowrap text-xs md:text-sm lg:text-lg transition-colors duration-300 ${
                   activeTab === "history"
                     ? "text-white"
                     : "text-gray-500 hover:bg-gray-100"
@@ -179,7 +181,7 @@ export default function DashboardView({
 
               <button
                 onClick={() => setActiveTab("cards")}
-                className={`relative px-2 md:px-4 lg:px-5 py-0.5 md:py-1 lg:py-1.5 rounded-full cursor-pointer whitespace-nowrap text-sm md:text-lg lg:text-xl transition-colors duration-300 ${
+                className={`relative px-1.5 md:px-3 lg:px-4 py-0.5 md:py-1 lg:py-1.5 rounded-full cursor-pointer whitespace-nowrap text-xs md:text-sm lg:text-lg transition-colors duration-300 ${
                   activeTab === "cards"
                     ? "text-white"
                     : "text-gray-500 hover:bg-gray-100"
