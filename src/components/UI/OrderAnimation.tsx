@@ -180,7 +180,7 @@ const OrderAnimation = ({
               </div>
 
               {/* Información del pedido */}
-              <div className="flex flex-col w-full divide-y divide-[#8e8e8e]/50">
+              <div className="flex flex-col w-full divide-y divide-stroke/50">
                 {/* Restaurante */}
                 <div className="pb-4 md:pb-6 lg:pb-7">
                   <div className="flex items-center gap-3 md:gap-4">
@@ -214,7 +214,7 @@ const OrderAnimation = ({
                         className="size-10 md:size-12 lg:size-14 rounded-full object-cover border border-gray-400 shrink-0"
                       />
                     ) : (
-                      <div className="size-10 md:size-12 lg:size-14 rounded-full border border-gray-400 bg-[#023828] flex items-center justify-center shrink-0">
+                      <div className="size-10 md:size-12 lg:size-14 rounded-full border border-gray-400 bg-even-evergreen flex items-center justify-center shrink-0">
                         <span className="text-white text-base md:text-lg lg:text-xl font-bold">
                           {displayName.charAt(0).toUpperCase()}
                         </span>
@@ -293,7 +293,7 @@ const OrderAnimation = ({
                 >
                   <button
                     onClick={handleCancel}
-                    className="py-1 md:py-1.5 px-6 md:px-8 text-black rounded-full active:scale-95 transition-all font-medium text-sm md:text-base bg-[#f9f9f9] lg:py-2 border border-[#8e8e8e]/40 cursor-pointer"
+                    className="py-1 md:py-1.5 px-6 md:px-8 text-black rounded-full active:scale-95 transition-all font-medium text-sm md:text-base bg-surface lg:py-2 border border-stroke/40 cursor-pointer"
                   >
                     Deshacer pedido
                   </button>
@@ -317,14 +317,14 @@ const OrderAnimation = ({
 
       {/* Success screen */}
       {animationState === "success" && (
-        <div className="fixed inset-0 z-9999 bg-[#82E657] overflow-hidden">
+        <div className="fixed inset-0 z-9999 bg-even-grass overflow-hidden">
           <div className="h-dvh p-8 flex flex-col">
             <div className="flex flex-col flex-1">
               {/* Checkmark */}
               <div className="mb-6 md:mb-8 lg:mb-10 mt-8 md:mt-12 lg:mt-14 animate-simple-fade-in">
                 <div className="size-20 md:size-24 lg:size-28 rounded-full bg-white flex items-center justify-center">
                   <svg
-                    className="size-14 md:size-16 lg:size-20 text-[#023828]"
+                    className="size-14 md:size-16 lg:size-20 text-even-evergreen"
                     fill="none"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -338,7 +338,7 @@ const OrderAnimation = ({
               </div>
 
               {/* Success message */}
-              <div className="text-[#023828] text-3xl md:text-5xl lg:text-6xl font-medium mb-8 md:mb-12 lg:mb-14 mr-16 md:mr-28 lg:mr-32 animate-simple-fade-in">
+              <div className="text-even-evergreen text-3xl md:text-5xl lg:text-6xl font-medium mb-8 md:mb-12 lg:mb-14 mr-16 md:mr-28 lg:mr-32 animate-simple-fade-in">
                 Tu pedido fue creado con éxito
               </div>
             </div>

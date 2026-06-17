@@ -538,8 +538,8 @@ export default function DishDetailPage() {
                 onClick={() => router.push("/")}
                 className="w-full bg-white hover:bg-gray-50 text-black py-4 md:py-5 lg:py-6 px-4 md:px-5 lg:px-6 rounded-xl md:rounded-2xl transition-all duration-200 flex items-center gap-3 md:gap-4 lg:gap-5 active:scale-95"
               >
-                <div className="bg-[#82E657] p-2 md:p-2.5 lg:p-3 rounded-full">
-                  <Home className="size-5 md:size-6 lg:size-7 text-[#023828]" />
+                <div className="bg-even-grass p-2 md:p-2.5 lg:p-3 rounded-full">
+                  <Home className="size-5 md:size-6 lg:size-7 text-even-evergreen" />
                 </div>
                 <div className="flex-1 text-left">
                   <h2 className="text-base md:text-lg lg:text-xl font-medium mb-0.5 md:mb-1">
@@ -581,8 +581,8 @@ export default function DishDetailPage() {
                 onClick={() => navigateWithTable("/menu")}
                 className="w-full bg-white hover:bg-gray-50 text-black py-4 md:py-5 lg:py-6 px-4 md:px-5 lg:px-6 rounded-xl md:rounded-2xl transition-all duration-200 flex items-center gap-3 md:gap-4 lg:gap-5 active:scale-95"
               >
-                <div className="bg-[#82E657] p-2 md:p-2.5 lg:p-3 rounded-full">
-                  <Home className="size-5 md:size-6 lg:size-7 text-[#023828]" />
+                <div className="bg-even-grass p-2 md:p-2.5 lg:p-3 rounded-full">
+                  <Home className="size-5 md:size-6 lg:size-7 text-even-evergreen" />
                 </div>
                 <div className="flex-1 text-left">
                   <h2 className="text-base md:text-lg lg:text-xl font-medium mb-0.5 md:mb-1">
@@ -757,7 +757,7 @@ export default function DishDetailPage() {
                 {dish.features.map((feature, index) => (
                   <div
                     key={index}
-                    className="text-sm md:text-base lg:text-lg text-black font-medium border border-[#bfbfbf]/50 rounded-3xl px-3 md:px-4 py-1 md:py-1.5 shadow-sm"
+                    className="text-sm md:text-base lg:text-lg text-black font-medium border border-stroke-soft/50 rounded-3xl px-3 md:px-4 py-1 md:py-1.5 shadow-sm"
                   >
                     {feature}
                   </div>
@@ -775,7 +775,7 @@ export default function DishDetailPage() {
                 {dishData.customFields.map((field) => (
                   <div key={field.id}>
                     <div
-                      className="flex justify-between items-center pb-2 md:pb-3 border-b border-[#8e8e8e] cursor-pointer"
+                      className="flex justify-between items-center pb-2 md:pb-3 border-b border-stroke cursor-pointer"
                       onClick={() => toggleSection(field.id)}
                     >
                       <div className="flex flex-col flex-1">
@@ -823,7 +823,7 @@ export default function DishDetailPage() {
                                   );
                                 }
                                 return (
-                                  <span className="text-[#8e8e8e] text-sm md:text-base mt-1">
+                                  <span className="text-stroke text-sm md:text-base mt-1">
                                     Seleccionar opción
                                   </span>
                                 );
@@ -849,7 +849,7 @@ export default function DishDetailPage() {
                                 ).reduce((s, n) => s + n, 0);
                                 if (total > 0)
                                   return (
-                                    <span className="text-[#82E657] text-sm md:text-base mt-1">
+                                    <span className="text-even-grass text-sm md:text-base mt-1">
                                       {total} producto(s) seleccionado(s)
                                     </span>
                                   );
@@ -862,7 +862,7 @@ export default function DishDetailPage() {
                                   Object.keys(sel as object).length === 0)
                               ) {
                                 return (
-                                  <span className="text-[#8e8e8e] text-sm md:text-base mt-1">
+                                  <span className="text-stroke text-sm md:text-base mt-1">
                                     Personalizar productos adicionales
                                   </span>
                                 );
@@ -878,7 +878,7 @@ export default function DishDetailPage() {
                                   ] as string[]) || [];
                                 const max = field.maxSelections || 1;
                                 return sel.length > 0 ? (
-                                  <span className="text-[#82E657] text-sm md:text-base mt-1">
+                                  <span className="text-even-grass text-sm md:text-base mt-1">
                                     {sel.length} producto(s) seleccionado(s)
                                   </span>
                                 ) : (
@@ -889,7 +889,7 @@ export default function DishDetailPage() {
                               })()}
                           </div>
 
-                          <div className="size-7 md:size-8 lg:size-9 bg-[#f9f9f9] rounded-full flex items-center justify-center border border-[#8e8e8e]/50">
+                          <div className="size-7 md:size-8 lg:size-9 bg-surface rounded-full flex items-center justify-center border border-stroke/50">
                             <ChevronDown
                               className={`size-5 md:size-6 lg:size-7 text-black transition-transform duration-250 ${openSections[field.id] ? "rotate-180" : ""}`}
                             />
@@ -901,7 +901,7 @@ export default function DishDetailPage() {
                     {openSections[field.id] && (
                       <div className="mt-3 md:mt-4">
                         {field.type === "dropdown" && field.options && (
-                          <div className="bg-white rounded-lg border border-[#8e8e8e]/30 shadow-lg overflow-hidden animate-in slide-in-from-top-2 duration-200">
+                          <div className="bg-white rounded-lg border border-stroke/30 shadow-lg overflow-hidden animate-in slide-in-from-top-2 duration-200">
                             {field.options.map((option, index) => {
                               const sel = customFieldSelections[field.id] as
                                 | string[]
@@ -914,16 +914,16 @@ export default function DishDetailPage() {
                                   onClick={() =>
                                     handleDropdownChange(field.id, option.id)
                                   }
-                                  className={`flex items-center justify-between gap-2 md:gap-3 cursor-pointer py-4 md:py-5 px-4 md:px-6 hover:bg-[#f9f9f9] transition-colors duration-200 ${
-                                    isSelected ? "bg-[#82E657]/10" : ""
-                                  } ${index !== (field.options?.length ?? 0) - 1 ? "border-b border-[#8e8e8e]/20" : ""}`}
+                                  className={`flex items-center justify-between gap-2 md:gap-3 cursor-pointer py-4 md:py-5 px-4 md:px-6 hover:bg-surface transition-colors duration-200 ${
+                                    isSelected ? "bg-even-grass/10" : ""
+                                  } ${index !== (field.options?.length ?? 0) - 1 ? "border-b border-stroke/20" : ""}`}
                                 >
                                   <div className="flex flex-col">
                                     <span className="text-black text-base md:text-lg lg:text-xl">
                                       {option.name}
                                     </span>
                                     {option.price > 0 && (
-                                      <span className="text-[#82E657] font-medium text-sm md:text-base lg:text-lg">
+                                      <span className="text-even-grass font-medium text-sm md:text-base lg:text-lg">
                                         +${option.price}
                                       </span>
                                     )}
@@ -943,7 +943,7 @@ export default function DishDetailPage() {
 
                         {field.type === "dropdown-quantity" &&
                           field.options && (
-                            <div className="bg-white rounded-lg border border-[#8e8e8e]/30 shadow-lg overflow-hidden animate-in slide-in-from-top-2 duration-200">
+                            <div className="bg-white rounded-lg border border-stroke/30 shadow-lg overflow-hidden animate-in slide-in-from-top-2 duration-200">
                               {field.options.map((option, index) => {
                                 const sel = customFieldSelections[field.id];
                                 const qty =
@@ -957,7 +957,7 @@ export default function DishDetailPage() {
                                     key={option.id}
                                     className={`flex items-center justify-between gap-2 md:gap-3 py-4 md:py-5 px-4 md:px-6 ${
                                       index !== (field.options?.length ?? 0) - 1
-                                        ? "border-b border-[#8e8e8e]/20"
+                                        ? "border-b border-stroke/20"
                                         : ""
                                     }`}
                                   >
@@ -966,7 +966,7 @@ export default function DishDetailPage() {
                                         {option.name}
                                       </span>
                                       {option.price > 0 && (
-                                        <span className="text-[#82E657] font-medium text-sm md:text-base lg:text-lg">
+                                        <span className="text-even-grass font-medium text-sm md:text-base lg:text-lg">
                                           +${option.price}
                                         </span>
                                       )}
@@ -981,9 +981,9 @@ export default function DishDetailPage() {
                                           )
                                         }
                                         disabled={qty <= 0}
-                                        className="w-8 h-8 md:w-9 md:h-9 bg-[#f9f9f9] hover:bg-[#82E657]/20 rounded-full flex items-center justify-center border border-[#8e8e8e]/50 transition-colors duration-200 disabled:opacity-40"
+                                        className="w-8 h-8 md:w-9 md:h-9 bg-surface hover:bg-even-grass/20 rounded-full flex items-center justify-center border border-stroke/50 transition-colors duration-200 disabled:opacity-40"
                                       >
-                                        <span className="text-lg font-medium text-[#8e8e8e]">
+                                        <span className="text-lg font-medium text-stroke">
                                           −
                                         </span>
                                       </button>
@@ -998,9 +998,9 @@ export default function DishDetailPage() {
                                             qty + 1,
                                           )
                                         }
-                                        className="w-8 h-8 md:w-9 md:h-9 bg-[#f9f9f9] hover:bg-[#82E657]/20 rounded-full flex items-center justify-center border border-[#8e8e8e]/50 transition-colors duration-200"
+                                        className="w-8 h-8 md:w-9 md:h-9 bg-surface hover:bg-even-grass/20 rounded-full flex items-center justify-center border border-stroke/50 transition-colors duration-200"
                                       >
-                                        <span className="text-lg font-medium text-[#8e8e8e]">
+                                        <span className="text-lg font-medium text-stroke">
                                           +
                                         </span>
                                       </button>
@@ -1012,7 +1012,7 @@ export default function DishDetailPage() {
                           )}
 
                         {field.type === "checkboxes" && field.options && (
-                          <div className="bg-white rounded-lg border border-[#8e8e8e]/30 shadow-lg overflow-hidden animate-in slide-in-from-top-2 duration-200">
+                          <div className="bg-white rounded-lg border border-stroke/30 shadow-lg overflow-hidden animate-in slide-in-from-top-2 duration-200">
                             {field.options.map((option, index) => {
                               const currentSelections =
                                 (customFieldSelections[field.id] as string[]) ||
@@ -1027,14 +1027,14 @@ export default function DishDetailPage() {
                               return (
                                 <label
                                   key={option.id}
-                                  className={`flex items-center justify-between gap-2 md:gap-3 py-4 md:py-5 px-4 md:px-6 hover:bg-[#f9f9f9] transition-colors duration-200 ${isSelected ? "bg-[#82E657]/10" : ""} ${isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"} ${index !== (field.options?.length ?? 0) - 1 ? "border-b border-[#8e8e8e]/20" : ""}`}
+                                  className={`flex items-center justify-between gap-2 md:gap-3 py-4 md:py-5 px-4 md:px-6 hover:bg-surface transition-colors duration-200 ${isSelected ? "bg-even-grass/10" : ""} ${isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"} ${index !== (field.options?.length ?? 0) - 1 ? "border-b border-stroke/20" : ""}`}
                                 >
                                   <div className="flex flex-col">
                                     <span className="text-black text-base md:text-lg lg:text-xl">
                                       {option.name}
                                     </span>
                                     {option.price > 0 && (
-                                      <span className="text-[#82E657] font-medium text-sm md:text-base lg:text-lg">
+                                      <span className="text-even-grass font-medium text-sm md:text-base lg:text-lg">
                                         +${option.price}
                                       </span>
                                     )}
@@ -1070,7 +1070,7 @@ export default function DishDetailPage() {
                 ¿Algo que debamos saber?
               </span>
               <textarea
-                className="h-24 md:h-28 lg:h-32 text-base md:text-lg lg:text-xl w-full bg-[#f9f9f9] border border-[#bfbfbf] px-3 md:px-4 py-2 md:py-3 rounded-lg resize-none focus:outline-none mt-2 md:mt-3"
+                className="h-24 md:h-28 lg:h-32 text-base md:text-lg lg:text-xl w-full bg-surface border border-stroke-soft px-3 md:px-4 py-2 md:py-3 rounded-lg resize-none focus:outline-none mt-2 md:mt-3"
                 placeholder="Alergias, instrucciones especiales, comentarios..."
                 value={specialInstructions}
                 onChange={(e) => setSpecialInstructions(e.target.value)}
@@ -1119,11 +1119,11 @@ export default function DishDetailPage() {
               <button
                 onClick={handleAddToCartAndReturn}
                 disabled={!isFormValid}
-                className={`flex-1 text-[#023828] py-3.5 md:py-4 lg:py-5 rounded-2xl flex items-center justify-center ${
+                className={`flex-1 text-even-evergreen py-3.5 md:py-4 lg:py-5 rounded-2xl flex items-center justify-center ${
                   dishData?.isOutOfStock
                     ? "bg-gray-400 cursor-pointer active:scale-95 transition-transform"
                     : isFormValid
-                      ? "bg-[#82E657] active:scale-95 transition-transform"
+                      ? "bg-even-grass active:scale-95 transition-transform"
                       : "bg-gray-400 cursor-not-allowed opacity-60"
                 }`}
               >
@@ -1186,7 +1186,7 @@ export default function DishDetailPage() {
             </div>
 
             <div className="px-6 md:px-8 lg:px-10 space-y-4 md:space-y-6">
-              <div className="border-t border-[#8e8e8e] pt-4 md:pt-6">
+              <div className="border-t border-stroke pt-4 md:pt-6">
                 <h3 className="font-normal text-lg md:text-xl lg:text-2xl text-black mb-3 md:mb-4 text-center">
                   ¿Cómo calificarías este platillo?
                 </h3>
@@ -1220,7 +1220,7 @@ export default function DishDetailPage() {
                 <button
                   onClick={handleSubmitReview}
                   disabled={reviewRating === 0 || isSubmittingReview}
-                  className={`w-full text-[#023828] py-3 md:py-4 lg:py-5 rounded-full transition-colors text-base md:text-lg lg:text-xl bg-[#82E657] ${
+                  className={`w-full text-even-evergreen py-3 md:py-4 lg:py-5 rounded-full transition-colors text-base md:text-lg lg:text-xl bg-even-grass ${
                     reviewRating === 0 || isSubmittingReview
                       ? "opacity-50 cursor-not-allowed"
                       : ""
@@ -1260,14 +1260,14 @@ export default function DishDetailPage() {
                   Error
                 </h2>
               </div>
-              <div className="bg-[#f9f9f9] border border-[#bfbfbf]/50 rounded-xl p-4 mb-6">
+              <div className="bg-surface border border-stroke-soft/50 rounded-xl p-4 mb-6">
                 <p className="text-gray-700 text-sm text-center">
                   {errorMessage}
                 </p>
               </div>
               <button
                 onClick={() => setErrorMessage(null)}
-                className="w-full bg-[#82E657] text-[#023828] py-3 rounded-full text-base"
+                className="w-full bg-even-grass text-even-evergreen py-3 rounded-full text-base"
               >
                 Entendido
               </button>

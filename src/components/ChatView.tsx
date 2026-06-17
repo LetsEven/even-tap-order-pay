@@ -153,7 +153,7 @@ const LoadingDots = () => (
 // Spinner SVG igual al de user/page.tsx
 const Spinner = () => (
   <svg
-    className="h-4 w-4 text-[#299E66]"
+    className="h-4 w-4 text-even-shamrock"
     style={{ animation: "spin 1s linear infinite" }}
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
@@ -874,7 +874,7 @@ export default function ChatView({ onBack }: ChatViewProps) {
                   >
                     <div
                       className={`max-w-[80%] rounded-xl md:rounded-2xl px-4 md:px-5 lg:px-6 py-2 md:py-3 lg:py-4 text-black text-base md:text-lg lg:text-xl ${
-                        msg.role === "user" ? "bg-[#82E657]" : "bg-white/60"
+                        msg.role === "user" ? "bg-even-grass" : "bg-white/60"
                       }`}
                     >
                       <MessageContent
@@ -933,7 +933,7 @@ export default function ChatView({ onBack }: ChatViewProps) {
             />
             <button
               onClick={handleSend}
-              className="text-[#023828] rounded-full transition-colors disabled:text-gray-400"
+              className="text-even-evergreen rounded-full transition-colors disabled:text-gray-400"
               disabled={!message.trim() || isLoading}
             >
               <SendHorizontal className="size-6 md:size-7 lg:size-8 -rotate-90" />

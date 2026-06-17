@@ -63,9 +63,9 @@ export default function DashboardView({
                 onClick={() => navigateWithTable("/auth")}
                 className="w-full bg-white hover:bg-gray-50 text-black py-4 md:py-5 lg:py-6 px-4 md:px-5 lg:px-6 rounded-xl md:rounded-2xl transition-all duration-200 flex items-center gap-3 md:gap-4 lg:gap-5 active:scale-95"
               >
-                <div className="bg-[#82E657] p-2 md:p-2.5 lg:p-3 rounded-full group-hover:scale-110 transition-transform">
+                <div className="bg-even-grass p-2 md:p-2.5 lg:p-3 rounded-full group-hover:scale-110 transition-transform">
                   <svg
-                    className="size-5 md:size-6 lg:size-7 text-[#023828]"
+                    className="size-5 md:size-6 lg:size-7 text-even-evergreen"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -115,7 +115,7 @@ export default function DashboardView({
       <div className="px-4 md:px-6 lg:px-8 w-full flex-1 flex flex-col">
         {/* Welcome Header */}
         <div
-          className={`left-4 right-4 rounded-t-4xl translate-y-7 z-0 ${onClose ? "bg-black/5" : "bg-[#023828]"}`}
+          className={`left-4 right-4 rounded-t-4xl translate-y-7 z-0 ${onClose ? "bg-black/5" : "bg-even-evergreen"}`}
         >
           <div className="py-6 md:py-8 lg:py-10 px-8 md:px-10 lg:px-12 flex flex-col justify-center pb-12 md:pb-14 lg:pb-16">
             <h1
@@ -196,7 +196,7 @@ export default function DashboardView({
               <Suspense
                 fallback={
                   <div className="flex items-center justify-center py-12 md:py-16 lg:py-20">
-                    <Loader2 className="size-8 md:size-10 lg:size-12 animate-spin text-[#299E66]" />
+                    <Loader2 className="size-8 md:size-10 lg:size-12 animate-spin text-even-shamrock" />
                   </div>
                 }
               >

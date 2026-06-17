@@ -179,7 +179,7 @@ function ReorderModal({ isOpen, onClose, items }: ReorderModalProps) {
         onClick={handleClose}
       >
         <div
-          className="relative bg-[#023828]/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl max-h-[65vh] flex flex-col"
+          className="relative bg-even-evergreen/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl max-h-[65vh] flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -239,7 +239,7 @@ function ReorderModal({ isOpen, onClose, items }: ReorderModalProps) {
                         itemIsOutOfStock
                           ? "opacity-50 cursor-not-allowed bg-white/5 border-white/10"
                           : isSelected
-                            ? "cursor-pointer bg-white/10 border-[#82E657]/70"
+                            ? "cursor-pointer bg-white/10 border-even-grass/70"
                             : "cursor-pointer bg-white/5 border-white/10"
                       }`}
                     >
@@ -251,12 +251,12 @@ function ReorderModal({ isOpen, onClose, items }: ReorderModalProps) {
                         <div
                           className={`size-4 md:size-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
                             isSelected
-                              ? "bg-[#82E657] border-[#82E657]"
+                              ? "bg-even-grass border-even-grass"
                               : "bg-transparent border-white/40"
                           }`}
                         >
                           {isSelected && (
-                            <div className="size-1.5 md:size-2 rounded-full bg-[#023828]" />
+                            <div className="size-1.5 md:size-2 rounded-full bg-even-evergreen" />
                           )}
                         </div>
                       </div>
@@ -357,7 +357,7 @@ function ReorderModal({ isOpen, onClose, items }: ReorderModalProps) {
             <button
               onClick={handleConfirm}
               disabled={!hasSelection || cartState.isLoading || isNavigating}
-              className="w-full bg-[#82E657] text-[#023828] rounded-full py-3 md:py-4 text-base md:text-lg font-medium transition-all active:scale-95 disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center gap-2"
+              className="w-full bg-even-grass text-even-evergreen rounded-full py-3 md:py-4 text-base md:text-lg font-medium transition-all active:scale-95 disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center gap-2"
             >
               {(cartState.isLoading || isNavigating) && (
                 <span className="size-4 md:size-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />

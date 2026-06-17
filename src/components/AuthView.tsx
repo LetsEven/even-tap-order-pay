@@ -280,7 +280,7 @@ export default function AuthView({ onClose }: AuthViewProps) {
                     <button
                       type="button"
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                      className="h-[48px] w-[90px] px-3 text-gray-700 font-medium bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#023828] cursor-pointer flex items-center justify-between gap-1.5"
+                      className="h-[48px] w-[90px] px-3 text-gray-700 font-medium bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-even-evergreen cursor-pointer flex items-center justify-between gap-1.5"
                       disabled={loading}
                     >
                       <div className="flex items-center gap-1.5">
@@ -331,7 +331,7 @@ export default function AuthView({ onClose }: AuthViewProps) {
                         setPhoneNumber(value);
                         setPhoneNumberDisplay(formatPhoneInput(value));
                       }}
-                      className="h-[48px] w-full pl-10 pr-3 text-gray-700 bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#023828]"
+                      className="h-[48px] w-full pl-10 pr-3 text-gray-700 bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-even-evergreen"
                       placeholder="Número de teléfono"
                       disabled={loading}
                       maxLength={14}
@@ -342,7 +342,7 @@ export default function AuthView({ onClose }: AuthViewProps) {
               <button
                 type="submit"
                 disabled={loading || !phoneNumber || phoneNumber.length < 8}
-                className="w-full bg-[#82E657] text-[#023828] hover:opacity-90 py-3 rounded-full font-medium transition-opacity disabled:bg-[#82E657]/30 disabled:text-[#023828]/40 disabled:cursor-not-allowed"
+                className="w-full bg-even-grass text-even-evergreen hover:opacity-90 py-3 rounded-full font-medium transition-opacity disabled:bg-even-grass/30 disabled:text-even-evergreen/40 disabled:cursor-not-allowed"
               >
                 {loading ? "Enviando..." : "Enviar código"}
               </button>
@@ -359,7 +359,7 @@ export default function AuthView({ onClose }: AuthViewProps) {
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
                 placeholder="000000"
-                className="w-full px-3 py-3 text-gray-700 bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#023828] text-center tracking-widest text-2xl"
+                className="w-full px-3 py-3 text-gray-700 bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-even-evergreen text-center tracking-widest text-2xl"
                 required
                 disabled={loading}
                 autoFocus
@@ -368,7 +368,7 @@ export default function AuthView({ onClose }: AuthViewProps) {
               <button
                 type="submit"
                 disabled={loading || otp.length !== 6}
-                className="w-full bg-[#82E657] text-[#023828] hover:opacity-90 py-3 rounded-full font-medium transition-opacity disabled:bg-[#82E657]/30 disabled:text-[#023828]/40 disabled:cursor-not-allowed"
+                className="w-full bg-even-grass text-even-evergreen hover:opacity-90 py-3 rounded-full font-medium transition-opacity disabled:bg-even-grass/30 disabled:text-even-evergreen/40 disabled:cursor-not-allowed"
               >
                 {loading ? "Verificando..." : "Verificar código"}
               </button>
@@ -415,7 +415,7 @@ export default function AuthView({ onClose }: AuthViewProps) {
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     placeholder="Nombre"
-                    className="h-[48px] w-full pl-10 pr-3 text-gray-700 bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#023828]"
+                    className="h-[48px] w-full pl-10 pr-3 text-gray-700 bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-even-evergreen"
                     required
                     disabled={loading}
                   />
@@ -425,7 +425,7 @@ export default function AuthView({ onClose }: AuthViewProps) {
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder="Apellido"
-                  className="h-[48px] w-full px-3 text-gray-700 bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#023828]"
+                  className="h-[48px] w-full px-3 text-gray-700 bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-even-evergreen"
                   disabled={loading}
                 />
               </div>
@@ -439,7 +439,7 @@ export default function AuthView({ onClose }: AuthViewProps) {
                   onChange={(e) =>
                     setAge(e.target.value === "" ? "" : Number(e.target.value))
                   }
-                  className="h-[48px] w-full px-3 text-gray-700 bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#023828] cursor-pointer"
+                  className="h-[48px] w-full px-3 text-gray-700 bg-white/70 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-even-evergreen cursor-pointer"
                   disabled={loading}
                 >
                   <option value="" disabled>

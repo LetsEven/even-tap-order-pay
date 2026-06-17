@@ -18,6 +18,12 @@
   --color-even-offwhite: #fefeeb; /* fondo claro neutro */
   --color-even-ink: #141512;
 
+  /* grises de UI — superficies, bordes y texto secundario */
+  --color-surface: #f9f9f9; /* fondos de chips/inputs */
+  --color-stroke: #8e8e8e; /* bordes y divisiones */
+  --color-stroke-soft: #bfbfbf; /* bordes de inputs */
+  --color-muted: #6b7280; /* texto secundario legible */
+
   /* semánticos — el producto consume estos, no hex sueltos */
   --color-primary: #023828;
   --color-accent: #82e657;

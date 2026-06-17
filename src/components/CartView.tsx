@@ -43,7 +43,7 @@ export default function CartView() {
       <MenuHeaderBack />
 
       <div className="px-4 md:px-6 lg:px-8 w-full flex-1 flex flex-col">
-        <div className="left-4 right-4 bg-[#023828] rounded-t-4xl translate-y-7 z-0">
+        <div className="left-4 right-4 bg-even-evergreen rounded-t-4xl translate-y-7 z-0">
           {cartState.items.length === 0 ? (
             <div className="py-6 md:py-8 lg:py-10 px-8 md:px-10 lg:px-12 flex flex-col justify-center">
               <h1 className="text-[#e0e0e0] text-xl md:text-2xl lg:text-3xl font-medium">
@@ -74,7 +74,7 @@ export default function CartView() {
               className="flex-1 overflow-y-auto flex flex-col pb-[160px] md:pb-[180px] lg:pb-[200px]"
             >
               <div className="pt-6 md:pt-8">
-                <h2 className="bg-[#f9f9f9] border border-[#8e8e8e] rounded-full px-3 md:px-4 lg:px-5 py-1 md:py-1.5 text-base md:text-lg lg:text-xl font-medium text-black w-fit mx-auto">
+                <h2 className="bg-surface border border-stroke rounded-full px-3 md:px-4 lg:px-5 py-1 md:py-1.5 text-base md:text-lg lg:text-xl font-medium text-black w-fit mx-auto">
                   Mi carrito
                 </h2>
               </div>
@@ -82,9 +82,9 @@ export default function CartView() {
               {cartState.items.length === 0 ? (
                 <div className="flex-1 flex items-center justify-center py-12 md:py-16 text-center">
                   <div className="flex flex-col items-center max-w-xs">
-                    <div className="size-20 md:size-24 rounded-full bg-[#023828]/5 flex items-center justify-center mb-5 md:mb-6">
+                    <div className="size-20 md:size-24 rounded-full bg-even-evergreen/5 flex items-center justify-center mb-5 md:mb-6">
                       <ShoppingBag
-                        className="size-9 md:size-10 text-[#023828]/70"
+                        className="size-9 md:size-10 text-even-evergreen/70"
                         strokeWidth={1.5}
                       />
                     </div>
@@ -96,7 +96,7 @@ export default function CartView() {
                     </p>
                     <button
                       onClick={() => navigateWithTable("/menu")}
-                      className="bg-[#82E657] text-[#023828] font-medium text-base md:text-lg px-8 py-3 md:py-4 rounded-full transition-opacity hover:opacity-90 active:scale-95"
+                      className="bg-even-grass text-even-evergreen font-medium text-base md:text-lg px-8 py-3 md:py-4 rounded-full transition-opacity hover:opacity-90 active:scale-95"
                     >
                       Ver menú
                     </button>
@@ -108,7 +108,7 @@ export default function CartView() {
                     <span>Cant.</span>
                     <span>Precio</span>
                   </div>
-                  <div className="divide-y divide-[#8e8e8e]/50">
+                  <div className="divide-y divide-stroke/50">
                     {cartState.items.map((item, index) => (
                       <div
                         key={`${item.id}-${item.cartItemId}-${index}`}
@@ -141,7 +141,7 @@ export default function CartView() {
                               </h3>
                               {item.customFields &&
                                 item.customFields.length > 0 && (
-                                  <div className="text-xs md:text-sm lg:text-base text-gray-400 space-y-0.5">
+                                  <div className="text-xs md:text-sm lg:text-base text-muted space-y-0.5">
                                     {item.customFields.map((field, idx) => (
                                       <div key={idx}>
                                         {field.selectedOptions.map(
@@ -210,7 +210,7 @@ export default function CartView() {
                       ¿Algo que debamos saber?
                     </span>
                     <textarea
-                      className="h-24 md:h-28 lg:h-32 text-base md:text-lg lg:text-xl w-full bg-[#f9f9f9] border border-[#bfbfbf] px-3 md:px-4 py-2 md:py-3 rounded-lg resize-none focus:outline-none mt-2 md:mt-3"
+                      className="h-24 md:h-28 lg:h-32 text-base md:text-lg lg:text-xl w-full bg-surface border border-stroke-soft px-3 md:px-4 py-2 md:py-3 rounded-lg resize-none focus:outline-none mt-2 md:mt-3"
                       placeholder="Alergias, instrucciones especiales, comentarios..."
                       value={orderNotes}
                       onChange={(e) => setOrderNotes(e.target.value)}
@@ -239,7 +239,7 @@ export default function CartView() {
                         }, 200);
                       }}
                     />
-                    <p className="text-right text-sm text-gray-400 mt-1">
+                    <p className="text-right text-sm text-muted mt-1">
                       {orderNotes.length}/80
                     </p>
                   </div>
@@ -267,10 +267,10 @@ export default function CartView() {
                   <button
                     onClick={handleOrder}
                     disabled={isSubmitting || cartState.isLoading}
-                    className={`py-3 md:py-4 lg:py-5 text-[#023828] rounded-full cursor-pointer font-normal h-fit flex items-center justify-center text-base md:text-lg lg:text-xl active:scale-95 transition-transform ${
+                    className={`py-3 md:py-4 lg:py-5 text-even-evergreen rounded-full cursor-pointer font-normal h-fit flex items-center justify-center text-base md:text-lg lg:text-xl active:scale-95 transition-transform ${
                       isSubmitting || cartState.isLoading
-                        ? "bg-[#82E657] opacity-50 cursor-not-allowed px-10 md:px-12 lg:px-14"
-                        : "bg-[#82E657] px-20 md:px-24 lg:px-28 animate-pulse-button"
+                        ? "bg-even-grass opacity-50 cursor-not-allowed px-10 md:px-12 lg:px-14"
+                        : "bg-even-grass px-20 md:px-24 lg:px-28 animate-pulse-button"
                     }`}
                   >
                     {isSubmitting || cartState.isLoading

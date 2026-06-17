@@ -139,7 +139,7 @@ export default function CardScanner({
           <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-white rounded-br-lg" />
 
           {isScanning && (
-            <div className="absolute inset-0 border-4 border-[#82E657] rounded-lg animate-pulse" />
+            <div className="absolute inset-0 border-4 border-even-grass rounded-lg animate-pulse" />
           )}
         </div>
       </div>

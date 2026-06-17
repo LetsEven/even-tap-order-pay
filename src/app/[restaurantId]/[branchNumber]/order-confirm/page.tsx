@@ -63,7 +63,7 @@ export default function OrderConfirmPage() {
 
         <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center">
           <div className="flex flex-col relative px-4 md:px-6 lg:px-8 w-full">
-            <div className="bg-[#023828] rounded-t-4xl translate-y-7 z-0">
+            <div className="bg-even-evergreen rounded-t-4xl translate-y-7 z-0">
               <div className="py-6 px-8 flex flex-col justify-center">
                 <div className="h-8 w-2/3 bg-white/20 rounded-full mt-2 mb-6 animate-pulse" />
               </div>
@@ -115,7 +115,7 @@ export default function OrderConfirmPage() {
       {/* Tarjeta anclada al fondo */}
       <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center">
         <div className="flex flex-col relative px-4 md:px-6 lg:px-8 w-full">
-          <div className="bg-[#023828] rounded-t-4xl translate-y-7 z-0">
+          <div className="bg-even-evergreen rounded-t-4xl translate-y-7 z-0">
             <div className="py-6 px-8 flex flex-col justify-center">
               <h1 className="font-medium text-white text-3xl leading-7 mt-2 mb-6">
                 Confirmar pedido
@@ -150,10 +150,10 @@ export default function OrderConfirmPage() {
                         handleTipPercentage(percentage);
                         setShowCustomTipInput(false);
                       }}
-                      className={`py-1 md:py-1.5 rounded-full border border-[#8e8e8e]/40 text-black transition-colors cursor-pointer ${
+                      className={`py-1 md:py-1.5 rounded-full border border-stroke/40 text-black transition-colors cursor-pointer ${
                         tipPercentage === percentage && !showCustomTipInput
-                          ? "bg-[#82E657] text-[#023828]"
-                          : "bg-[#f9f9f9] hover:border-gray-400"
+                          ? "bg-even-grass text-even-evergreen"
+                          : "bg-surface hover:border-gray-400"
                       }`}
                     >
                       {percentage === 0 ? "0%" : `${percentage}%`}
@@ -164,10 +164,10 @@ export default function OrderConfirmPage() {
                       setShowCustomTipInput(true);
                       setTipPercentage(0);
                     }}
-                    className={`py-1 md:py-1.5 rounded-full border border-[#8e8e8e]/40 text-black transition-colors cursor-pointer ${
+                    className={`py-1 md:py-1.5 rounded-full border border-stroke/40 text-black transition-colors cursor-pointer ${
                       showCustomTipInput
-                        ? "bg-[#82E657] text-[#023828]"
-                        : "bg-[#f9f9f9] hover:border-gray-400"
+                        ? "bg-even-grass text-even-evergreen"
+                        : "bg-surface hover:border-gray-400"
                     }`}
                   >
                     $
@@ -189,7 +189,7 @@ export default function OrderConfirmPage() {
                       step="0.01"
                       min="0"
                       autoFocus
-                      className="w-full pl-8 pr-4 py-1 md:py-1.5 border border-[#8e8e8e]/40 rounded-full focus:outline-none focus:ring focus:ring-gray-400 text-black text-center bg-[#f9f9f9] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
+                      className="w-full pl-8 pr-4 py-1 md:py-1.5 border border-stroke/40 rounded-full focus:outline-none focus:ring focus:ring-gray-400 text-black text-center bg-surface [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                     />
                   </div>
                 </div>
@@ -197,7 +197,7 @@ export default function OrderConfirmPage() {
 
               {tipAmount > 0 && (
                 <div className="flex justify-end items-center mt-2 text-sm">
-                  <span className="text-[#82E657] font-medium">
+                  <span className="text-even-grass font-medium">
                     +${tipAmount.toFixed(2)} MXN
                   </span>
                 </div>
@@ -230,10 +230,10 @@ export default function OrderConfirmPage() {
             <button
               onClick={handleContinue}
               disabled={isUnderMinimum}
-              className={`w-full text-[#023828] py-3 rounded-full cursor-pointer transition-all active:scale-90 ${
+              className={`w-full text-even-evergreen py-3 rounded-full cursor-pointer transition-all active:scale-90 ${
                 isUnderMinimum
-                  ? "bg-[#82E657] opacity-50 cursor-not-allowed"
-                  : "bg-[#82E657] animate-pulse-button"
+                  ? "bg-even-grass opacity-50 cursor-not-allowed"
+                  : "bg-even-grass animate-pulse-button"
               }`}
             >
               Continuar

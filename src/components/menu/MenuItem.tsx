@@ -266,7 +266,7 @@ function MenuItem({ item, onRestaurantClosed }: MenuItemProps) {
                 {adaptedItem.name}
               </h3>
               <div
-                className={`flex gap-1.5 md:gap-2 px-3 md:px-4 lg:px-5 py-0.5 md:py-1 h-fit rounded-full border items-center justify-center border-[#8e8e8e]/50 text-black transition-all ${isPulsing ? "bg-[#82E657]/50" : "bg-[#f9f9f9]"}`}
+                className={`flex gap-1.5 md:gap-2 px-3 md:px-4 lg:px-5 py-0.5 md:py-1 h-fit rounded-full border items-center justify-center border-stroke/50 text-black transition-all ${isPulsing ? "bg-even-grass/50" : "bg-surface"}`}
                 onClick={(e) => e.stopPropagation()}
               >
                 <Minus
@@ -291,7 +291,7 @@ function MenuItem({ item, onRestaurantClosed }: MenuItemProps) {
                 {adaptedItem.features.map((feature, index) => (
                   <div
                     key={index}
-                    className="text-sm md:text-base lg:text-lg text-black font-medium border border-[#bfbfbf]/50 rounded-3xl px-3 md:px-4 py-1 md:py-1.5 shadow-sm"
+                    className="text-sm md:text-base lg:text-lg text-black font-medium border border-stroke-soft/50 rounded-3xl px-3 md:px-4 py-1 md:py-1.5 shadow-sm"
                   >
                     {feature}
                   </div>

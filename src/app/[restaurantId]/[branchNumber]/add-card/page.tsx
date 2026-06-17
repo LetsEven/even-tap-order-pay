@@ -290,7 +290,7 @@ function AddCardContent() {
         <MenuHeaderBack />
 
         <div className="px-4 w-full flex-1 flex flex-col justify-end">
-          <div className="left-4 right-4 bg-[#023828] rounded-t-4xl translate-y-7 z-0">
+          <div className="left-4 right-4 bg-even-evergreen rounded-t-4xl translate-y-7 z-0">
             <div className="pt-6 pb-12 px-8 flex flex-col justify-center">
               <h2 className="font-medium text-white text-3xl leading-7 mt-2 mb-2">
                 Agrega tu tarjeta para continuar
@@ -305,19 +305,19 @@ function AddCardContent() {
             <div className="min-h-full bg-white rounded-t-4xl flex-1 z-5 flex flex-col px-6 py-6">
               {/* Test Card Helper */}
               {process.env.NODE_ENV === "development" && (
-                <div className="bg-[#82E657]/10 border border-[#82E657]/40 rounded-lg p-4 mb-4">
+                <div className="bg-even-grass/10 border border-even-grass/40 rounded-lg p-4 mb-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-[#023828] font-medium text-sm">
+                      <p className="text-even-evergreen font-medium text-sm">
                         Development Mode
                       </p>
-                      <p className="text-[#023828]/70 text-xs">
+                      <p className="text-even-evergreen/70 text-xs">
                         Use eCartpay test card data
                       </p>
                     </div>
                     <button
                       onClick={fillTestCard}
-                      className="px-3 py-2 bg-[#023828] text-white text-xs rounded-md hover:opacity-90 transition-opacity"
+                      className="px-3 py-2 bg-even-evergreen text-white text-xs rounded-md hover:opacity-90 transition-opacity"
                     >
                       Fill Test Card
                     </button>
@@ -338,7 +338,7 @@ function AddCardContent() {
                     onKeyDown={handleKeyDown}
                     autoComplete="cc-name"
                     placeholder="John Doe"
-                    className={`w-full px-3 py-3 border text-black rounded-lg focus:outline-none focus:ring focus:ring-[#023828] focus:border-transparent ${errors.fullName ? "border-red-500 bg-red-50" : "border-gray-300"}`}
+                    className={`w-full px-3 py-3 border text-black rounded-lg focus:outline-none focus:ring focus:ring-even-evergreen focus:border-transparent ${errors.fullName ? "border-red-500 bg-red-50" : "border-gray-300"}`}
                   />
                   {errors.fullName && (
                     <p className="text-red-500 text-xs mt-1">
@@ -360,7 +360,7 @@ function AddCardContent() {
                     inputMode="numeric"
                     placeholder="**** 2098"
                     maxLength={19}
-                    className={`w-full px-3 py-3 text-black rounded-lg focus:outline-none focus:ring focus:ring-[#023828] focus:border-transparent ${errors.cardNumber ? "border border-red-500 bg-red-50" : "bg-gray-100 border border-gray-200"}`}
+                    className={`w-full px-3 py-3 text-black rounded-lg focus:outline-none focus:ring focus:ring-even-evergreen focus:border-transparent ${errors.cardNumber ? "border border-red-500 bg-red-50" : "bg-gray-100 border border-gray-200"}`}
                   />
                   {errors.cardNumber && (
                     <p className="text-red-500 text-xs mt-1">
@@ -381,7 +381,7 @@ function AddCardContent() {
                         setExpMonthIdx(MONTHS.indexOf(e.target.value))
                       }
                       autoComplete="cc-exp-month"
-                      className={`flex-1 px-3 py-3 rounded-lg text-black focus:outline-none focus:ring focus:ring-[#023828] focus:border-transparent ${errors.expDate ? "border border-red-500 bg-red-50" : "bg-gray-100 border border-gray-200"}`}
+                      className={`flex-1 px-3 py-3 rounded-lg text-black focus:outline-none focus:ring focus:ring-even-evergreen focus:border-transparent ${errors.expDate ? "border border-red-500 bg-red-50" : "bg-gray-100 border border-gray-200"}`}
                     >
                       {MONTHS.map((m) => (
                         <option key={m} value={m}>
@@ -395,7 +395,7 @@ function AddCardContent() {
                         setExpYearIdx(YEARS.indexOf(e.target.value))
                       }
                       autoComplete="cc-exp-year"
-                      className={`flex-1 px-3 py-3 rounded-lg text-black focus:outline-none focus:ring focus:ring-[#023828] focus:border-transparent ${errors.expDate ? "border border-red-500 bg-red-50" : "bg-gray-100 border border-gray-200"}`}
+                      className={`flex-1 px-3 py-3 rounded-lg text-black focus:outline-none focus:ring focus:ring-even-evergreen focus:border-transparent ${errors.expDate ? "border border-red-500 bg-red-50" : "bg-gray-100 border border-gray-200"}`}
                     >
                       {YEARS.map((y) => (
                         <option key={y} value={y}>
@@ -425,7 +425,7 @@ function AddCardContent() {
                     inputMode="numeric"
                     placeholder="123"
                     maxLength={4}
-                    className={`w-full px-3 py-3 text-black rounded-lg focus:outline-none focus:ring focus:ring-[#023828] focus:border-transparent ${errors.cvv ? "border border-red-500 bg-red-50" : "border border-gray-300"}`}
+                    className={`w-full px-3 py-3 text-black rounded-lg focus:outline-none focus:ring focus:ring-even-evergreen focus:border-transparent ${errors.cvv ? "border border-red-500 bg-red-50" : "border border-gray-300"}`}
                   />
                   {errors.cvv && (
                     <p className="text-red-500 text-xs mt-1">{errors.cvv}</p>
@@ -437,7 +437,7 @@ function AddCardContent() {
               <button
                 onClick={handleSave}
                 disabled={isLoading}
-                className="bg-[#82E657] text-[#023828] hover:opacity-90 w-full py-3 rounded-full cursor-pointer transition-opacity mt-8 font-medium disabled:bg-[#82E657]/30 disabled:text-[#023828]/40 disabled:cursor-not-allowed"
+                className="bg-even-grass text-even-evergreen hover:opacity-90 w-full py-3 rounded-full cursor-pointer transition-opacity mt-8 font-medium disabled:bg-even-grass/30 disabled:text-even-evergreen/40 disabled:cursor-not-allowed"
               >
                 {isLoading ? "Guardando..." : "Guardar"}
               </button>

@@ -87,7 +87,7 @@ export default function RestaurantClosedModal({
             </p>
 
             {nextOpeningTime && (
-              <div className="bg-[#f9f9f9] border border-[#bfbfbf]/50 rounded-lg md:rounded-xl p-2 md:p-3 lg:p-4">
+              <div className="bg-surface border border-stroke-soft/50 rounded-lg md:rounded-xl p-2 md:p-3 lg:p-4">
                 <p className="text-black font-medium text-center text-base md:text-lg lg:text-xl">
                   {nextOpeningTime}
                 </p>

@@ -367,7 +367,7 @@ export default function PaymentSuccessPage() {
   };
 
   return (
-    <div className="min-h-dvh overflow-hidden bg-[#023828] flex flex-col">
+    <div className="min-h-dvh overflow-hidden bg-even-evergreen flex flex-col">
       {/* Success Icon */}
       <div className="flex-1 flex justify-center items-center">
         <img
@@ -379,7 +379,7 @@ export default function PaymentSuccessPage() {
 
       <div className="px-4 md:px-6 lg:px-8 w-full animate-slide-up">
         <div className="flex-1 flex flex-col">
-          <div className="left-4 right-4 bg-[#023828] rounded-t-4xl translate-y-7 z-0">
+          <div className="left-4 right-4 bg-even-evergreen rounded-t-4xl translate-y-7 z-0">
             <div className="py-6 md:py-8 lg:py-10 px-8 md:px-10 lg:px-12 flex flex-col justify-center items-center mb-6 md:mb-8 lg:mb-10 mt-2 md:mt-4 lg:mt-6 gap-2 md:gap-3 lg:gap-4">
               <h1 className="font-medium text-white text-3xl md:text-4xl lg:text-5xl leading-7 md:leading-9 lg:leading-tight">
                 ¡Gracias por tu pedido!
@@ -402,7 +402,7 @@ export default function PaymentSuccessPage() {
               <button
                 onClick={handleReorder}
                 disabled={!reorderItems.length}
-                className="w-full flex items-center justify-center gap-2 md:gap-3 lg:gap-4 text-[#023828] py-3 md:py-4 lg:py-5 rounded-full cursor-pointer transition-all active:scale-90 bg-[#82E657] text-base md:text-lg lg:text-xl disabled:opacity-70 animate-pulse-button font-medium"
+                className="w-full flex items-center justify-center gap-2 md:gap-3 lg:gap-4 text-even-evergreen py-3 md:py-4 lg:py-5 rounded-full cursor-pointer transition-all active:scale-90 bg-even-grass text-base md:text-lg lg:text-xl disabled:opacity-70 animate-pulse-button font-medium"
               >
                 <RefreshCw
                   className="size-5 md:size-6 lg:size-7"
@@ -413,7 +413,7 @@ export default function PaymentSuccessPage() {
 
               <button
                 onClick={handleBackToMenu}
-                className="w-full text-[#023828] py-3 md:py-4 lg:py-5 rounded-full cursor-pointer transition-all active:scale-90 bg-[#82E657] text-base md:text-lg lg:text-xl"
+                className="w-full text-even-evergreen py-3 md:py-4 lg:py-5 rounded-full cursor-pointer transition-all active:scale-90 bg-even-grass text-base md:text-lg lg:text-xl"
               >
                 Ir al menú
               </button>
@@ -453,7 +453,7 @@ export default function PaymentSuccessPage() {
           onClick={() => setIsTicketModalOpen(false)}
         >
           <div
-            className="bg-[#023828]/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl z-999 max-h-[77vh] flex flex-col"
+            className="bg-even-evergreen/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl z-999 max-h-[77vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header - Fixed */}
@@ -517,8 +517,8 @@ export default function PaymentSuccessPage() {
                     </div>
                   )}
                   <div className="flex items-center gap-2 md:gap-3 lg:gap-4 text-white/90">
-                    <div className="bg-[#C3FEFF] p-2 md:p-2.5 lg:p-3 rounded-xl flex items-center justify-center">
-                      <Calendar className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-[#023828]" />
+                    <div className="bg-even-aqua p-2 md:p-2.5 lg:p-3 rounded-xl flex items-center justify-center">
+                      <Calendar className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-even-evergreen" />
                     </div>
                     <span className="text-sm md:text-base lg:text-lg">
                       {(orderCreatedAt || new Date())
@@ -664,7 +664,7 @@ export default function PaymentSuccessPage() {
           onClick={() => setIsStatusModalOpen(false)}
         >
           <div
-            className="bg-[#023828]/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl z-999 max-h-[85vh] flex flex-col"
+            className="bg-even-evergreen/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl z-999 max-h-[85vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header - Fixed */}
@@ -829,7 +829,7 @@ export default function PaymentSuccessPage() {
           <div className="relative bg-white rounded-t-4xl w-full mx-4 md:mx-6 lg:mx-8">
             {/* Titulo */}
             <div className="px-6 md:px-8 lg:px-10 pt-4 md:pt-6 lg:pt-8">
-              <div className="flex items-center justify-between pb-4 md:pb-5 lg:pb-6 border-b border-[#8e8e8e]">
+              <div className="flex items-center justify-between pb-4 md:pb-5 lg:pb-6 border-b border-stroke">
                 <h3 className="text-lg md:text-xl lg:text-2xl font-semibold text-black">
                   Desglose del pago
                 </h3>
@@ -916,7 +916,7 @@ export default function PaymentSuccessPage() {
           onClick={() => setIsRegisterModalOpen(false)}
         >
           <div
-            className="bg-[#023828]/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl z-999 flex flex-col justify-center py-12 md:py-16 lg:py-20 min-h-[70vh] animate-slide-up"
+            className="bg-even-evergreen/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl z-999 flex flex-col justify-center py-12 md:py-16 lg:py-20 min-h-[70vh] animate-slide-up"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
@@ -955,8 +955,8 @@ export default function PaymentSuccessPage() {
                 onClick={handleSignUp}
                 className="w-full bg-white hover:bg-gray-50 text-black py-4 md:py-5 lg:py-6 px-4 md:px-5 lg:px-6 rounded-xl md:rounded-2xl transition-all duration-200 flex items-center gap-3 md:gap-4 lg:gap-5 active:scale-95"
               >
-                <div className="bg-[#82E657] p-2 md:p-2.5 lg:p-3 rounded-full group-hover:scale-110 transition-transform">
-                  <LogIn className="size-5 md:size-6 lg:size-7 text-[#023828]" />
+                <div className="bg-even-grass p-2 md:p-2.5 lg:p-3 rounded-full group-hover:scale-110 transition-transform">
+                  <LogIn className="size-5 md:size-6 lg:size-7 text-even-evergreen" />
                 </div>
                 <div className="flex-1 text-left">
                   <h2 className="text-base md:text-lg lg:text-xl font-medium mb-0.5 md:mb-1">
