@@ -250,7 +250,7 @@ export default function ProfileTab({ onLogout }: ProfileTabProps = {}) {
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             placeholder="Tu nombre"
-            className="w-full px-4 md:px-5 lg:px-6 py-3 md:py-4 lg:py-5 border text-black text-base md:text-lg lg:text-xl border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-teal-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+            className="w-full px-4 md:px-5 lg:px-6 py-3 md:py-4 lg:py-5 border text-black text-base md:text-lg lg:text-xl border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-[#023828] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
             disabled={isUpdating || !isAuthenticated}
           />
         </div>
@@ -264,7 +264,7 @@ export default function ProfileTab({ onLogout }: ProfileTabProps = {}) {
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
             placeholder="Tu apellido"
-            className="w-full px-4 md:px-5 lg:px-6 py-3 md:py-4 lg:py-5 border text-black text-base md:text-lg lg:text-xl border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-teal-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+            className="w-full px-4 md:px-5 lg:px-6 py-3 md:py-4 lg:py-5 border text-black text-base md:text-lg lg:text-xl border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-[#023828] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
             disabled={isUpdating || !isAuthenticated}
           />
         </div>
@@ -290,7 +290,7 @@ export default function ProfileTab({ onLogout }: ProfileTabProps = {}) {
             onChange={(e) =>
               setAge(e.target.value === "" ? undefined : Number(e.target.value))
             }
-            className="cursor-pointer w-full px-4 md:px-5 lg:px-6 py-3 md:py-4 lg:py-5 border text-black text-base md:text-lg lg:text-xl border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-teal-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed bg-white"
+            className="cursor-pointer w-full px-4 md:px-5 lg:px-6 py-3 md:py-4 lg:py-5 border text-black text-base md:text-lg lg:text-xl border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-[#023828] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed bg-white"
             disabled={isUpdating || !isAuthenticated}
           >
             <option value="" disabled>
