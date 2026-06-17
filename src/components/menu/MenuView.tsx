@@ -350,14 +350,16 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
 
   return (
     <div className="min-h-screen bg-white relative">
-      <img
-        src={
-          restaurant.banner_url || "/even/even-asterisk-evergreen.svg"
-        }
-        alt=""
-        fetchPriority="high"
-        className="absolute top-0 left-0 w-full h-[230px] md:h-96 lg:h-112 object-cover banner-mobile z-0"
-      />
+      {restaurant.banner_url ? (
+        <img
+          src={restaurant.banner_url}
+          alt=""
+          fetchPriority="high"
+          className="absolute top-0 left-0 w-full h-[230px] md:h-96 lg:h-112 object-cover banner-mobile z-0"
+        />
+      ) : (
+        <div className="absolute top-0 left-0 w-full h-[230px] md:h-96 lg:h-112 bg-[#023828] banner-mobile z-0" />
+      )}
 
       <MenuHeader restaurant={restaurant} tableNumber={tableNumber} />
 
@@ -401,14 +403,14 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
 
           {/* Name and photo */}
           <div className="mb-4 md:mb-6 flex flex-col items-center">
-            <div className="size-28 md:size-36 lg:size-40 rounded-full bg-gray-200 overflow-hidden border border-gray-400 shadow-sm">
-              <img
-                src={
-                  restaurant.logo_url || "/even/even-asterisk-evergreen.svg"
-                }
-                alt="Profile Pic"
-                className="w-full h-full object-cover"
-              />
+            <div className="size-28 md:size-36 lg:size-40 rounded-full bg-[#023828] overflow-hidden border border-gray-400 shadow-sm">
+              {restaurant.logo_url && (
+                <img
+                  src={restaurant.logo_url}
+                  alt="Logo del restaurante"
+                  className="w-full h-full object-cover"
+                />
+              )}
             </div>
             <h1 className="text-black text-3xl md:text-4xl lg:text-5xl font-medium mt-3 md:mt-5">
               ¡{welcomeMessage}

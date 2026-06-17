@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus, ShoppingBag } from "lucide-react";
 import { useTable } from "../context/TableContext";
 import { useCart } from "../context/CartContext";
 import { useTableNavigation } from "../hooks/useTableNavigation";
@@ -80,20 +80,23 @@ export default function CartView() {
               </div>
 
               {cartState.items.length === 0 ? (
-                <div className="flex-1 flex items-center justify-center py-8 md:py-12 text-center">
-                  <div className="flex flex-col items-center">
-                    <img
-                      src="/even/even-asterisk-evergreen.svg"
-                      alt=""
-                      aria-hidden="true"
-                      className="size-16 md:size-20 lg:size-24 mb-4 md:mb-6 opacity-80"
-                    />
-                    <p className="text-black text-2xl md:text-3xl lg:text-4xl mb-6 md:mb-8">
-                      El carrito está vacío
+                <div className="flex-1 flex items-center justify-center py-12 md:py-16 text-center">
+                  <div className="flex flex-col items-center max-w-xs">
+                    <div className="size-20 md:size-24 rounded-full bg-[#023828]/5 flex items-center justify-center mb-5 md:mb-6">
+                      <ShoppingBag
+                        className="size-9 md:size-10 text-[#023828]/70"
+                        strokeWidth={1.5}
+                      />
+                    </div>
+                    <p className="text-black text-2xl md:text-3xl font-medium mb-2">
+                      Tu carrito está vacío
+                    </p>
+                    <p className="text-gray-500 text-base md:text-lg mb-6 md:mb-8">
+                      Agrega platillos del menú para empezar tu pedido.
                     </p>
                     <button
                       onClick={() => navigateWithTable("/menu")}
-                      className="bg-[#82E657] text-[#023828] font-medium text-base md:text-lg lg:text-xl px-6 md:px-8 py-3 md:py-4 rounded-full transition-opacity hover:opacity-90 active:scale-95"
+                      className="bg-[#82E657] text-[#023828] font-medium text-base md:text-lg px-8 py-3 md:py-4 rounded-full transition-opacity hover:opacity-90 active:scale-95"
                     >
                       Ver menú
                     </button>
