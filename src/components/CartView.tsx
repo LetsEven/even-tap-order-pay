@@ -103,23 +103,22 @@ export default function CartView() {
                         className="py-3 md:py-4 lg:py-5"
                       >
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3 md:gap-4 lg:gap-5">
+                          <div className="flex items-center gap-3 md:gap-4 lg:gap-5 flex-1 min-w-0">
                             <div className="shrink-0">
                               <div className="size-16 md:size-20 lg:size-24 bg-gray-300 rounded-sm md:rounded-md flex items-center justify-center hover:scale-105 transition-transform duration-200">
-                                {item.images && item.images.length > 0 ? (
+                                {item.images &&
+                                item.images.length > 0 &&
+                                item.images[0] ? (
                                   <img
-                                    src={
-                                      item.images[0] ||
-                                      "/brand/even-asterisk-evergreen.svg"
-                                    }
+                                    src={item.images[0]}
                                     alt="Dish preview"
                                     className="w-full h-full object-cover rounded-sm md:rounded-md"
                                   />
                                 ) : (
                                   <img
-                                    src="/brand/even-asterisk-evergreen.svg"
+                                    src="/even/even-asterisk-evergreen.svg"
                                     alt="Logo Even"
-                                    className="size-18 md:size-20 lg:size-22 object-contain"
+                                    className="size-10 md:size-12 lg:size-14 object-contain"
                                   />
                                 )}
                               </div>
@@ -153,7 +152,7 @@ export default function CartView() {
                               )}
                             </div>
                           </div>
-                          <div className="text-right flex items-center justify-center gap-4 md:gap-5 lg:gap-6">
+                          <div className="shrink-0 text-right flex items-center justify-center gap-4 md:gap-5 lg:gap-6">
                             <div className="flex items-center gap-2 md:gap-3">
                               <Minus
                                 onClick={() =>
@@ -179,8 +178,8 @@ export default function CartView() {
                                 className="size-4 md:size-5 lg:size-6 flex items-center justify-center text-black cursor-pointer"
                               />
                             </div>
-                            <div className="w-16 md:w-20 lg:w-24 text-right">
-                              <p className="text-base md:text-lg lg:text-xl text-black">
+                            <div className="w-20 md:w-24 lg:w-28 text-right">
+                              <p className="text-base md:text-lg lg:text-xl text-black whitespace-nowrap">
                                 $
                                 {(item.price + (item.extraPrice || 0)).toFixed(
                                   2,
