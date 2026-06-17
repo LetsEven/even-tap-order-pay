@@ -380,9 +380,9 @@ export default function AuthPage() {
       <div className="relative z-10 w-full max-w-md">
         <div className="mb-8 text-center">
           <img
-            src="/brand/even-wordmark-grass.svg"
-            alt="even"
-            className="w-32 md:w-36 h-auto mx-auto mb-6"
+            src="/brand/even-asterisk-grass.svg"
+            alt="Even"
+            className="size-24 md:size-28 lg:size-32 mx-auto mb-6"
           />
           <h1 className="text-2xl font-medium text-white">
             {step === "phone"
