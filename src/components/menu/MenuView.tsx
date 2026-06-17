@@ -26,6 +26,7 @@ import { useTableNavigation } from "../../hooks/useTableNavigation";
 import { useCart } from "../../context/CartContext";
 import { useRestaurant } from "../../context/RestaurantContext";
 import Loader from "../UI/Loader";
+import PepperIcon from "../UI/PepperIcon";
 import { useAuth } from "@/context/AuthContext";
 import { useGuest } from "@/context/GuestContext";
 import {
@@ -392,7 +393,7 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
             {/* Settings Icon */}
             <button
               onClick={() => setShowSettingsModal(true)}
-              className="bg-white rounded-full border border-gray-400 shadow-sm hover:bg-gray-50 transition-all active:scale-95 size-9 md:size-10 lg:size-12 overflow-hidden flex items-center justify-center"
+              className="bg-white rounded-full shadow-sm hover:bg-gray-50 transition-all active:scale-95 size-9 md:size-10 lg:size-12 overflow-hidden flex items-center justify-center"
             >
               <UserAvatar isAuthenticated={isAuthenticated} profile={profile} />
             </button>
@@ -400,21 +401,9 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
             {/* Assistant Icon */}
             <button
               onClick={() => setShowPepperChat(true)}
-              className="bg-white rounded-full text-black border border-gray-400 size-10 md:size-12 lg:size-14 shadow-sm overflow-hidden"
+              className="bg-white rounded-full size-10 md:size-12 lg:size-14 shadow-sm overflow-hidden hover:bg-gray-50 transition-all active:scale-95"
             >
-              <video
-                src="/videos/video-icon-pepper.webm"
-                autoPlay
-                loop
-                muted
-                playsInline
-                preload="none"
-                aria-hidden="true"
-                disablePictureInPicture
-                controls={false}
-                controlsList="nodownload nofullscreen noremoteplayback"
-                className="w-full h-full object-cover rounded-full"
-              />
+              <PepperIcon />
             </button>
           </div>
 
@@ -584,21 +573,9 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
           {/* Pepper */}
           <button
             onClick={() => setShowPepperChat(true)}
-            className="size-11 md:size-12 rounded-full border border-gray-200 bg-white/60 overflow-hidden hover:bg-white transition-colors active:scale-95"
+            className="size-11 md:size-12 rounded-full border border-gray-200 bg-white overflow-hidden hover:bg-gray-50 transition-colors active:scale-95"
           >
-            <video
-              src="/videos/video-icon-pepper.webm"
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="none"
-              aria-hidden="true"
-              disablePictureInPicture
-              controls={false}
-              controlsList="nodownload nofullscreen noremoteplayback"
-              className="w-full h-full object-cover"
-            />
+            <PepperIcon />
           </button>
         </div>
       </div>
