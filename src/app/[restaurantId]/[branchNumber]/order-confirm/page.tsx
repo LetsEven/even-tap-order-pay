@@ -17,7 +17,7 @@ export default function OrderConfirmPage() {
   const baseAmount = cartState.totalPrice;
   const MINIMUM_AMOUNT = 20;
 
-  const [tipPercentage, setTipPercentage] = useState(0);
+  const [tipPercentage, setTipPercentage] = useState(10);
   const [customTip, setCustomTip] = useState("");
   const [showCustomTipInput, setShowCustomTipInput] = useState(false);
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
