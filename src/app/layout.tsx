@@ -31,18 +31,6 @@ const jakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "Even Tap Order & Pay",
   description: "Tu menú digital con un toque de NFC",
-  icons: {
-    icon: [
-      {
-        url: "/even/even-asterisk-evergreen.svg",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/even/even-asterisk-grass.svg",
-        media: "(prefers-color-scheme: dark)",
-      },
-    ],
-  },
 };
 
 export default async function RootLayout({

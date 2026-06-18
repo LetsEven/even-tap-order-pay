@@ -654,10 +654,12 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
                     </h2>
                     <p className="text-sm md:text-base lg:text-lg text-white/80">
                       Mesa {tableNumber}
-                      {activeOrders.length > 1
-                        ? ` • ${activeOrderIndex + 1} de ${activeOrders.length}`
-                        : ""}
                     </p>
+                    {activeOrders.length > 1 && (
+                      <p className="text-sm md:text-base lg:text-lg text-white/80">
+                        {activeOrderIndex + 1} de {activeOrders.length}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
