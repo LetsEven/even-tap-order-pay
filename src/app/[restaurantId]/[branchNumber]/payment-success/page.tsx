@@ -8,7 +8,6 @@ import { useTableNavigation } from "@/hooks/useTableNavigation";
 import { useRestaurant } from "@/context/RestaurantContext";
 import { useTable } from "@/context/TableContext";
 import { useAuth } from "@/context/AuthContext";
-import { useGuest } from "@/context/GuestContext";
 import {
   Receipt,
   X,
@@ -30,8 +29,7 @@ export default function PaymentSuccessPage() {
   const restaurantId = params?.restaurantId as string;
   const branchNumber = params?.branchNumber as string;
   const { state } = useTable();
-  const { isAuthenticated, user } = useAuth();
-  const { guestId } = useGuest();
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
 
   useEffect(() => {
     if (restaurantId && !isNaN(parseInt(restaurantId))) {
@@ -74,9 +72,16 @@ export default function PaymentSuccessPage() {
   const [orderError, setOrderError] = useState<string | null>(null);
   const [showReorderModal, setShowReorderModal] = useState(false);
   const [reorderItems, setReorderItems] = useState<LastOrderDish[]>([]);
-  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(
-    !isAuthenticated && !cameFromAuth,
-  );
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+
+  // Abrir el modal de registro solo cuando la auth terminó de cargar
+  // y confirmamos que NO hay sesión (evita el flash al recargar)
+  useEffect(() => {
+    if (isAuthLoading) return;
+    if (!isAuthenticated && !cameFromAuth) {
+      setIsRegisterModalOpen(true);
+    }
+  }, [isAuthLoading, isAuthenticated, cameFromAuth]);
 
   // Limpiar el flag de redirect después de cargar
   useEffect(() => {
@@ -84,26 +89,6 @@ export default function PaymentSuccessPage() {
       sessionStorage.removeItem("even-post-auth-redirect");
     }
   }, [cameFromAuth]);
-
-  // Bloquear scroll de la página completa al montar
-  useEffect(() => {
-    const prev = {
-      overflow: document.body.style.overflow,
-      position: document.body.style.position,
-      width: document.body.style.width,
-      height: document.body.style.height,
-    };
-    document.body.style.overflow = "hidden";
-    document.body.style.position = "fixed";
-    document.body.style.width = "100%";
-    document.body.style.height = "100%";
-    return () => {
-      document.body.style.overflow = prev.overflow;
-      document.body.style.position = prev.position;
-      document.body.style.width = prev.width;
-      document.body.style.height = prev.height;
-    };
-  }, []);
 
   // Bloquear scroll cuando los modales están abiertos
   useEffect(() => {
@@ -207,27 +192,9 @@ export default function PaymentSuccessPage() {
   const [orderCreatedAt, setOrderCreatedAt] = useState<Date | null>(null);
 
   const fetchDishOrders = async () => {
-    // 1. Siempre intentar obtener reorderItems desde getLastOrderByUser
-    //    (igual que MenuView — usa las dishes que garantizan tener menu_item_id)
-    const clientId = user?.id || guestId;
-    if (clientId && restaurantId) {
-      try {
-        const lastOrder = await tapOrderService.getLastOrderByUser(
-          clientId,
-          parseInt(restaurantId),
-        );
-        if (lastOrder.success && (lastOrder as any).hasLastOrder) {
-          const dishes: LastOrderDish[] =
-            (lastOrder as any)?.data?.dishes ?? [];
-          const withMenuItemId = dishes.filter((d) => d.menu_item_id);
-          if (withMenuItemId.length) setReorderItems(withMenuItemId);
-        }
-      } catch {
-        // si falla, continuar con el resto
-      }
-    }
-
-    // 2. Obtener detalles completos de la orden para el ticket (dishOrders)
+    // Obtener los detalles de la orden a partir del ID que viene en la URL.
+    // De ahí salen tanto el ticket (dishOrders) como los items para reordenar,
+    // sin depender de que la sesión del usuario ya haya cargado.
     const orderId = paymentId || paymentDetails?.orderId;
     if (!orderId) {
       setDishOrders(paymentDetails?.dishOrders || []);
@@ -241,6 +208,23 @@ export default function PaymentSuccessPage() {
           setOrderCreatedAt(new Date(orderData.tap_order.created_at));
         }
         if (orderData?.dishes?.length) {
+          // Items para reordenar (solo los que tienen menu_item_id válido)
+          const reorder: LastOrderDish[] = orderData.dishes
+            .filter((d: any) => d.menu_item_id != null)
+            .map((d: any) => ({
+              id: d.id,
+              menu_item_id: Number(d.menu_item_id),
+              item: d.item,
+              quantity: d.quantity,
+              price: d.price,
+              extra_price: d.extra_price || 0,
+              images: d.images || [],
+              custom_fields: d.custom_fields || null,
+              special_instructions: d.special_instructions || null,
+            }));
+          if (reorder.length) setReorderItems(reorder);
+
+          // Items para el ticket
           const transformed = orderData.dishes.map((d: any) => ({
             dish_order_id: d.menu_item_id || d.id,
             item: d.item,
@@ -265,6 +249,7 @@ export default function PaymentSuccessPage() {
 
   useEffect(() => {
     fetchDishOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paymentId, paymentDetails]);
 
   const handleBackToMenu = () => {
@@ -367,7 +352,7 @@ export default function PaymentSuccessPage() {
   };
 
   return (
-    <div className="min-h-dvh overflow-hidden bg-even-evergreen flex flex-col">
+    <div className="min-h-dvh brand-evergreen flex flex-col">
       {/* Success Icon */}
       <div className="flex-1 flex justify-center items-center">
         <img
@@ -377,7 +362,7 @@ export default function PaymentSuccessPage() {
         />
       </div>
 
-      <div className="px-4 md:px-6 lg:px-8 w-full animate-slide-up">
+      <div className="px-4 md:px-6 lg:px-8 w-full animate-slide-up flex-1 flex flex-col">
         <div className="flex-1 flex flex-col">
           <div className="left-4 right-4 bg-even-evergreen rounded-t-4xl translate-y-7 z-0">
             <div className="py-6 md:py-8 lg:py-10 px-8 md:px-10 lg:px-12 flex flex-col justify-center items-center mb-6 md:mb-8 lg:mb-10 mt-2 md:mt-4 lg:mt-6 gap-2 md:gap-3 lg:gap-4">
@@ -392,12 +377,7 @@ export default function PaymentSuccessPage() {
 
           <div className="bg-white rounded-t-4xl relative z-10 flex flex-col min-h-80 justify-center px-6 md:px-8 lg:px-10 flex-1 py-8 md:py-10 lg:py-12">
             {/* Action Buttons */}
-            <div
-              className="space-y-3 md:space-y-4 lg:space-y-5"
-              style={{
-                paddingBottom: "max(0rem, env(safe-area-inset-bottom))",
-              }}
-            >
+            <div className="space-y-3 md:space-y-4 lg:space-y-5">
               {/* Reordenar btn */}
               <button
                 onClick={handleReorder}

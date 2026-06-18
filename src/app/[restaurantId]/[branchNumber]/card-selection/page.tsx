@@ -896,7 +896,11 @@ export default function CardSelectionPage() {
               `/payment-success?orderId=${orderId}&success=true`,
             );
           }}
-          onCancel={handleCancelPayment}
+          onCancel={
+            isApplePayProcessing || isGooglePayProcessing
+              ? undefined
+              : handleCancelPayment
+          }
           onConfirm={handleConfirmPayment}
         />
       )}

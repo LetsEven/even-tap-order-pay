@@ -37,6 +37,29 @@ const YEARS = Array.from(
   (_, i) => String(START_YEAR + i).slice(-2),
 );
 
+const DEFAULT_CARD_ERROR = "No se pudo agregar la tarjeta. Intenta de nuevo.";
+
+// Extracts a readable string from any error shape the API may return
+// (plain string, { message }, nested { message: {...} }, { details }, etc.)
+// so we never render "[object Object]".
+const extractErrorMessage = (error: unknown): string => {
+  if (!error) return DEFAULT_CARD_ERROR;
+  if (typeof error === "string") return error.trim() || DEFAULT_CARD_ERROR;
+  if (typeof error === "object") {
+    const e = error as {
+      message?: unknown;
+      details?: unknown;
+      error?: unknown;
+    };
+    if (typeof e.message === "string" && e.message.trim()) return e.message;
+    if (e.message && typeof e.message === "object")
+      return extractErrorMessage(e.message);
+    if (e.details) return extractErrorMessage(e.details);
+    if (e.error) return extractErrorMessage(e.error);
+  }
+  return DEFAULT_CARD_ERROR;
+};
+
 function AddCardContent() {
   const params = useParams();
   const { setRestaurantId, setBranchNumber } = useRestaurant();
@@ -191,11 +214,7 @@ function AddCardContent() {
           router.back();
         }
       } else {
-        const rawError =
-          typeof result.error === "string"
-            ? result.error
-            : (result.error as unknown as { message?: string })?.message ||
-              "No se pudo agregar la tarjeta. Intenta de nuevo.";
+        const rawError = extractErrorMessage(result.error);
         const ERROR_TRANSLATIONS: Record<string, string> = {
           "Invalid expiry date": "Fecha de expiración inválida",
         };
@@ -235,10 +254,17 @@ function AddCardContent() {
     const numbersOnlyRegex = /^[0-9\s]*$/;
 
     if (numbersOnlyRegex.test(value)) {
+      const prevDigits = cardNumber.replace(/\s+/g, "").length;
+      const nextDigits = value.replace(/\s+/g, "").length;
       const formatted = formatCardNumber(value);
       setCardNumber(formatted);
       if (errors.cardNumber)
         setErrors((prev) => ({ ...prev, cardNumber: undefined }));
+
+      if (nextDigits - prevDigits > 1) {
+        e.currentTarget.blur();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     }
   };
 

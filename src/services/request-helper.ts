@@ -4,7 +4,7 @@ export interface ApiResponse<T> {
   success: boolean;
   data?: T;
   message?: string;
-  error?: string;
+  error?: string | { type?: string; message?: string; details?: unknown };
 }
 
 /**
@@ -67,7 +67,13 @@ export async function requestWithAuth<T>(
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || data.error || "API request failed");
+      // Preserve the server's error structure instead of collapsing it into a
+      // string. Forcing an object through `new Error(...)` produces the literal
+      // "[object Object]"; returning it lets callers extract a real message.
+      return {
+        success: false,
+        error: data?.error ?? data?.message ?? "API request failed",
+      } as ApiResponse<T>;
     }
 
     return data;

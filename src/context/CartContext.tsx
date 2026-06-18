@@ -116,6 +116,9 @@ function cartReducer(state: CartState, action: CartAction): CartState {
     }
 
     case "REMOVE_ITEM": {
+      // Un cartItemId vacío haría match con todos los items pendientes (los
+      // que aún no reciben id del backend) — no hacer nada en ese caso.
+      if (!action.payload) return state;
       const newItems = state.items.filter(
         (i) => i.cartItemId !== action.payload,
       );
@@ -124,6 +127,8 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 
     case "UPDATE_QUANTITY": {
       const { cartItemId, quantity } = action.payload;
+      // Idem: un cartItemId vacío afectaría a varios items pendientes.
+      if (!cartItemId) return state;
       const newItems =
         quantity <= 0
           ? state.items.filter((i) => i.cartItemId !== cartItemId)

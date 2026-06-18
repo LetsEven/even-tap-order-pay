@@ -17,7 +17,13 @@ interface ReorderModalProps {
 }
 
 function ReorderModal({ isOpen, onClose, items }: ReorderModalProps) {
-  const { state: cartState, addItem, removeItem, updateQuantity } = useCart();
+  const {
+    state: cartState,
+    addItem,
+    removeItem,
+    updateQuantity,
+    decrementItem,
+  } = useCart();
   const { navigateWithTable } = useTableNavigation();
   const { isOpen: restaurantIsOpen, restaurant, menu } = useRestaurant();
 
@@ -70,6 +76,18 @@ function ReorderModal({ isOpen, onClose, items }: ReorderModalProps) {
     void Promise.all(idsToRemove.map((id) => removeItem(id)));
   };
 
+  const toMenuItem = (item: LastOrderDish): MenuItemData => ({
+    id: item.menu_item_id,
+    name: item.item,
+    description: "",
+    price: item.price,
+    images: item.images,
+    features: [],
+    discount: 0,
+    customFields: (item.custom_fields as MenuItemData["customFields"]) ?? [],
+    extraPrice: item.extra_price,
+  });
+
   const handleCardTap = async (item: LastOrderDish) => {
     if (!restaurantIsOpen) {
       setShowClosedModal(true);
@@ -82,19 +100,7 @@ function ReorderModal({ isOpen, onClose, items }: ReorderModalProps) {
     }
     const cartItem = getCartItem(item.menu_item_id);
     if (!cartItem || cartItem.quantity === 0) {
-      const menuItem: MenuItemData = {
-        id: item.menu_item_id,
-        name: item.item,
-        description: "",
-        price: item.price,
-        images: item.images,
-        features: [],
-        discount: 0,
-        customFields:
-          (item.custom_fields as MenuItemData["customFields"]) ?? [],
-        extraPrice: item.extra_price,
-      };
-      await addItem(menuItem, 1, item.special_instructions);
+      await addItem(toMenuItem(item), 1, item.special_instructions);
     }
   };
 
@@ -102,11 +108,9 @@ function ReorderModal({ isOpen, onClose, items }: ReorderModalProps) {
     e.stopPropagation();
     const cartItem = getCartItem(item.menu_item_id);
     if (!cartItem) return;
-    if (cartItem.quantity <= 1) {
-      await removeItem(cartItem.id);
-    } else {
-      await updateQuantity(cartItem.cartItemId!, cartItem.quantity - 1);
-    }
+    // Operar siempre por menu_item_id: el cartItemId puede no haber llegado
+    // aún del backend, y decrementItem resuelve ese caso solo.
+    await decrementItem(item.menu_item_id);
   };
 
   const handleIncrement = async (e: React.MouseEvent, item: LastOrderDish) => {
@@ -121,10 +125,12 @@ function ReorderModal({ isOpen, onClose, items }: ReorderModalProps) {
       return;
     }
     const cartItem = getCartItem(item.menu_item_id);
-    if (!cartItem) {
-      await handleCardTap(item);
+    if (cartItem?.cartItemId) {
+      await updateQuantity(cartItem.cartItemId, cartItem.quantity + 1);
     } else {
-      await updateQuantity(cartItem.cartItemId!, cartItem.quantity + 1);
+      // Sin cartItem o con cartItemId aún pendiente: incrementar por id
+      // (ADD_ITEM agrupa por id/customFields y no toca otros platillos).
+      await addItem(toMenuItem(item), 1, item.special_instructions);
     }
   };
 
@@ -263,7 +269,7 @@ function ReorderModal({ isOpen, onClose, items }: ReorderModalProps) {
 
                       {/* Image */}
                       <div className="shrink-0 relative">
-                        <div className="size-16 md:size-20 rounded-sm overflow-hidden bg-gray-300">
+                        <div className="size-16 md:size-20 rounded-sm overflow-hidden bg-gray-300 flex items-center justify-center">
                           {item.images?.length > 0 && item.images[0] ? (
                             <img
                               src={item.images[0]}
