@@ -392,11 +392,17 @@ export default function AuthPage() {
                 : "Completa tu perfil"}
           </h1>
           <p className="text-gray-200 mt-2">
-            {step === "phone"
-              ? "Te enviaremos un código de verificación"
-              : step === "verify"
-                ? `Enviamos un código al ${formatPhoneNumber(phone)}`
-                : "Cuéntanos un poco más sobre ti"}
+            {step === "phone" ? (
+              "Te enviaremos un código de verificación"
+            ) : step === "verify" ? (
+              <>
+                Enviamos un código al
+                <br />
+                {formatPhoneNumber(phone)}
+              </>
+            ) : (
+              "Cuéntanos un poco más sobre ti"
+            )}
           </p>
         </div>
 
