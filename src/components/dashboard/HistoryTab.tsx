@@ -221,35 +221,6 @@ export default function HistoryTab() {
                     </p>
                   </div>
                 </div>
-
-                {/* Order Type Badge */}
-                <div className="flex items-center gap-2 md:gap-3 lg:gap-4">
-                  {/*
-                  <div className="text-right">
-                    <span
-                      className={`text-xs md:text-sm lg:text-base px-2 md:px-3 lg:px-4 py-1 md:py-1.5 lg:py-2 rounded-full font-medium truncate ${
-                        order.orderType === "tap-order-and-pay"
-                          ? "bg-even-grass/20 text-even-evergreen"
-                          : order.orderType === "pick-and-go"
-                            ? "bg-green-100 text-green-700"
-                            : order.orderType === "room-service"
-                              ? "bg-orange-100 text-orange-700"
-                              : order.orderType === "tap-and-pay"
-                                ? "bg-yellow-100 text-yellow-600"
-                                : "bg-even-aqua text-even-evergreen"
-                      }`}
-                    >
-                      {order.orderType === "tap-order-and-pay"
-                        ? "Pick & Go"
-                        : order.orderType === "room-service"
-                          ? "Room Service"
-                          : order.orderType === "tap-and-pay"
-                            ? "Tap & Pay"
-                            : "Flex Bill"}
-                    </span>
-                  </div>*/}
-                  <ChevronRight className="w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 text-gray-400 shrink-0" />
-                </div>
               </div>
             </div>
           );
@@ -318,6 +289,15 @@ export default function HistoryTab() {
                         Mesa {selectedOrderDetails.tableNumber}
                       </p>
                     ) : null}
+                    {/* Pick & Go: estatus a nivel de orden */}
+                    {selectedOrderDetails.orderType === "pick-and-go" &&
+                      selectedOrderDetails.tableOrderStatus && (
+                        <span
+                          className={`inline-block mt-2 px-3 py-1 rounded-full text-xs md:text-sm font-medium border ${getStatusColor(selectedOrderDetails.tableOrderStatus)}`}
+                        >
+                          {getStatusText(selectedOrderDetails.tableOrderStatus)}
+                        </span>
+                      )}
                   </div>
                 </div>
               </div>
@@ -393,11 +373,19 @@ export default function HistoryTab() {
                     className="flex justify-between items-center gap-3 md:gap-4 lg:gap-5"
                   >
                     <div className="size-14 md:size-16 lg:size-20 bg-gray-300 rounded-sm md:rounded-md flex items-center justify-center hover:scale-105 transition-transform duration-200">
-                      <img
-                        src={dish.images[0]}
-                        alt="Dish preview"
-                        className="w-full h-full object-cover rounded-sm md:rounded-md"
-                      />
+                      {dish.images?.length > 0 && dish.images[0] ? (
+                        <img
+                          src={dish.images[0]}
+                          alt="Dish preview"
+                          className="w-full h-full object-cover rounded-sm md:rounded-md"
+                        />
+                      ) : (
+                        <img
+                          src="/even/even-asterisk-evergreen.svg"
+                          alt="Logo Even"
+                          className={`size-10 md:size-12 object-contain`}
+                        />
+                      )}
                     </div>
                     {/* Dish Info */}
                     <div className="flex-1">
@@ -412,14 +400,15 @@ export default function HistoryTab() {
                           + Extras: ${dish.extraPrice?.toFixed(2)} MXN
                         </p>
                       )}
-                      {/* Status Badge */}
-                      {dish.status && (
-                        <span
-                          className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(dish.status)}`}
-                        >
-                          {getStatusText(dish.status)}
-                        </span>
-                      )}
+                      {/* Status Badge — Pick & Go maneja el estatus a nivel de orden, no por platillo */}
+                      {selectedOrderDetails.orderType !== "pick-and-go" &&
+                        dish.status && (
+                          <span
+                            className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(dish.status)}`}
+                          >
+                            {getStatusText(dish.status)}
+                          </span>
+                        )}
                     </div>
 
                     {/* Total Price */}
