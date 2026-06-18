@@ -6,6 +6,7 @@ import React, {
   useReducer,
   useState,
   useEffect,
+  useRef,
   ReactNode,
 } from "react";
 import { MenuItemData } from "../interfaces/menuItemData";
@@ -264,6 +265,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
     migrateCartIfNeeded();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, isLoading, restaurantId, isAuthenticated]);
+
+  const wasAuthenticatedRef = useRef(false);
+  useEffect(() => {
+    if (isLoading) return;
+    if (wasAuthenticatedRef.current && !isAuthenticated) {
+      refreshCart();
+    }
+    wasAuthenticatedRef.current = isAuthenticated;
+  }, [isAuthenticated, isLoading]);
 
   const refreshCart = async () => {
     try {
