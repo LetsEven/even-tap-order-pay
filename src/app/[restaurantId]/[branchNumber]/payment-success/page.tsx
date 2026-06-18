@@ -307,7 +307,11 @@ export default function PaymentSuccessPage() {
         const orderData = result.data?.data || result.data;
         setOrder(orderData);
       } else {
-        setOrderError(result.error || "Error al cargar la orden");
+        setOrderError(
+          (typeof result.error === "string"
+            ? result.error
+            : result.error?.message) || "Error al cargar la orden",
+        );
       }
     } catch (err) {
       setOrderError("Error de red al cargar la orden");

@@ -264,10 +264,15 @@ class TapOrderService {
     data: ConfirmTapOrderData,
   ): Promise<ConfirmTapOrderResponse> {
     try {
-      return await this.request<any>("/tap-orders/confirm", {
+      const res = await this.request<any>("/tap-orders/confirm", {
         method: "POST",
         body: JSON.stringify(data),
       });
+      return {
+        success: res.success,
+        data: res.data,
+        error: typeof res.error === "string" ? res.error : res.error?.message,
+      };
     } catch (error) {
       console.error("Error confirming tap order:", error);
       return { success: false, error: "Error al confirmar la orden" };
