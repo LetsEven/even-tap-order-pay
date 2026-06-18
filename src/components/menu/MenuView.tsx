@@ -224,58 +224,69 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
     return () => observer.disconnect();
   }, []);
 
-  // Verificar si hay pedido activo
+  // Verificar si hay pedido activo — devuelve el pedido (o null) sin tocar estado
   const checkActiveOrder = async () => {
     const clientId = user?.id || guestId;
-    if (!clientId || !restaurantId) {
-      return;
-    }
-
+    if (!clientId || !restaurantId) return null;
     try {
       const response = (await tapOrderService.getActiveOrderByUser(
         clientId,
         restaurantId,
       )) as any;
-      if (response.success && response.hasActiveOrder) {
-        setActiveOrder(response.data);
-      } else {
-        setActiveOrder(null);
-      }
+      return response.success && response.hasActiveOrder
+        ? response.data
+        : null;
     } catch (error) {
       console.error("Error checking active order:", error);
-      setActiveOrder(null);
+      return null;
     }
   };
 
-  useEffect(() => {
-    checkActiveOrder();
-  }, [user?.id, guestId, restaurantId]);
-
-  useEffect(() => {
-    const checkLastOrder = async () => {
-      const clientId = user?.id || guestId;
-      if (!clientId || !restaurantId) return;
+  // Verificar último pedido — devuelve los platillos reordenables
+  const checkLastOrderItems = async (): Promise<LastOrderDish[]> => {
+    const clientId = user?.id || guestId;
+    if (!clientId || !restaurantId) return [];
+    try {
       const response = await tapOrderService.getLastOrderByUser(
         clientId,
         restaurantId,
       );
-      if (response.success && (response as any).hasLastOrder) {
-        const dishes: LastOrderDish[] = (response as any)?.data?.dishes ?? [];
-        const withMenuItemId = dishes.filter((d) => d.menu_item_id);
-        if (withMenuItemId.length) {
-          setLastOrderItems(withMenuItemId);
-          setHasLastOrder(true);
-        }
-      }
+      return response.success && (response as any).hasLastOrder
+        ? ((response as any)?.data?.dishes ?? []).filter(
+            (d: LastOrderDish) => d.menu_item_id,
+          )
+        : [];
+    } catch (error) {
+      console.error("Error checking last order:", error);
+      return [];
+    }
+  };
+
+  // Cargar ambos en paralelo y setear el estado junto, para que los botones de
+  // "Estatus de pedido" y "Reordenar" aparezcan exactamente al mismo tiempo.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const [active, dishes] = await Promise.all([
+        checkActiveOrder(),
+        checkLastOrderItems(),
+      ]);
+      if (cancelled) return;
+      setActiveOrder(active);
+      setLastOrderItems(dishes);
+      setHasLastOrder(dishes.length > 0);
+    })();
+    return () => {
+      cancelled = true;
     };
-    checkLastOrder();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, guestId, restaurantId]);
 
   const handleReorder = () => setShowReorderModal(true);
 
   const handleRefreshOrder = async () => {
     setIsRefreshing(true);
-    await checkActiveOrder();
+    setActiveOrder(await checkActiveOrder());
     setIsRefreshing(false);
   };
 
