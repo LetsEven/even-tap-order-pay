@@ -260,11 +260,17 @@ export default function AuthView({ onClose }: AuthViewProps) {
                   : "Completa tu perfil"}
             </h1>
             <p className="text-gray-500 mt-2 text-sm md:text-base">
-              {step === "phone"
-                ? "Te enviaremos un código de verificación"
-                : step === "verify"
-                  ? `Enviamos un código al ${formatPhoneNumber(phone)}`
-                  : "Cuéntanos un poco más sobre ti"}
+              {step === "phone" ? (
+                "Te enviaremos un código de verificación"
+              ) : step === "verify" ? (
+                <>
+                  Enviamos un código al
+                  <br />
+                  {formatPhoneNumber(phone)}
+                </>
+              ) : (
+                "Cuéntanos un poco más sobre ti"
+              )}
             </p>
           </div>
 
@@ -459,7 +465,7 @@ export default function AuthView({ onClose }: AuthViewProps) {
               <button
                 type="submit"
                 disabled={loading || !firstName || age === ""}
-                className="w-full bg-black hover:bg-stone-950 text-white py-3 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+                className="w-full bg-even-grass text-even-evergreen hover:opacity-90 py-3 rounded-full transition-opacity disabled:bg-even-grass/30 disabled:text-even-evergreen/40 disabled:cursor-not-allowed mt-6"
               >
                 {loading ? "Guardando..." : "Continuar"}
               </button>

@@ -65,7 +65,7 @@ export default function OutOfStockModal({
 
           <button
             onClick={onClose}
-            className="w-full mt-6 md:mt-8 lg:mt-10 bg-black hover:bg-stone-950 text-white text-base md:text-lg lg:text-xl py-3 md:py-4 lg:py-5 rounded-full transition-colors"
+            className="w-full mt-6 md:mt-8 lg:mt-10 bg-even-grass text-even-evergreen hover:opacity-90 text-base md:text-lg lg:text-xl py-3 md:py-4 lg:py-5 rounded-full transition-opacity"
           >
             Entendido
           </button>

@@ -334,7 +334,7 @@ export default function ProfileTab({ onLogout }: ProfileTabProps = {}) {
         <button
           onClick={handleUpdateProfile}
           disabled={isUpdating}
-          className="mt-6 md:mt-8 lg:mt-10 bg-black hover:bg-stone-950 w-full text-white py-3 md:py-4 lg:py-5 text-base md:text-lg lg:text-xl rounded-full cursor-pointer transition-colors disabled:bg-stone-600 disabled:cursor-not-allowed"
+          className="mt-6 md:mt-8 lg:mt-10 bg-even-grass hover:opacity-90 w-full text-even-evergreen py-3 md:py-4 lg:py-5 text-base md:text-lg lg:text-xl rounded-full cursor-pointer transition-opacity disabled:bg-even-grass/30 disabled:text-even-evergreen/40 disabled:cursor-not-allowed"
         >
           {isUpdating ? (
             <div className="flex items-center justify-center gap-1 md:gap-2">

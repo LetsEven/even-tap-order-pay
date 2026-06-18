@@ -158,7 +158,7 @@ export default function CardScanner({
           <button
             onClick={handleScan}
             disabled={isScanning}
-            className="flex-1 w-full text-white py-4 rounded-full cursor-pointer transition-colors bg-black hover:bg-stone-950 disabled:bg-stone-900 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="flex-1 w-full text-even-evergreen py-4 rounded-full cursor-pointer transition-opacity bg-even-grass hover:opacity-90 disabled:bg-even-grass/30 disabled:text-even-evergreen/40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isScanning ? (
               <>
