@@ -72,14 +72,17 @@ export interface TapOrderResponse {
   data: TapOrder;
 }
 
+export interface ActiveOrder {
+  tap_order: TapOrderInfo;
+  table: TableInfo;
+  dishes: Dish[];
+  pending_dishes_count: number;
+}
+
 export interface ActiveOrderResponse {
   hasActiveOrder: boolean;
-  data: {
-    tap_order: TapOrderInfo;
-    table: TableInfo;
-    dishes: Dish[];
-    pending_dishes_count: number;
-  } | null;
+  data: ActiveOrder | null;
+  orders: ActiveOrder[];
 }
 
 export interface DishOrderData {

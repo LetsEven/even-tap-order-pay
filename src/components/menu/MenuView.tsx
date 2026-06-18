@@ -20,6 +20,8 @@ import {
   RefreshCw,
   Utensils,
   Loader2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useUserData } from "../../context/userDataContext";
 import { useTableNavigation } from "../../hooks/useTableNavigation";
@@ -31,7 +33,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useGuest } from "@/context/GuestContext";
 import {
   tapOrderService,
-  type ActiveOrderResponse,
+  type ActiveOrder,
   type LastOrderDish,
 } from "@/services/taporders.service";
 
@@ -130,9 +132,8 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
   const { user, profile, isAuthenticated, logout } = useAuth();
   const { guestId } = useGuest();
   const { signUpData } = useUserData();
-  const [activeOrder, setActiveOrder] = useState<
-    ActiveOrderResponse["data"] | null
-  >(null);
+  const [activeOrders, setActiveOrders] = useState<ActiveOrder[]>([]);
+  const [activeOrderIndex, setActiveOrderIndex] = useState(0);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [hasLastOrder, setHasLastOrder] = useState(false);
@@ -224,21 +225,21 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
     return () => observer.disconnect();
   }, []);
 
-  // Verificar si hay pedido activo — devuelve el pedido (o null) sin tocar estado
-  const checkActiveOrder = async () => {
+  // Verificar si hay pedidos activos — devuelve el array (o vacío) sin tocar estado
+  const checkActiveOrder = async (): Promise<ActiveOrder[]> => {
     const clientId = user?.id || guestId;
-    if (!clientId || !restaurantId) return null;
+    if (!clientId || !restaurantId) return [];
     try {
       const response = (await tapOrderService.getActiveOrderByUser(
         clientId,
         restaurantId,
       )) as any;
       return response.success && response.hasActiveOrder
-        ? response.data
-        : null;
+        ? (response.orders ?? [])
+        : [];
     } catch (error) {
       console.error("Error checking active order:", error);
-      return null;
+      return [];
     }
   };
 
@@ -267,12 +268,13 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const [active, dishes] = await Promise.all([
+      const [orders, dishes] = await Promise.all([
         checkActiveOrder(),
         checkLastOrderItems(),
       ]);
       if (cancelled) return;
-      setActiveOrder(active);
+      setActiveOrders(orders);
+      setActiveOrderIndex((prev) => (prev < orders.length ? prev : 0));
       setLastOrderItems(dishes);
       setHasLastOrder(dishes.length > 0);
     })();
@@ -282,11 +284,15 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, guestId, restaurantId]);
 
+  const activeOrder = activeOrders[activeOrderIndex] ?? null;
+
   const handleReorder = () => setShowReorderModal(true);
 
   const handleRefreshOrder = async () => {
     setIsRefreshing(true);
-    setActiveOrder(await checkActiveOrder());
+    const orders = await checkActiveOrder();
+    setActiveOrders(orders);
+    setActiveOrderIndex((prev) => (prev < orders.length ? prev : 0));
     setIsRefreshing(false);
   };
 
@@ -439,14 +445,16 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
 
             {/* Link to active order status + reorder */}
             <div className="flex flex-wrap gap-2 justify-center">
-              {activeOrder && (
+              {activeOrders.length > 0 && (
                 <button
                   onClick={() =>
                     setTimeout(() => setIsStatusModalOpen(true), 400)
                   }
                   className="bg-surface border border-stroke rounded-full px-3 md:px-4 lg:px-5 py-1 md:py-1.5 text-sm md:text-lg lg:text-xl font-medium text-black w-fit active:scale-90 transition-all"
                 >
-                  Estatus de pedido
+                  {activeOrders.length > 1
+                    ? "Ver pedidos"
+                    : "Estatus de pedido"}
                 </button>
               )}
               {hasLastOrder && (
@@ -598,9 +606,27 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
           onClick={() => setIsStatusModalOpen(false)}
         >
           <div
-            className="bg-even-evergreen/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl z-999 max-h-[85vh] flex flex-col"
+            className="relative bg-even-evergreen/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl z-999 max-h-[85vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
+            {activeOrders.length > 1 && (
+              <>
+                <button
+                  onClick={() => setActiveOrderIndex((i) => i - 1)}
+                  disabled={activeOrderIndex === 0}
+                  className="absolute left-3 md:left-4 top-[30%] z-10 rounded-full size-9 md:size-10 flex items-center justify-center bg-white/10 border border-white/25 hover:bg-white/20 transition-colors active:scale-90 disabled:opacity-25 disabled:pointer-events-none"
+                >
+                  <ChevronLeft className="size-6 md:size-7 text-white" />
+                </button>
+                <button
+                  onClick={() => setActiveOrderIndex((i) => i + 1)}
+                  disabled={activeOrderIndex === activeOrders.length - 1}
+                  className="absolute right-3 md:right-4 top-[30%] z-10 rounded-full size-9 md:size-10 flex items-center justify-center bg-white/10 border border-white/25 hover:bg-white/20 transition-colors active:scale-90 disabled:opacity-25 disabled:pointer-events-none"
+                >
+                  <ChevronRight className="size-6 md:size-7 text-white" />
+                </button>
+              </>
+            )}
             {/* Header */}
             <div className="shrink-0">
               <div className="w-full flex justify-end">
@@ -628,6 +654,9 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
                     </h2>
                     <p className="text-sm md:text-base lg:text-lg text-white/80">
                       Mesa {tableNumber}
+                      {activeOrders.length > 1
+                        ? ` • ${activeOrderIndex + 1} de ${activeOrders.length}`
+                        : ""}
                     </p>
                   </div>
                 </div>
