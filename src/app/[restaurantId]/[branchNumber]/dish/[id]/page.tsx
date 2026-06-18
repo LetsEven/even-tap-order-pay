@@ -493,7 +493,11 @@ export default function DishDetailPage() {
         setIsReviewModalOpen(false);
         await Promise.all([loadDishStats(), loadMyReview()]);
       } else {
-        throw new Error(response.error || "Error al enviar reseña");
+        throw new Error(
+          (typeof response.error === "string"
+            ? response.error
+            : response.error?.message) || "Error al enviar reseña",
+        );
       }
     } catch (error: any) {
       console.error("Error submitting review:", error);
@@ -1089,7 +1093,9 @@ export default function DishDetailPage() {
                     value={specialInstructions}
                     onChange={(e) => setSpecialInstructions(e.target.value)}
                     maxLength={60}
-                    onBlur={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                    onBlur={() =>
+                      window.scrollTo({ top: 0, behavior: "smooth" })
+                    }
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
