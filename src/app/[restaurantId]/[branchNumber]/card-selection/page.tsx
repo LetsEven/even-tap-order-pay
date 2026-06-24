@@ -45,22 +45,7 @@ export default function CardSelectionPage() {
   const { guestId, guestName } = useGuest();
   const searchParams = useSearchParams();
 
-  const isDev = process.env.NODE_ENV === "development";
-
-  const defaultSystemCard = {
-    id: "system-default-card",
-    lastFourDigits: "1234",
-    cardBrand: "amex",
-    cardType: "credit",
-    isDefault: true,
-    isSystemCard: true,
-  };
-
-  const allPaymentMethods = [
-    //...(isDev ? [defaultSystemCard] : []),
-    defaultSystemCard,
-    ...paymentMethods,
-  ];
+  const allPaymentMethods = [...paymentMethods];
 
   const baseAmount = cartState.totalPrice;
   const MINIMUM_AMOUNT = 20;
@@ -661,36 +646,6 @@ export default function CardSelectionPage() {
         return;
       }
 
-      // ── Tarjeta del sistema (sin EcartPay) ─────────────────────────────────
-      if (selectedPaymentMethodId === "system-default-card") {
-        const result = await tapOrderService.confirmOrder({
-          ...commonBody,
-          payment_method_id: null,
-          payment_source: "dev",
-        });
-
-        if (!result.success || !result.data?.order) {
-          throw new Error(
-            (result.error as any)?.message ||
-              result.error ||
-              "Error al confirmar la orden",
-          );
-        }
-
-        const orderId = result.data.order.id;
-        saveAndFinalize(
-          orderId,
-          `pick-go-${orderId}`,
-          orderId,
-          "1234",
-          "amex",
-          null,
-        );
-        setOrderNotes("");
-        await clearCart();
-        setCompletedOrderId(orderId);
-        return;
-      }
 
       // ── Tarjeta guardada (EcartPay primero) ────────────────────────────────
       const paymentResult = await paymentService.processPayment({
@@ -1060,8 +1015,7 @@ export default function CardSelectionPage() {
                           )}
                         </div>
 
-                        {method.id !== "system-default-card" && (
-                          <button
+                        <button
                             onClick={() => handleDeleteCard(method.id)}
                             disabled={deletingCardId === method.id}
                             className="pl-2 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50 cursor-pointer"
@@ -1072,7 +1026,6 @@ export default function CardSelectionPage() {
                               <Trash2 className="size-5" />
                             )}
                           </button>
-                        )}
                       </div>
                     ))}
 
