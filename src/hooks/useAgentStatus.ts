@@ -9,6 +9,7 @@ interface AgentStatus {
   isAgentConnected: boolean;
   isActive: boolean;
   providerName: string | null;
+  isTurnoOpen: boolean | null;
 }
 
 export function useAgentStatus(
@@ -36,6 +37,7 @@ export function useAgentStatus(
           isAgentConnected: data.isAgentConnected ?? false,
           isActive: data.isActive ?? false,
           providerName: data.providerName ?? null,
+          isTurnoOpen: data.isTurnoOpen ?? null,
         });
       } catch (err) {
         console.error("useAgentStatus error:", err);
@@ -48,12 +50,26 @@ export function useAgentStatus(
     fetchStatus();
   }, [restaurantId, branchNumber]);
 
-  // true solo si tiene integración activa pero el agente no está conectado
-  const isAgentRequired =
-    agentStatus !== null &&
-    agentStatus.hasIntegration &&
-    agentStatus.isActive &&
-    !agentStatus.isAgentConnected;
+  const hasActivePOS =
+    agentStatus !== null && agentStatus.hasIntegration && agentStatus.isActive;
 
-  return { agentStatus, isLoadingAgentStatus, isAgentRequired };
+  // Agente requerido pero no conectado
+  const isAgentRequired = hasActivePOS && !agentStatus.isAgentConnected;
+
+  // Agente desconectado (alias explícito para mensajes distintos)
+  const isAgentDisconnected = hasActivePOS && !agentStatus.isAgentConnected;
+
+  // Agente conectado pero turno cerrado en SR
+  const isTurnoClosed =
+    hasActivePOS &&
+    agentStatus.isAgentConnected &&
+    agentStatus.isTurnoOpen === false;
+
+  return {
+    agentStatus,
+    isLoadingAgentStatus,
+    isAgentRequired,
+    isAgentDisconnected,
+    isTurnoClosed,
+  };
 }

@@ -1,14 +1,34 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useParams } from "next/navigation";
 import { Minus, Plus, ShoppingBag, ChevronDown } from "lucide-react";
 import { useTable } from "../context/TableContext";
 import { useCart } from "../context/CartContext";
 import { useTableNavigation } from "../hooks/useTableNavigation";
 import MenuHeaderBack from "./headers/MenuHeaderBack";
 import { useAuth } from "../context/AuthContext";
+import { useAgentStatus } from "../hooks/useAgentStatus";
+import { useRestaurant } from "../context/RestaurantContext";
+import POSBlockedModal from "./POSBlockedModal";
+
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") ||
+  "http://localhost:5000";
 
 export default function CartView() {
+  const params = useParams();
+  const restaurantId = params?.restaurantId
+    ? Number(params.restaurantId)
+    : null;
+  const branchNumber = params?.branchNumber
+    ? Number(params.branchNumber)
+    : null;
+  const { agentStatus } = useAgentStatus(restaurantId, branchNumber);
+  const hasActivePOS =
+    agentStatus !== null && agentStatus.hasIntegration && agentStatus.isActive;
+  const { restaurant } = useRestaurant();
+
   const { state: tableState } = useTable();
   const {
     state: cartState,
@@ -21,9 +41,36 @@ export default function CartView() {
   const { isAuthenticated, isLoading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
+  const [showPOSModal, setShowPOSModal] = useState(false);
+  const [posModalReason, setPosModalReason] = useState<
+    "turno_closed" | "agent_disconnected"
+  >("turno_closed");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const handleOrder = async () => {
+    if (hasActivePOS && restaurantId && branchNumber) {
+      try {
+        const res = await fetch(
+          `${API_BASE_URL}/api/pos/restaurant/${restaurantId}/branch/${branchNumber}/attempt-order`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              identifier: `Mesa ${tableState.tableNumber}`,
+            }),
+          },
+        );
+        const data = await res.json();
+        if (data.blocked) {
+          setPosModalReason(data.reason);
+          setShowPOSModal(true);
+          return;
+        }
+      } catch {
+        // network error — proceed with order
+      }
+    }
+
     if (!isLoading && isAuthenticated) {
       setIsSubmitting(true);
       try {
@@ -300,6 +347,14 @@ export default function CartView() {
           </div>
         </div>
       </div>
+
+      <POSBlockedModal
+        isOpen={showPOSModal}
+        onClose={() => setShowPOSModal(false)}
+        reason={posModalReason}
+        restaurantName={restaurant?.name}
+        restaurantLogo={restaurant?.logo_url}
+      />
     </div>
   );
 }

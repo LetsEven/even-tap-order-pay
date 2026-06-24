@@ -18,9 +18,10 @@ import { tapOrderService } from "@/services/taporders.service";
 import { paymentService } from "@/services/payment.service";
 import { calculateCommissions } from "@/utils/commissionCalculator";
 import { usePaymentProvider } from "@/hooks/usePaymentProvider";
-import { useAgentStatus } from "@/hooks/useAgentStatus";
 import { useMsiConfig } from "@/hooks/useMsiConfig";
 import { useRestaurant } from "@/context/RestaurantContext";
+import { useAgentStatus } from "@/hooks/useAgentStatus";
+import POSBlockedModal from "@/components/POSBlockedModal";
 
 export default function CardSelectionPage() {
   const {
@@ -30,7 +31,10 @@ export default function CardSelectionPage() {
   } = useValidateAccess();
   const restaurantId = restaurantIdNum.toString();
   const { provider, isLoadingProvider } = usePaymentProvider(restaurantId);
-  const { isAgentRequired } = useAgentStatus(restaurantIdNum, branchNumber);
+  const { isAgentDisconnected, isTurnoClosed } = useAgentStatus(
+    restaurantIdNum,
+    branchNumber,
+  );
   const { msiConfig } = useMsiConfig();
   const { restaurant } = useRestaurant();
 
@@ -67,6 +71,7 @@ export default function CardSelectionPage() {
 
   const [showTotalModal, setShowTotalModal] = useState(false);
   const [showPaymentOptionsModal, setShowPaymentOptionsModal] = useState(false);
+  const [showPOSModal, setShowPOSModal] = useState(false);
   const [selectedMSI, setSelectedMSI] = useState<number | null>(null);
 
   // Tarjetas
@@ -422,6 +427,11 @@ export default function CardSelectionPage() {
   }, [isLoadingInitial, totalAmount, googlePayUnavailable]);
 
   const handleInitiatePayment = (): void => {
+    if (isAgentDisconnected || isTurnoClosed) {
+      setShowPOSModal(true);
+      return;
+    }
+
     if (!tableNumber) {
       setErrorMessage(
         "No se encontró el número de mesa. Por favor escanea el código QR nuevamente.",
@@ -919,9 +929,7 @@ export default function CardSelectionPage() {
 
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="bg-white rounded-t-4xl flex-1 flex flex-col px-8 overflow-hidden z-50">
-              <div
-                className={`flex-1 overflow-y-auto py-8 ${isAgentRequired ? "pb-[160px]" : "pb-[120px]"}`}
-              >
+              <div className="flex-1 overflow-y-auto py-8 pb-[120px]">
                 {/* Resumen del pedido */}
                 <div className="space-y-2 mb-6">
                   <div className="flex justify-between items-center">
@@ -1069,7 +1077,7 @@ export default function CardSelectionPage() {
                     ))}
 
                     {/* Apple Pay */}
-                    {!applePayUnavailable && !isAgentRequired && (
+                    {!applePayUnavailable && (
                       <div className="relative w-full h-[48px]">
                         <div id="apple-pay-container" className="w-full" />
                         {!applePayReady && (
@@ -1094,7 +1102,7 @@ export default function CardSelectionPage() {
                     )}
 
                     {/* Google Pay */}
-                    {!googlePayUnavailable && !isAgentRequired && (
+                    {!googlePayUnavailable && (
                       <div className="relative w-full h-[48px]">
                         <div id="google-pay-container" className="w-full" />
                         {!googlePayReady && (
@@ -1151,25 +1159,13 @@ export default function CardSelectionPage() {
 
         {/* Barra inferior fija */}
         <div className="fixed bottom-0 left-0 right-0 bg-white mx-4 px-8 z-90 py-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-          {isAgentRequired && (
-            <p className="text-red-500 text-xs text-center mb-6">
-              El sistema de caja no está disponible en este momento. Intenta más
-              tarde.
-            </p>
-          )}
           <button
             onClick={handleInitiatePayment}
             disabled={
-              isProcessing ||
-              !selectedPaymentMethodId ||
-              isUnderMinimum ||
-              isAgentRequired
+              isProcessing || !selectedPaymentMethodId || isUnderMinimum
             }
             className={`py-3 text-even-evergreen rounded-full cursor-pointer font-normal h-fit w-full flex items-center justify-center text-base active:scale-95 transition-transform ${
-              isProcessing ||
-              !selectedPaymentMethodId ||
-              isUnderMinimum ||
-              isAgentRequired
+              isProcessing || !selectedPaymentMethodId || isUnderMinimum
                 ? "bg-even-grass opacity-50 cursor-not-allowed px-10"
                 : "bg-even-grass px-10 animate-pulse-button"
             }`}
@@ -1435,6 +1431,14 @@ export default function CardSelectionPage() {
           </div>
         </div>
       )}
+
+      <POSBlockedModal
+        isOpen={showPOSModal}
+        onClose={() => setShowPOSModal(false)}
+        reason={isTurnoClosed ? "turno_closed" : "agent_disconnected"}
+        restaurantName={restaurant?.name}
+        restaurantLogo={restaurant?.logo_url}
+      />
     </>
   );
 }
