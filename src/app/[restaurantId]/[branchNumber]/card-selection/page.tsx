@@ -31,7 +31,7 @@ export default function CardSelectionPage() {
   } = useValidateAccess();
   const restaurantId = restaurantIdNum.toString();
   const { provider, isLoadingProvider } = usePaymentProvider(restaurantId);
-  const { isAgentDisconnected, isTurnoClosed } = useAgentStatus(
+  const { isAgentDisconnected, isTurnoClosed, isLoadingAgentStatus } = useAgentStatus(
     restaurantIdNum,
     branchNumber,
   );
@@ -1077,7 +1077,7 @@ export default function CardSelectionPage() {
                     ))}
 
                     {/* Apple Pay */}
-                    {!applePayUnavailable && !isAgentDisconnected && !isTurnoClosed && (
+                    {!applePayUnavailable && !isLoadingAgentStatus && !isAgentDisconnected && !isTurnoClosed && (
                       <div className="relative w-full h-[48px]">
                         <div id="apple-pay-container" className="w-full" />
                         {!applePayReady && (
@@ -1102,7 +1102,7 @@ export default function CardSelectionPage() {
                     )}
 
                     {/* Google Pay */}
-                    {!googlePayUnavailable && !isAgentDisconnected && !isTurnoClosed && (
+                    {!googlePayUnavailable && !isLoadingAgentStatus && !isAgentDisconnected && !isTurnoClosed && (
                       <div className="relative w-full h-[48px]">
                         <div id="google-pay-container" className="w-full" />
                         {!googlePayReady && (
