@@ -1077,7 +1077,7 @@ export default function CardSelectionPage() {
                     ))}
 
                     {/* Apple Pay */}
-                    {!applePayUnavailable && (
+                    {!applePayUnavailable && !isAgentDisconnected && !isTurnoClosed && (
                       <div className="relative w-full h-[48px]">
                         <div id="apple-pay-container" className="w-full" />
                         {!applePayReady && (
@@ -1102,7 +1102,7 @@ export default function CardSelectionPage() {
                     )}
 
                     {/* Google Pay */}
-                    {!googlePayUnavailable && (
+                    {!googlePayUnavailable && !isAgentDisconnected && !isTurnoClosed && (
                       <div className="relative w-full h-[48px]">
                         <div id="google-pay-container" className="w-full" />
                         {!googlePayReady && (
