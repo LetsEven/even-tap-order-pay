@@ -45,6 +45,7 @@ export interface ProcessPaymentRequest {
   currency: string;
   description: string;
   orderId: string;
+  orderType?: string;
   tableNumber: string;
   restaurantId: string;
   installments?: number;
