@@ -135,7 +135,7 @@ export default function UserPage() {
                   value={userName}
                   onKeyDown={handleKeyDown}
                   onChange={handleNameChange}
-                  className="w-full px-6 md:px-8 lg:px-10 py-3 md:py-4 lg:py-5 bg-gray-100/90 backdrop-blur-xl rounded-[9999px]! text-black text-xl md:text-2xl lg:text-3xl text-center font-normal placeholder:text-gray-400 focus:outline-none border border-white/80 shadow-[0_2px_8px_rgba(0,0,0,0.06),inset_0_1px_6px_rgba(255,255,255,0.8)] focus:shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_0_0_1.2px_rgba(20,184,166,0.5)] transition-shadow"
+                  className="w-full px-6 md:px-8 lg:px-10 py-3 md:py-4 lg:py-5 bg-gray-100/90 backdrop-blur-xl rounded-[9999px]! text-black text-xl md:text-2xl lg:text-3xl text-center font-normal placeholder:text-gray-400 focus:outline-none border border-white/80 shadow-[0_2px_8px_rgba(0,0,0,0.06),inset_0_1px_6px_rgba(255,255,255,0.8)] focus:shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_0_0_1.2px_rgba(130,230,87,0.7)] transition-shadow"
                 />
               </div>
             </div>
