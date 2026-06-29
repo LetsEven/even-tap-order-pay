@@ -24,7 +24,10 @@ export default function CartView() {
   const branchNumber = params?.branchNumber
     ? Number(params.branchNumber)
     : null;
-  const { agentStatus } = useAgentStatus(restaurantId, branchNumber);
+  const { agentStatus, isLoadingAgentStatus } = useAgentStatus(
+    restaurantId,
+    branchNumber,
+  );
   const hasActivePOS =
     agentStatus !== null && agentStatus.hasIntegration && agentStatus.isActive;
   const { restaurant } = useRestaurant();
@@ -40,6 +43,7 @@ export default function CartView() {
   const { navigateWithTable } = useTableNavigation();
   const { isAuthenticated, isLoading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingPOS, setIsCheckingPOS] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
   const [showPOSModal, setShowPOSModal] = useState(false);
   const [posModalReason, setPosModalReason] = useState<
@@ -49,6 +53,7 @@ export default function CartView() {
 
   const handleOrder = async () => {
     if (hasActivePOS && restaurantId && branchNumber) {
+      setIsCheckingPOS(true);
       try {
         const res = await fetch(
           `${API_BASE_URL}/api/pos/restaurant/${restaurantId}/branch/${branchNumber}/attempt-order`,
@@ -68,6 +73,8 @@ export default function CartView() {
         }
       } catch {
         // network error — proceed with order
+      } finally {
+        setIsCheckingPOS(false);
       }
     }
 
@@ -330,16 +337,28 @@ export default function CartView() {
                   </div>
                   <button
                     onClick={handleOrder}
-                    disabled={isSubmitting || cartState.isLoading}
+                    disabled={
+                      isLoadingAgentStatus ||
+                      isCheckingPOS ||
+                      isSubmitting ||
+                      cartState.isLoading
+                    }
                     className={`py-3 md:py-4 lg:py-5 text-even-evergreen rounded-full cursor-pointer font-normal h-fit flex items-center justify-center text-base md:text-lg lg:text-xl active:scale-95 transition-transform ${
-                      isSubmitting || cartState.isLoading
+                      isLoadingAgentStatus ||
+                      isCheckingPOS ||
+                      isSubmitting ||
+                      cartState.isLoading
                         ? "bg-even-grass opacity-50 cursor-not-allowed px-10 md:px-12 lg:px-14"
                         : "bg-even-grass px-18 md:px-20 lg:px-24 animate-pulse-button"
                     }`}
                   >
-                    {isSubmitting || cartState.isLoading
-                      ? "Cargando..."
-                      : "Ordenar"}
+                    {isLoadingAgentStatus
+                      ? "Verificando..."
+                      : isCheckingPOS
+                        ? "Revisando disponibilidad..."
+                        : isSubmitting || cartState.isLoading
+                          ? "Enviando pedido..."
+                          : "Ordenar"}
                   </button>
                 </div>
               </div>
