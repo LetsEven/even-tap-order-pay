@@ -67,19 +67,20 @@ export default function CartView() {
         );
         const data = await res.json();
         if (data.blocked) {
+          setIsCheckingPOS(false);
           setPosModalReason(data.reason);
           setShowPOSModal(true);
           return;
         }
       } catch {
         // network error — proceed with order
-      } finally {
-        setIsCheckingPOS(false);
       }
+      // intentionally NOT clearing isCheckingPOS here — let the next state take over
     }
 
     if (!isLoading && isAuthenticated) {
       setIsSubmitting(true);
+      setIsCheckingPOS(false); // batch together so there's no flash between states
       try {
         navigateWithTable("/order-confirm");
       } catch (error) {
@@ -88,6 +89,7 @@ export default function CartView() {
         setIsSubmitting(false);
       }
     } else {
+      setIsCheckingPOS(false);
       sessionStorage.setItem("authFromPaymentFlow", "true");
       navigateWithTable("/auth");
     }
@@ -353,7 +355,7 @@ export default function CartView() {
                     }`}
                   >
                     {isLoadingAgentStatus
-                      ? "Verificando..."
+                      ? "Cargando..."
                       : isCheckingPOS
                         ? "Cargando..."
                         : isSubmitting || cartState.isLoading
