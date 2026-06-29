@@ -349,13 +349,13 @@ export default function CartView() {
                       isSubmitting ||
                       cartState.isLoading
                         ? "bg-even-grass opacity-50 cursor-not-allowed px-10 md:px-12 lg:px-14"
-                        : "bg-even-grass px-18 md:px-20 lg:px-24 animate-pulse-button"
+                        : "bg-even-grass px-10 md:px-12 lg:px-14 animate-pulse-button"
                     }`}
                   >
                     {isLoadingAgentStatus
                       ? "Verificando..."
                       : isCheckingPOS
-                        ? "Revisando disponibilidad..."
+                        ? "Cargando..."
                         : isSubmitting || cartState.isLoading
                           ? "Enviando pedido..."
                           : "Ordenar"}
