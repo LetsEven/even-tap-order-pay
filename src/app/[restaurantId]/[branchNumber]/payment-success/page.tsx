@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, lazy, Suspense } from "react";
+import { lockScroll, unlockScroll } from "@/utils/scrollLock";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 const ReorderModal = lazy(() => import("@/components/modals/ReorderModal"));
@@ -97,30 +98,21 @@ export default function PaymentSuccessPage() {
     }
   }, [cameFromAuth]);
 
-  // Bloquear scroll cuando los modales están abiertos
   useEffect(() => {
-    if (
-      isTicketModalOpen ||
-      isBreakdownModalOpen ||
-      isStatusModalOpen ||
-      isRegisterModalOpen ||
-      showReorderModal
-    ) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [
-    isTicketModalOpen,
-    isBreakdownModalOpen,
-    isStatusModalOpen,
-    isRegisterModalOpen,
-    showReorderModal,
-  ]);
+    if (isTicketModalOpen) { lockScroll(); return unlockScroll; }
+  }, [isTicketModalOpen]);
+  useEffect(() => {
+    if (isBreakdownModalOpen) { lockScroll(); return unlockScroll; }
+  }, [isBreakdownModalOpen]);
+  useEffect(() => {
+    if (isStatusModalOpen) { lockScroll(); return unlockScroll; }
+  }, [isStatusModalOpen]);
+  useEffect(() => {
+    if (isRegisterModalOpen) { lockScroll(); return unlockScroll; }
+  }, [isRegisterModalOpen]);
+  useEffect(() => {
+    if (showReorderModal) { lockScroll(); return unlockScroll; }
+  }, [showReorderModal]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {

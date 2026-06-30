@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
+import { lockScroll, unlockScroll } from "@/utils/scrollLock";
 
 interface POSBlockedModalProps {
   isOpen: boolean;
@@ -20,13 +21,9 @@ export default function POSBlockedModal({
 }: POSBlockedModalProps) {
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
+      lockScroll();
+      return unlockScroll;
     }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
   }, [isOpen]);
 
   if (!isOpen) return null;

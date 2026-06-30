@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
+import { lockScroll, unlockScroll } from "@/utils/scrollLock";
 import { getNextOpeningTime } from "../utils/restaurantHours";
 import { OpeningHours } from "../utils/restaurantHours";
 
@@ -20,18 +21,11 @@ export default function RestaurantClosedModal({
   restaurantName,
   restaurantLogo,
 }: RestaurantClosedModalProps) {
-  // Bloquear scroll cuando el modal está abierto
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
+      lockScroll();
+      return unlockScroll;
     }
-
-    // Cleanup: restaurar scroll al desmontar
-    return () => {
-      document.body.style.overflow = "unset";
-    };
   }, [isOpen]);
 
   if (!isOpen) return null;

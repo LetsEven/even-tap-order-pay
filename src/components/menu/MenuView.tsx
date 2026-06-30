@@ -10,6 +10,7 @@ import {
   useTransition,
   useDeferredValue,
 } from "react";
+import { lockScroll, unlockScroll } from "@/utils/scrollLock";
 import MenuHeader from "../headers/MenuHeader";
 import MenuCategory from "./MenuCategory";
 import {
@@ -70,22 +71,6 @@ function getStatusText(status: string) {
   }
 }
 
-function lockScroll() {
-  const scrollY = window.scrollY;
-  document.body.style.position = "fixed";
-  document.body.style.top = `-${scrollY}px`;
-  document.body.style.width = "100%";
-  document.body.style.overflow = "hidden";
-}
-
-function unlockScroll() {
-  const scrollY = parseInt(document.body.style.top || "0") * -1;
-  document.body.style.position = "";
-  document.body.style.top = "";
-  document.body.style.width = "";
-  document.body.style.overflow = "";
-  window.scrollTo(0, scrollY);
-}
 
 interface UserAvatarProps {
   isAuthenticated: boolean;
@@ -187,20 +172,18 @@ export default function MenuView({ tableNumber }: MenuViewProps) {
     }, 380);
   };
 
-  // Scroll lock unificado para todos los modales
   useEffect(() => {
-    if (
-      showPepperChat ||
-      showSettingsModal ||
-      isStatusModalOpen ||
-      showReorderModal
-    ) {
-      lockScroll();
-    } else {
-      unlockScroll();
-    }
-    return unlockScroll;
-  }, [showPepperChat, showSettingsModal, isStatusModalOpen, showReorderModal]);
+    if (showPepperChat) { lockScroll(); return unlockScroll; }
+  }, [showPepperChat]);
+  useEffect(() => {
+    if (showSettingsModal) { lockScroll(); return unlockScroll; }
+  }, [showSettingsModal]);
+  useEffect(() => {
+    if (isStatusModalOpen) { lockScroll(); return unlockScroll; }
+  }, [isStatusModalOpen]);
+  useEffect(() => {
+    if (showReorderModal) { lockScroll(); return unlockScroll; }
+  }, [showReorderModal]);
 
   // Precargar chunks lazy después de que la página ya es interactiva
   useEffect(() => {
