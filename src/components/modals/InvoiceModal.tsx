@@ -388,9 +388,9 @@ export default function InvoiceModal({
                 antes de emitir.
               </p>
               {previewBlobUrl && (
-                <iframe
+                <embed
                   src={previewBlobUrl}
-                  title="Vista previa de factura"
+                  type="application/pdf"
                   className="w-full rounded-xl border border-black/10"
                   style={{ height: "380px" }}
                 />

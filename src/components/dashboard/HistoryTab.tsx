@@ -644,6 +644,15 @@ export default function HistoryTab() {
             transactionId={invoiceModalOrder.transactionId || ""}
             restaurantId={invoiceModalOrder.restaurantId || 0}
             isAuthenticated={isAuthenticated}
+            onInvoiceCreated={(invoiceId) => {
+              setOrders((prev) =>
+                prev.map((o) =>
+                  o.transactionId === invoiceModalOrder.transactionId
+                    ? { ...o, facturapiInvoiceId: invoiceId, invoiceStatus: "valid" }
+                    : o,
+                ),
+              );
+            }}
           />,
           document.body,
         )}
