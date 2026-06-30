@@ -20,6 +20,7 @@ export interface Restaurant {
   };
   created_at: string;
   updated_at: string;
+  billing_enabled?: boolean;
 }
 
 // Interface simplificada para uso en componentes

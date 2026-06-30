@@ -4,6 +4,8 @@ import { useEffect, useState, lazy, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 const ReorderModal = lazy(() => import("@/components/modals/ReorderModal"));
+import InvoiceModal from "@/components/modals/InvoiceModal";
+import { invoiceService } from "@/services/invoice.service";
 import { useTableNavigation } from "@/hooks/useTableNavigation";
 import { useRestaurant } from "@/context/RestaurantContext";
 import { useTable } from "@/context/TableContext";
@@ -18,6 +20,7 @@ import {
   Loader2,
   LogIn,
   UserCircle2,
+  FileText,
 } from "lucide-react";
 import { getCardTypeIcon } from "@/utils/cardIcons";
 import { tapOrderService } from "@/services/taporders.service";
@@ -73,6 +76,10 @@ export default function PaymentSuccessPage() {
   const [showReorderModal, setShowReorderModal] = useState(false);
   const [reorderItems, setReorderItems] = useState<LastOrderDish[]>([]);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+  const [existingInvoiceId, setExistingInvoiceId] = useState<string | null>(
+    null,
+  );
 
   // Abrir el modal de registro solo cuando la auth terminó de cargar
   // y confirmamos que NO hay sesión (evita el flash al recargar)
@@ -251,6 +258,19 @@ export default function PaymentSuccessPage() {
     fetchDishOrders();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paymentId, paymentDetails]);
+
+  useEffect(() => {
+    const txId = paymentDetails?.transactionId || paymentDetails?.paymentId;
+    if (!txId) return;
+    invoiceService
+      .getTransactionInvoice(txId)
+      .then((info) => {
+        if (info?.invoiceId && info.status !== "cancelled") {
+          setExistingInvoiceId(info.invoiceId);
+        }
+      })
+      .catch(() => {});
+  }, [paymentDetails]);
 
   const handleBackToMenu = () => {
     // Clear payment success data from sessionStorage
@@ -605,37 +625,64 @@ export default function PaymentSuccessPage() {
               )}
             </div>
 
-            {/* Total Summary - Fixed */}
-            <div className="shrink-0 px-6 md:px-8 lg:px-10 flex justify-between items-center border-t border-white/20 pt-4 md:pt-5 lg:pt-6 pb-6 md:pb-8 lg:pb-10">
-              <div className="flex items-center gap-2 md:gap-3 lg:gap-4">
-                <span className="text-lg md:text-xl lg:text-2xl font-medium text-white">
-                  Total
-                </span>
-                {(paymentDetails?.baseAmount ||
-                  paymentDetails?.tipAmount ||
-                  paymentDetails?.evenCommissionClient) && (
-                  <button
-                    onClick={() => setIsBreakdownModalOpen(true)}
-                    className="p-1 hover:bg-white/10 rounded-full transition-colors"
-                    aria-label="Ver desglose"
-                  >
-                    <CircleAlert
-                      className="size-4 md:size-5 lg:size-6 cursor-pointer text-white/70"
-                      strokeWidth={2.3}
-                    />
-                  </button>
+            {/* Total Summary + Facturar - Fixed */}
+            <div className="shrink-0 px-6 md:px-8 lg:px-10 border-t border-white/20 pt-4 md:pt-5 lg:pt-6 pb-6 md:pb-8 lg:pb-10 flex flex-col gap-4 md:gap-5 lg:gap-6">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2 md:gap-3 lg:gap-4">
+                  <span className="text-lg md:text-xl lg:text-2xl font-medium text-white">
+                    Total
+                  </span>
+                  {(paymentDetails?.baseAmount ||
+                    paymentDetails?.tipAmount ||
+                    paymentDetails?.evenCommissionClient) && (
+                    <button
+                      onClick={() => setIsBreakdownModalOpen(true)}
+                      className="p-1 hover:bg-white/10 rounded-full transition-colors"
+                      aria-label="Ver desglose"
+                    >
+                      <CircleAlert
+                        className="size-4 md:size-5 lg:size-6 cursor-pointer text-white/70"
+                        strokeWidth={2.3}
+                      />
+                    </button>
+                  )}
+                </div>
+                {paymentDetails?.installments ? (
+                  <span className="text-lg md:text-xl lg:text-2xl font-medium text-white">
+                    {paymentDetails.installments}x $
+                    {(amount / paymentDetails.installments).toFixed(2)} MXN
+                  </span>
+                ) : (
+                  <span className="text-lg md:text-xl lg:text-2xl font-medium text-white">
+                    ${amount.toFixed(2)} MXN
+                  </span>
                 )}
               </div>
-              {paymentDetails?.installments ? (
-                <span className="text-lg md:text-xl lg:text-2xl font-medium text-white">
-                  {paymentDetails.installments}x $
-                  {(amount / paymentDetails.installments).toFixed(2)} MXN
-                </span>
-              ) : (
-                <span className="text-lg md:text-xl lg:text-2xl font-medium text-white">
-                  ${amount.toFixed(2)} MXN
-                </span>
-              )}
+
+              {restaurant?.billing_enabled !== false &&
+                (existingInvoiceId ? (
+                  <button
+                    onClick={() => {
+                      setIsTicketModalOpen(false);
+                      setIsInvoiceModalOpen(true);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 text-even-evergreen bg-even-grass py-3 md:py-4 rounded-full cursor-pointer transition-all active:scale-90 text-base md:text-lg font-medium"
+                  >
+                    <FileText className="size-4 md:size-5" strokeWidth={1.5} />
+                    Ver factura
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setIsTicketModalOpen(false);
+                      setIsInvoiceModalOpen(true);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 text-even-evergreen bg-even-grass py-3 md:py-4 rounded-full cursor-pointer transition-all active:scale-90 text-base md:text-lg font-medium"
+                  >
+                    <FileText className="size-4 md:size-5" strokeWidth={1.5} />
+                    Facturar
+                  </button>
+                ))}
             </div>
           </div>
         </div>
@@ -982,6 +1029,19 @@ export default function PaymentSuccessPage() {
           items={reorderItems}
         />
       </Suspense>
+
+      {/* Invoice Modal */}
+      <InvoiceModal
+        isOpen={isInvoiceModalOpen}
+        onClose={() => setIsInvoiceModalOpen(false)}
+        transactionId={
+          paymentDetails?.transactionId || paymentDetails?.paymentId || ""
+        }
+        restaurantId={parseInt(restaurantId as string, 10)}
+        isAuthenticated={isAuthenticated}
+        onInvoiceCreated={(id) => setExistingInvoiceId(id)}
+        existingInvoiceId={existingInvoiceId}
+      />
     </div>
   );
 }

@@ -1,9 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useAuth } from "@/context/AuthContext";
-import { Loader2, ChevronRight, X, Calendar, Utensils } from "lucide-react";
+import {
+  Loader2,
+  X,
+  Calendar,
+  Utensils,
+  FileText,
+  Download,
+  CircleAlert,
+} from "lucide-react";
 import { getCardTypeIcon } from "@/utils/cardIcons";
+import InvoiceModal from "@/components/modals/InvoiceModal";
+import { invoiceService } from "@/services/invoice.service";
 
 interface OrderHistoryItem {
   orderType?:
@@ -36,15 +47,38 @@ interface OrderHistoryItem {
   paymentCardLastFour?: string | null;
   paymentCardType?: string | null;
   paymentCardBrand?: string | null;
+  // Invoice / CFDI
+  transactionId?: string | null;
+  facturapiInvoiceId?: string | null;
+  invoiceStatus?: string | null;
+  invoicedViaConsolidation?: boolean;
+  billingEnabled?: boolean;
+  commissionAmount?: number;
+}
+
+function isCurrentMonth(dateValue: string) {
+  if (!dateValue) return false;
+  const date = new Date(dateValue);
+  const now = new Date();
+  return (
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth()
+  );
 }
 
 export default function HistoryTab() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [orders, setOrders] = useState<OrderHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedOrderDetails, setSelectedOrderDetails] = useState<any>(null);
   const [displayCount, setDisplayCount] = useState(5);
+  const [invoiceModalOrder, setInvoiceModalOrder] =
+    useState<OrderHistoryItem | null>(null);
+  const [downloadingInvoiceId, setDownloadingInvoiceId] = useState<
+    string | null
+  >(null);
+  const [isBreakdownOpen, setIsBreakdownOpen] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -181,45 +215,40 @@ export default function HistoryTab() {
               }}
               className="border border-gray-200 rounded-lg md:rounded-xl p-4 md:p-5 lg:p-6 cursor-pointer"
             >
-              {/* Header */}
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-3 md:gap-4 lg:gap-5">
-                  {/* Logo */}
-                  {order.restaurantLogo ? (
-                    <img
-                      src={order.restaurantLogo}
-                      alt={order.restaurantName}
-                      className="size-16 md:size-20 lg:size-24 object-cover rounded-lg md:rounded-xl"
-                    />
-                  ) : (
-                    <div className="size-16 md:size-20 lg:size-24 bg-even-grass/20 rounded-lg md:rounded-xl flex items-center justify-center">
-                      <span className="text-2xl md:text-3xl lg:text-4xl">
-                        🍽️
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Order Info */}
-                  <div className="flex-1">
-                    <h3 className="text-black mb-1 text-base md:text-lg lg:text-xl">
-                      {order.restaurantName}
-                    </h3>
-                    <p className="text-sm md:text-base lg:text-lg text-gray-600 mb-1">
-                      {order.totalQuantity}{" "}
-                      {order.totalQuantity === 1 ? "articulo" : "articulos"} - $
-                      {order.totalAmount.toFixed(2)}
-                    </p>
-                    <p className="text-xs md:text-sm lg:text-base text-gray-400">
-                      {new Date(order.tableOrderDate).toLocaleDateString(
-                        "es-MX",
-                        {
-                          day: "numeric",
-                          month: "numeric",
-                          year: "numeric",
-                        },
-                      )}{" "}
-                    </p>
+              <div className="flex items-center gap-3 md:gap-4 lg:gap-5">
+                {/* Logo */}
+                {order.restaurantLogo ? (
+                  <img
+                    src={order.restaurantLogo}
+                    alt={order.restaurantName}
+                    className="size-16 md:size-20 lg:size-24 object-cover rounded-lg md:rounded-xl shrink-0"
+                  />
+                ) : (
+                  <div className="size-16 md:size-20 lg:size-24 bg-even-grass/20 rounded-lg md:rounded-xl flex items-center justify-center shrink-0">
+                    <span className="text-2xl md:text-3xl lg:text-4xl">🍽️</span>
                   </div>
+                )}
+
+                {/* Order Info */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-black mb-1 text-base md:text-lg lg:text-xl truncate">
+                    {order.restaurantName}
+                  </h3>
+                  <p className="text-sm md:text-base lg:text-lg text-gray-600 mb-1">
+                    {order.totalQuantity}{" "}
+                    {order.totalQuantity === 1 ? "artículo" : "artículos"} · $
+                    {order.totalAmount.toFixed(2)}
+                  </p>
+                  <p className="text-xs md:text-sm lg:text-base text-gray-400">
+                    {new Date(order.tableOrderDate).toLocaleDateString(
+                      "es-MX",
+                      {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      },
+                    )}
+                  </p>
                 </div>
               </div>
             </div>
@@ -238,202 +267,386 @@ export default function HistoryTab() {
       )}
 
       {/* Modal */}
-      {selectedOrderDetails && (
-        <div
-          className="fixed inset-0 bg-black/25 backdrop-blur-xs z-999 flex items-center justify-center"
-          onClick={() => {
-            setSelectedOrderDetails(null);
-          }}
-        >
+      {selectedOrderDetails &&
+        createPortal(
           <div
-            className="bg-even-evergreen/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl z-999 max-h-[85vh] flex flex-col"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 bg-black/25 z-999 flex items-center justify-center"
+            onClick={() => {
+              setSelectedOrderDetails(null);
+              setIsBreakdownOpen(false);
+            }}
           >
-            {/* Header - Fixed */}
-            <div className="shrink-0">
-              <div className="w-full flex justify-end">
-                <button
-                  onClick={() => {
-                    setSelectedOrderDetails(null);
-                  }}
-                  className="p-2 md:p-3 lg:p-4 hover:bg-white/10 rounded-lg md:rounded-xl transition-colors justify-end flex items-end mt-3 md:mt-4 lg:mt-5 mr-3 md:mr-4 lg:mr-5"
-                >
-                  <X className="w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 text-white" />
-                </button>
-              </div>
-              <div className="px-6 md:px-8 lg:px-10 flex items-center justify-center mb-4 md:mb-5 lg:mb-6">
-                <div className="flex flex-col justify-center items-center gap-3 md:gap-4 lg:gap-5">
-                  {selectedOrderDetails.restaurantLogo ? (
-                    <img
-                      src={selectedOrderDetails.restaurantLogo}
-                      alt={selectedOrderDetails.restaurantName}
-                      className="size-20 md:size-24 lg:size-28 object-cover rounded-lg md:rounded-xl"
-                    />
-                  ) : (
-                    <div className="size-20 md:size-24 lg:size-28 bg-even-grass/20 rounded-lg md:rounded-xl flex items-center justify-center">
-                      <span className="text-2xl md:text-3xl lg:text-4xl">
-                        🍽️
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex flex-col items-center justify-center">
-                    <h2 className="text-xl md:text-2xl lg:text-3xl text-white font-bold">
-                      {selectedOrderDetails.restaurantName}
-                    </h2>
-                    {selectedOrderDetails.orderType === "room-service" ? (
-                      <p className="text-sm md:text-base lg:text-lg text-white/80">
-                        Habitación {selectedOrderDetails.roomNumber}
-                      </p>
-                    ) : selectedOrderDetails.orderType !== "pick-and-go" ? (
-                      <p className="text-sm md:text-base lg:text-lg text-white/80">
-                        Mesa {selectedOrderDetails.tableNumber}
-                      </p>
-                    ) : null}
-                    {/* Pick & Go: estatus a nivel de orden */}
-                    {selectedOrderDetails.orderType === "pick-and-go" &&
-                      selectedOrderDetails.tableOrderStatus && (
-                        <span
-                          className={`inline-block mt-2 px-3 py-1 rounded-full text-xs md:text-sm font-medium border ${getStatusColor(selectedOrderDetails.tableOrderStatus)}`}
-                        >
-                          {getStatusText(selectedOrderDetails.tableOrderStatus)}
-                        </span>
-                      )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Order Info - Fixed */}
-              <div className="px-6 md:px-8 lg:px-10 border-t border-white/20 pt-4 md:pt-5 lg:pt-6 pb-4 md:pb-5 lg:pb-6">
-                <h3 className="font-medium text-xl md:text-2xl lg:text-3xl text-white mb-3 md:mb-4 lg:mb-5">
-                  Tu orden
-                </h3>
-                <div className="space-y-2 md:space-y-3 lg:space-y-4">
-                  <div className="flex items-center gap-2 md:gap-3 lg:gap-4 text-white/90">
-                    <div className="bg-even-aqua p-2 md:p-2.5 lg:p-3 rounded-xl flex items-center justify-center">
-                      <Calendar className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-even-evergreen" />
-                    </div>
-                    <span className="text-sm md:text-base lg:text-lg">
-                      {new Date(selectedOrderDetails.tableOrderDate)
-                        .toLocaleDateString("es-MX", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "2-digit",
-                        })
-                        .replace(/\//g, "/")}
-                    </span>
-                  </div>
-                  {selectedOrderDetails.orderType === "room-service" ? (
-                    <div className="flex items-center gap-2 md:gap-3 lg:gap-4 text-white/90">
-                      <div className="bg-orange-100 p-2 md:p-2.5 lg:p-3 rounded-xl flex items-center justify-center">
-                        <Utensils className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-orange-600" />
-                      </div>
-                      <span className="text-sm md:text-base lg:text-lg">
-                        Habitación {selectedOrderDetails.roomNumber}
-                      </span>
-                    </div>
-                  ) : selectedOrderDetails.orderType !== "pick-and-go" ? (
-                    <div className="flex items-center gap-2 md:gap-3 lg:gap-4 text-white/90">
-                      <div className="bg-orange-100 p-2 md:p-2.5 lg:p-3 rounded-xl flex items-center justify-center">
-                        <Utensils className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-orange-600" />
-                      </div>
-                      <span className="text-sm md:text-base lg:text-lg">
-                        Mesa {selectedOrderDetails.tableNumber}
-                      </span>
-                    </div>
-                  ) : null}
-                  {selectedOrderDetails.paymentCardBrand && (
-                    <div className="flex items-center gap-2 md:gap-3 lg:gap-4 text-white/90">
-                      <div className="bg-green-100 px-1 py-1.5 md:py-2 md:px-1.5 lg:py-2.5 lg:px-2 rounded-xl flex items-center justify-center">
-                        {getCardTypeIcon(
-                          selectedOrderDetails.paymentCardBrand,
-                          "small",
-                          32,
-                          20,
-                        )}
-                      </div>
-                      <span className="text-sm md:text-base lg:text-lg">
-                        ****{" "}
-                        {selectedOrderDetails.paymentCardLastFour.slice(-3)}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Lista de platillos - Scrollable */}
-            <div className="flex-1 overflow-y-auto px-6 md:px-8 lg:px-10 border-t border-white/20 pt-4 md:pt-5 lg:pt-6">
-              <h3 className="font-medium text-xl md:text-2xl lg:text-3xl text-white mb-3 md:mb-4 lg:mb-5">
-                Items de la orden
-              </h3>
-              <div className="space-y-3 md:space-y-4 lg:space-y-5 pb-4 md:pb-5 lg:pb-6">
-                {selectedOrderDetails.dishes?.map((dish: any) => (
-                  <div
-                    key={dish.dishOrderId}
-                    className="flex justify-between items-center gap-3 md:gap-4 lg:gap-5"
+            <div
+              className="bg-even-evergreen/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full mx-4 md:mx-12 lg:mx-28 rounded-4xl z-999 max-h-[85vh] flex flex-col overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header - Fixed */}
+              <div className="shrink-0">
+                <div className="w-full flex justify-end">
+                  <button
+                    onClick={() => {
+                      setSelectedOrderDetails(null);
+                      setIsBreakdownOpen(false);
+                    }}
+                    className="p-2 md:p-3 lg:p-4 hover:bg-white/10 rounded-lg md:rounded-xl transition-colors justify-end flex items-end mt-3 md:mt-4 lg:mt-5 mr-3 md:mr-4 lg:mr-5"
                   >
-                    <div className="size-14 md:size-16 lg:size-20 bg-gray-300 rounded-sm md:rounded-md flex items-center justify-center hover:scale-105 transition-transform duration-200">
-                      {dish.images?.length > 0 && dish.images[0] ? (
-                        <img
-                          src={dish.images[0]}
-                          alt="Dish preview"
-                          className="w-full h-full object-cover rounded-sm md:rounded-md"
-                        />
-                      ) : (
-                        <img
-                          src="/even/even-asterisk-evergreen.svg"
-                          alt="Logo Even"
-                          className={`size-10 md:size-12 object-contain`}
-                        />
-                      )}
-                    </div>
-                    {/* Dish Info */}
-                    <div className="flex-1">
-                      <p className="text-white font-medium text-base md:text-lg lg:text-xl capitalize">
-                        {dish.quantity}x {dish.item}
-                      </p>
-                      <p className="text-xs md:text-sm lg:text-base text-white/60">
-                        ${dish.price?.toFixed(2)} MXN c/u
-                      </p>
-                      {dish.extraPrice > 0 && (
-                        <p className="text-xs md:text-sm lg:text-base text-white/60">
-                          + Extras: ${dish.extraPrice?.toFixed(2)} MXN
+                    <X className="w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 text-white" />
+                  </button>
+                </div>
+                <div className="px-6 md:px-8 lg:px-10 flex items-center justify-center mb-4 md:mb-5 lg:mb-6">
+                  <div className="flex flex-col justify-center items-center gap-3 md:gap-4 lg:gap-5">
+                    {selectedOrderDetails.restaurantLogo ? (
+                      <img
+                        src={selectedOrderDetails.restaurantLogo}
+                        alt={selectedOrderDetails.restaurantName}
+                        className="size-20 md:size-24 lg:size-28 object-cover rounded-lg md:rounded-xl"
+                      />
+                    ) : (
+                      <div className="size-20 md:size-24 lg:size-28 bg-even-grass/20 rounded-lg md:rounded-xl flex items-center justify-center">
+                        <span className="text-2xl md:text-3xl lg:text-4xl">
+                          🍽️
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex flex-col items-center justify-center">
+                      <h2 className="text-xl md:text-2xl lg:text-3xl text-white font-bold">
+                        {selectedOrderDetails.restaurantName}
+                      </h2>
+                      {selectedOrderDetails.orderType === "room-service" ? (
+                        <p className="text-sm md:text-base lg:text-lg text-white/80">
+                          Habitación {selectedOrderDetails.roomNumber}
                         </p>
-                      )}
-                      {/* Status Badge — Pick & Go maneja el estatus a nivel de orden, no por platillo */}
-                      {selectedOrderDetails.orderType !== "pick-and-go" &&
-                        dish.status && (
+                      ) : selectedOrderDetails.orderType !== "pick-and-go" ? (
+                        <p className="text-sm md:text-base lg:text-lg text-white/80">
+                          Mesa {selectedOrderDetails.tableNumber}
+                        </p>
+                      ) : null}
+                      {/* Pick & Go: estatus a nivel de orden */}
+                      {selectedOrderDetails.orderType === "pick-and-go" &&
+                        selectedOrderDetails.tableOrderStatus && (
                           <span
-                            className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(dish.status)}`}
+                            className={`inline-block mt-2 px-3 py-1 rounded-full text-xs md:text-sm font-medium border ${getStatusColor(selectedOrderDetails.tableOrderStatus)}`}
                           >
-                            {getStatusText(dish.status)}
+                            {getStatusText(
+                              selectedOrderDetails.tableOrderStatus,
+                            )}
                           </span>
                         )}
                     </div>
+                  </div>
+                </div>
+              </div>
 
-                    {/* Total Price */}
-                    <div className="text-right">
-                      <p className="text-white font-medium text-base md:text-lg lg:text-xl">
-                        ${dish.totalPrice?.toFixed(2)} MXN
+              {/* Scrollable from "Tu orden" onwards */}
+              <div className="flex-1 min-h-0 overflow-y-auto px-6 md:px-8 lg:px-10 border-t border-white/20">
+                {/* Order Info */}
+                <div className="pt-4 md:pt-5 lg:pt-6 pb-4 md:pb-5 lg:pb-6">
+                  <h3 className="font-medium text-xl md:text-2xl lg:text-3xl text-white mb-3 md:mb-4 lg:mb-5">
+                    Tu orden
+                  </h3>
+                  <div className="space-y-2 md:space-y-3 lg:space-y-4">
+                    <div className="flex items-center gap-2 md:gap-3 lg:gap-4 text-white/90">
+                      <div className="bg-even-aqua p-2 md:p-2.5 lg:p-3 rounded-xl flex items-center justify-center">
+                        <Calendar className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-even-evergreen" />
+                      </div>
+                      <span className="text-sm md:text-base lg:text-lg">
+                        {new Date(selectedOrderDetails.tableOrderDate)
+                          .toLocaleDateString("es-MX", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "2-digit",
+                          })
+                          .replace(/\//g, "/")}
+                      </span>
+                    </div>
+                    {selectedOrderDetails.orderType === "room-service" ? (
+                      <div className="flex items-center gap-2 md:gap-3 lg:gap-4 text-white/90">
+                        <div className="bg-orange-100 p-2 md:p-2.5 lg:p-3 rounded-xl flex items-center justify-center">
+                          <Utensils className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-orange-600" />
+                        </div>
+                        <span className="text-sm md:text-base lg:text-lg">
+                          Habitación {selectedOrderDetails.roomNumber}
+                        </span>
+                      </div>
+                    ) : selectedOrderDetails.orderType !== "pick-and-go" ? (
+                      <div className="flex items-center gap-2 md:gap-3 lg:gap-4 text-white/90">
+                        <div className="bg-orange-100 p-2 md:p-2.5 lg:p-3 rounded-xl flex items-center justify-center">
+                          <Utensils className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-orange-600" />
+                        </div>
+                        <span className="text-sm md:text-base lg:text-lg">
+                          Mesa {selectedOrderDetails.tableNumber}
+                        </span>
+                      </div>
+                    ) : null}
+                    {selectedOrderDetails.paymentCardBrand && (
+                      <div className="flex items-center gap-2 md:gap-3 lg:gap-4 text-white/90">
+                        <div className="bg-green-100 px-1 py-1.5 md:py-2 md:px-1.5 lg:py-2.5 lg:px-2 rounded-xl flex items-center justify-center">
+                          {getCardTypeIcon(
+                            selectedOrderDetails.paymentCardBrand,
+                            "small",
+                            32,
+                            20,
+                          )}
+                        </div>
+                        <span className="text-sm md:text-base lg:text-lg">
+                          **** {selectedOrderDetails.paymentCardLastFour}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Lista de platillos */}
+                <div className="border-t border-white/20 pt-4 md:pt-5 lg:pt-6">
+                  <h3 className="font-medium text-xl md:text-2xl lg:text-3xl text-white mb-3 md:mb-4 lg:mb-5">
+                    Items de la orden
+                  </h3>
+                  {selectedOrderDetails.orderType === "flex-bill" ? (
+                    <div className="flex items-center gap-3 pb-4 md:pb-5 lg:pb-6">
+                      <div className="bg-white/10 rounded-xl p-2.5">
+                        <svg
+                          className="size-5 text-white/70"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"
+                          />
+                        </svg>
+                      </div>
+                      <p className="text-white/70 text-sm md:text-base lg:text-lg">
+                        Pago dividido — solo se muestra el monto que pagaste
                       </p>
                     </div>
+                  ) : (
+                    <div className="space-y-3 md:space-y-4 lg:space-y-5 pb-4 md:pb-5 lg:pb-6">
+                      {selectedOrderDetails.dishes?.map((dish: any) => (
+                        <div
+                          key={dish.dishOrderId}
+                          className="flex justify-between items-center gap-3 md:gap-4 lg:gap-5"
+                        >
+                          <div className="size-14 md:size-16 lg:size-20 bg-gray-300 rounded-sm md:rounded-md flex items-center justify-center hover:scale-105 transition-transform duration-200">
+                            {dish.images?.length > 0 && dish.images[0] ? (
+                              <img
+                                src={dish.images[0]}
+                                alt="Dish preview"
+                                className="w-full h-full object-cover rounded-sm md:rounded-md"
+                              />
+                            ) : (
+                              <img
+                                src="/even/even-asterisk-evergreen.svg"
+                                alt="Logo Even"
+                                className={`size-10 md:size-12 object-contain`}
+                              />
+                            )}
+                          </div>
+                          {/* Dish Info */}
+                          <div className="flex-1">
+                            <p className="text-white font-medium text-base md:text-lg lg:text-xl capitalize">
+                              {dish.quantity}x {dish.item}
+                            </p>
+                            <p className="text-xs md:text-sm lg:text-base text-white/60">
+                              ${dish.price?.toFixed(2)} MXN c/u
+                            </p>
+                            {dish.extraPrice > 0 && (
+                              <p className="text-xs md:text-sm lg:text-base text-white/60">
+                                + Extras: ${dish.extraPrice?.toFixed(2)} MXN
+                              </p>
+                            )}
+                            {/* Status Badge — Pick & Go maneja el estatus a nivel de orden, no por platillo */}
+                            {selectedOrderDetails.orderType !== "pick-and-go" &&
+                              dish.status && (
+                                <span
+                                  className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(dish.status)}`}
+                                >
+                                  {getStatusText(dish.status)}
+                                </span>
+                              )}
+                          </div>
+
+                          {/* Total Price */}
+                          <div className="text-right">
+                            <p className="text-white font-medium text-base md:text-lg lg:text-xl">
+                              ${dish.totalPrice?.toFixed(2)} MXN
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Total Summary - Fixed */}
+              <div className="shrink-0 px-6 md:px-8 lg:px-10 border-t border-white/20 pt-4 md:pt-5 lg:pt-6 pb-6 md:pb-8 lg:pb-10 space-y-3 md:space-y-4">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg md:text-xl lg:text-2xl font-medium text-white">
+                      Total
+                    </span>
+                    {selectedOrderDetails.baseAmount > 0 && (
+                      <button
+                        onClick={() => setIsBreakdownOpen(true)}
+                        className="p-1 hover:bg-white/10 rounded-full transition-colors"
+                        aria-label="Ver desglose"
+                      >
+                        <CircleAlert
+                          className="size-4 md:size-5 lg:size-6 text-white/70"
+                          strokeWidth={2.3}
+                        />
+                      </button>
+                    )}
                   </div>
-                ))}
+                  <span className="text-lg md:text-xl lg:text-2xl font-medium text-white">
+                    ${selectedOrderDetails.totalAmount?.toFixed(2)} MXN
+                  </span>
+                </div>
+
+                {/* Download — only for individually-issued invoices, never the consolidated PUBLICO EN GENERAL one */}
+                {!selectedOrderDetails.invoicedViaConsolidation &&
+                  selectedOrderDetails.facturapiInvoiceId && (
+                  <button
+                    onClick={async () => {
+                      if (downloadingInvoiceId) return;
+                      setDownloadingInvoiceId(
+                        selectedOrderDetails.facturapiInvoiceId,
+                      );
+                      try {
+                        const blob = await invoiceService.downloadInvoicePdf(
+                          selectedOrderDetails.facturapiInvoiceId,
+                          selectedOrderDetails.restaurantId,
+                        );
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = `factura-${selectedOrderDetails.facturapiInvoiceId}.pdf`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                      } catch {
+                        // silently ignore
+                      } finally {
+                        setDownloadingInvoiceId(null);
+                      }
+                    }}
+                    className="w-full flex items-center justify-center gap-2 bg-even-grass text-even-evergreen rounded-2xl py-3 md:py-4 text-sm md:text-base font-medium"
+                  >
+                    {downloadingInvoiceId ===
+                    selectedOrderDetails.facturapiInvoiceId ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Download className="w-4 h-4" />
+                    )}
+                    Descargar factura
+                  </button>
+                )}
+
+                {/* Facturar — only when billing active, no existing invoice, current month */}
+                {selectedOrderDetails.billingEnabled !== false &&
+                  !selectedOrderDetails.invoicedViaConsolidation &&
+                  !selectedOrderDetails.facturapiInvoiceId &&
+                  isCurrentMonth(selectedOrderDetails.tableOrderDate) && (
+                    <button
+                      onClick={() => {
+                        setInvoiceModalOrder(selectedOrderDetails);
+                        setSelectedOrderDetails(null);
+                      }}
+                      className="w-full flex items-center justify-center gap-2 border border-white/30 text-white rounded-2xl py-3 md:py-4 text-sm md:text-base hover:bg-white/10 transition-colors"
+                    >
+                      <FileText className="w-4 h-4" />
+                      Facturar
+                    </button>
+                  )}
               </div>
             </div>
+          </div>,
+          document.body,
+        )}
 
-            {/* Total Summary - Fixed */}
-            <div className="shrink-0 px-6 md:px-8 lg:px-10 flex justify-between items-center border-t border-white/20 pt-4 md:pt-5 lg:pt-6 pb-6 md:pb-8 lg:pb-10">
-              <span className="text-lg md:text-xl lg:text-2xl font-medium text-white">
-                Total
-              </span>
-              <span className="text-lg md:text-xl lg:text-2xl font-medium text-white">
-                ${selectedOrderDetails.totalAmount?.toFixed(2)} MXN
-              </span>
+      {/* Breakdown Modal */}
+      {isBreakdownOpen &&
+        selectedOrderDetails &&
+        createPortal(
+          <div
+            className="fixed inset-0 flex items-end justify-center"
+            style={{ zIndex: 999999 }}
+          >
+            <div
+              className="absolute inset-0 bg-black/25"
+              onClick={() => setIsBreakdownOpen(false)}
+            />
+            <div className="relative bg-white rounded-t-4xl w-full">
+              <div className="px-6 md:px-8 lg:px-10 pt-4 md:pt-6 lg:pt-8">
+                <div className="flex items-center justify-between pb-4 md:pb-5 lg:pb-6 border-b border-gray-100">
+                  <h3 className="text-lg md:text-xl lg:text-2xl font-semibold text-black">
+                    Desglose del pago
+                  </h3>
+                  <button
+                    onClick={() => setIsBreakdownOpen(false)}
+                    className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                  >
+                    <X className="size-5 md:size-6 lg:size-7 text-gray-500" />
+                  </button>
+                </div>
+              </div>
+              <div className="px-6 md:px-8 lg:px-10 py-4 md:py-6 lg:py-8 space-y-3 md:space-y-4 lg:space-y-5">
+                <div className="flex justify-between items-center">
+                  <span className="text-black font-medium text-base md:text-lg lg:text-xl">
+                    + Consumo
+                  </span>
+                  <span className="text-black font-medium text-base md:text-lg lg:text-xl">
+                    ${selectedOrderDetails.baseAmount?.toFixed(2)} MXN
+                  </span>
+                </div>
+                {selectedOrderDetails.tipAmount > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-black font-medium text-base md:text-lg lg:text-xl">
+                      + Propina
+                    </span>
+                    <span className="text-black font-medium text-base md:text-lg lg:text-xl">
+                      ${selectedOrderDetails.tipAmount?.toFixed(2)} MXN
+                    </span>
+                  </div>
+                )}
+                {(selectedOrderDetails.commissionAmount || 0) > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-black font-medium text-base md:text-lg lg:text-xl">
+                      + Comisión de servicio
+                    </span>
+                    <span className="text-black font-medium text-base md:text-lg lg:text-xl">
+                      ${selectedOrderDetails.commissionAmount?.toFixed(2)} MXN
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center border-t border-gray-100 pt-3 md:pt-4">
+                  <span className="text-black font-semibold text-base md:text-lg lg:text-xl">
+                    Total
+                  </span>
+                  <span className="text-black font-semibold text-base md:text-lg lg:text-xl">
+                    ${selectedOrderDetails.totalAmount?.toFixed(2)} MXN
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
+
+      {/* Invoice Modal */}
+      {invoiceModalOrder &&
+        createPortal(
+          <InvoiceModal
+            isOpen={true}
+            onClose={() => setInvoiceModalOrder(null)}
+            transactionId={invoiceModalOrder.transactionId || ""}
+            restaurantId={invoiceModalOrder.restaurantId || 0}
+            isAuthenticated={isAuthenticated}
+          />,
+          document.body,
+        )}
     </>
   );
 }
