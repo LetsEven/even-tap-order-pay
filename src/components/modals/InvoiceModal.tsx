@@ -263,7 +263,6 @@ export default function InvoiceModal({
                 <ChevronLeft className="w-5 h-5 text-even-evergreen" />
               </button>
             )}
-            <FileText className="w-5 h-5 text-even-evergreen" />
             <h2 className="text-even-evergreen font-medium text-lg">
               {step === "form" && "Datos de facturación"}
               {step === "preview" && "Vista previa"}
@@ -377,12 +376,15 @@ export default function InvoiceModal({
                 antes de emitir.
               </p>
               {previewBlobUrl && (
-                <embed
-                  src={previewBlobUrl}
-                  type="application/pdf"
-                  className="w-full rounded-xl border border-black/10"
-                  style={{ height: "380px" }}
-                />
+                <a
+                  href={previewBlobUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full border border-black/10 rounded-xl py-4 text-sm font-medium text-even-evergreen hover:bg-black/5 transition-colors"
+                >
+                  <Eye className="w-4 h-4" />
+                  Abrir vista previa
+                </a>
               )}
               {error && <p className="text-red-500 text-sm">{error}</p>}
             </div>
