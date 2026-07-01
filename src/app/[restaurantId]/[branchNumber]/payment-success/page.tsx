@@ -99,19 +99,34 @@ export default function PaymentSuccessPage() {
   }, [cameFromAuth]);
 
   useEffect(() => {
-    if (isTicketModalOpen) { lockScroll(); return unlockScroll; }
+    if (isTicketModalOpen) {
+      lockScroll();
+      return unlockScroll;
+    }
   }, [isTicketModalOpen]);
   useEffect(() => {
-    if (isBreakdownModalOpen) { lockScroll(); return unlockScroll; }
+    if (isBreakdownModalOpen) {
+      lockScroll();
+      return unlockScroll;
+    }
   }, [isBreakdownModalOpen]);
   useEffect(() => {
-    if (isStatusModalOpen) { lockScroll(); return unlockScroll; }
+    if (isStatusModalOpen) {
+      lockScroll();
+      return unlockScroll;
+    }
   }, [isStatusModalOpen]);
   useEffect(() => {
-    if (isRegisterModalOpen) { lockScroll(); return unlockScroll; }
+    if (isRegisterModalOpen) {
+      lockScroll();
+      return unlockScroll;
+    }
   }, [isRegisterModalOpen]);
   useEffect(() => {
-    if (showReorderModal) { lockScroll(); return unlockScroll; }
+    if (showReorderModal) {
+      lockScroll();
+      return unlockScroll;
+    }
   }, [showReorderModal]);
 
   useEffect(() => {
@@ -414,6 +429,20 @@ export default function PaymentSuccessPage() {
                 Ir al menú
               </button>
 
+              {/* Facturar btn */}
+              {restaurant?.billing_enabled !== false && (
+                <button
+                  onClick={() => setIsInvoiceModalOpen(true)}
+                  className="w-full flex items-center justify-center gap-2 md:gap-3 lg:gap-4 text-even-evergreen bg-even-grass py-3 md:py-4 lg:py-5 rounded-full cursor-pointer transition-all active:scale-90 text-base md:text-lg lg:text-xl font-medium"
+                >
+                  <FileText
+                    className="size-5 md:size-6 lg:size-7"
+                    strokeWidth={1.5}
+                  />
+                  {existingInvoiceId ? "Ver factura" : "Facturar"}
+                </button>
+              )}
+
               {/* Ticket btn */}
               <button
                 onClick={() => setIsTicketModalOpen(true)}
@@ -650,31 +679,6 @@ export default function PaymentSuccessPage() {
                   </span>
                 )}
               </div>
-
-              {restaurant?.billing_enabled !== false &&
-                (existingInvoiceId ? (
-                  <button
-                    onClick={() => {
-                      setIsTicketModalOpen(false);
-                      setIsInvoiceModalOpen(true);
-                    }}
-                    className="w-full flex items-center justify-center gap-2 text-even-evergreen bg-even-grass py-3 md:py-4 rounded-full cursor-pointer transition-all active:scale-90 text-base md:text-lg font-medium"
-                  >
-                    <FileText className="size-4 md:size-5" strokeWidth={1.5} />
-                    Ver factura
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => {
-                      setIsTicketModalOpen(false);
-                      setIsInvoiceModalOpen(true);
-                    }}
-                    className="w-full flex items-center justify-center gap-2 text-even-evergreen bg-even-grass py-3 md:py-4 rounded-full cursor-pointer transition-all active:scale-90 text-base md:text-lg font-medium"
-                  >
-                    <FileText className="size-4 md:size-5" strokeWidth={1.5} />
-                    Facturar
-                  </button>
-                ))}
             </div>
           </div>
         </div>
