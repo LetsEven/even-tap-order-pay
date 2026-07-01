@@ -10,6 +10,7 @@ import {
   Download,
   Loader2,
   ChevronLeft,
+  Calendar,
 } from "lucide-react";
 import {
   invoiceService,
@@ -79,7 +80,7 @@ const USO_CFDI_OPTIONS = [
   { value: "S01", label: "S01 – Sin efectos fiscales" },
 ];
 
-type Step = "form" | "preview" | "done";
+type Step = "info" | "form" | "preview" | "done";
 
 interface Props {
   isOpen: boolean;
@@ -100,7 +101,7 @@ export default function InvoiceModal({
   onInvoiceCreated,
   existingInvoiceId,
 }: Props) {
-  const [step, setStep] = useState<Step>("form");
+  const [step, setStep] = useState<Step>("info");
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [isLoadingCreate, setIsLoadingCreate] = useState(false);
@@ -157,7 +158,7 @@ export default function InvoiceModal({
   // Reset when closed
   useEffect(() => {
     if (!isOpen) {
-      setStep("form");
+      setStep("info");
       setError(null);
       setPreviewBlobUrl(null);
       setInvoiceId(null);
@@ -178,6 +179,16 @@ export default function InvoiceModal({
   }, [isOpen, existingInvoiceId]);
 
   if (!isOpen) return null;
+
+  const lastDayOfMonth = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth() + 1,
+    0,
+  ).toLocaleDateString("es-MX", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 
   function updateField(field: keyof FiscalData, value: string) {
     setFiscalData((prev) => ({ ...prev, [field]: value }));
@@ -307,6 +318,7 @@ export default function InvoiceModal({
               </button>
             )}
             <h2 className="text-even-evergreen font-medium text-lg">
+              {step === "info" && "Facturación"}
               {step === "form" && "Datos de facturación"}
               {step === "preview" && "Vista previa"}
               {step === "done" && "Factura emitida"}
@@ -322,6 +334,28 @@ export default function InvoiceModal({
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-5">
+          {/* STEP 0: Info */}
+          {step === "info" && (
+            <div className="flex flex-col items-center gap-5 py-6 text-center">
+              <div className="w-16 h-16 rounded-full bg-even-grass/20 flex items-center justify-center">
+                <Calendar className="w-8 h-8 text-even-evergreen" />
+              </div>
+              <div className="space-y-2">
+                <p className="text-even-evergreen font-medium text-base">
+                  Plazo de facturación
+                </p>
+                <p className="text-sm text-black/55 leading-relaxed">
+                  Solo puedes facturar esta compra dentro del mes en curso. La
+                  fecha límite para solicitar tu factura es el{" "}
+                  <span className="font-semibold text-even-evergreen">
+                    {lastDayOfMonth}
+                  </span>
+                  .
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* STEP 1: Formulario */}
           {step === "form" && (
             <div className="space-y-4">
@@ -491,6 +525,17 @@ export default function InvoiceModal({
         </div>
 
         {/* Footer CTA */}
+        {step === "info" && (
+          <div className="px-6 pb-6 pt-3 shrink-0 border-t border-black/10">
+            <button
+              onClick={() => setStep("form")}
+              className="w-full flex items-center justify-center gap-2 bg-even-evergreen text-even-grass rounded-2xl py-4 font-medium text-sm hover:bg-even-evergreen/90 transition-colors"
+            >
+              Continuar
+            </button>
+          </div>
+        )}
+
         {step === "form" && (
           <div className="px-6 pb-6 pt-3 shrink-0 border-t border-black/10">
             <button

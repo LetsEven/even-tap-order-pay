@@ -395,8 +395,8 @@ export default function PaymentSuccessPage() {
 
       <div className="px-4 md:px-6 lg:px-8 w-full animate-slide-up flex-1 flex flex-col">
         <div className="flex-1 flex flex-col">
-          <div className="left-4 right-4 bg-even-evergreen rounded-t-4xl translate-y-7 z-0">
-            <div className="py-6 md:py-8 lg:py-10 px-8 md:px-10 lg:px-12 flex flex-col justify-center items-center mb-6 md:mb-8 lg:mb-10 mt-2 md:mt-4 lg:mt-6 gap-2 md:gap-3 lg:gap-4">
+          <div className="left-4 right-4 bg-even-evergreen rounded-t-4xl z-0">
+            <div className="pb-6 md:pb-8 lg:pb-10 px-8 md:px-10 lg:px-12 flex flex-col justify-center items-center mb-6 md:mb-8 lg:mb-10 gap-2 md:gap-3 lg:gap-4">
               <h1 className="font-medium text-white text-3xl md:text-4xl lg:text-5xl leading-7 md:leading-9 lg:leading-tight">
                 ¡Gracias por tu pedido!
               </h1>
@@ -406,14 +406,14 @@ export default function PaymentSuccessPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-t-4xl relative z-10 flex flex-col min-h-80 justify-center px-6 md:px-8 lg:px-10 flex-1 py-8 md:py-10 lg:py-12">
+          <div className="bg-white rounded-t-4xl relative z-10 flex flex-col min-h-60 justify-center px-6 md:px-8 lg:px-10 flex-1 -mt-7">
             {/* Action Buttons */}
             <div className="space-y-3 md:space-y-4 lg:space-y-5">
               {/* Reordenar btn */}
               <button
                 onClick={handleReorder}
                 disabled={!reorderItems.length}
-                className="w-full flex items-center justify-center gap-2 md:gap-3 lg:gap-4 text-even-evergreen py-3 md:py-4 lg:py-5 rounded-full cursor-pointer transition-all active:scale-90 bg-even-grass text-base md:text-lg lg:text-xl disabled:opacity-70 animate-pulse-button font-medium"
+                className="w-full flex items-center justify-center gap-2 md:gap-3 lg:gap-4 text-even-evergreen py-3 md:py-4 lg:py-5 rounded-full cursor-pointer transition-all active:scale-90 bg-even-grass text-base md:text-lg lg:text-xl disabled:opacity-70 animate-pulse-button"
               >
                 <RefreshCw
                   className="size-5 md:size-6 lg:size-7"
@@ -428,20 +428,6 @@ export default function PaymentSuccessPage() {
               >
                 Ir al menú
               </button>
-
-              {/* Facturar btn */}
-              {restaurant?.billing_enabled !== false && (
-                <button
-                  onClick={() => setIsInvoiceModalOpen(true)}
-                  className="w-full flex items-center justify-center gap-2 md:gap-3 lg:gap-4 text-even-evergreen bg-even-grass py-3 md:py-4 lg:py-5 rounded-full cursor-pointer transition-all active:scale-90 text-base md:text-lg lg:text-xl font-medium"
-                >
-                  <FileText
-                    className="size-5 md:size-6 lg:size-7"
-                    strokeWidth={1.5}
-                  />
-                  {existingInvoiceId ? "Ver factura" : "Facturar"}
-                </button>
-              )}
 
               {/* Ticket btn */}
               <button
@@ -466,6 +452,20 @@ export default function PaymentSuccessPage() {
                 />
                 Ver Estatus
               </button>
+
+              {/* Facturar btn */}
+              {restaurant?.billing_enabled !== false && (
+                <button
+                  onClick={() => setIsInvoiceModalOpen(true)}
+                  className="w-full flex items-center justify-center gap-2 md:gap-3 lg:gap-4 text-black bg-white hover:bg-stone-100 border border-black py-3 md:py-4 lg:py-5 rounded-full cursor-pointer transition-all active:scale-90 text-base md:text-lg lg:text-xl"
+                >
+                  <FileText
+                    className="size-5 md:size-6 lg:size-7"
+                    strokeWidth={1.5}
+                  />
+                  {existingInvoiceId ? "Ver factura" : "Facturar"}
+                </button>
+              )}
             </div>
           </div>
         </div>
