@@ -50,6 +50,30 @@ export function useAgentStatus(
     fetchStatus();
   }, [restaurantId, branchNumber]);
 
+  const refetch = async (): Promise<AgentStatus | null> => {
+    if (!restaurantId || !branchNumber) return null;
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      const res = await fetch(
+        `${API_BASE_URL}/api/pos/restaurant/${restaurantId}/branch/${branchNumber}/agent-status`,
+        { signal: controller.signal },
+      );
+      clearTimeout(timeoutId);
+      if (!res.ok) return null;
+      const data = await res.json();
+      return {
+        hasIntegration: data.hasIntegration ?? false,
+        isAgentConnected: data.isAgentConnected ?? false,
+        isActive: data.isActive ?? false,
+        providerName: data.providerName ?? null,
+        isTurnoOpen: data.isTurnoOpen ?? null,
+      };
+    } catch {
+      return null;
+    }
+  };
+
   const hasActivePOS =
     agentStatus !== null && agentStatus.hasIntegration && agentStatus.isActive;
 
@@ -71,5 +95,6 @@ export function useAgentStatus(
     isAgentRequired,
     isAgentDisconnected,
     isTurnoClosed,
+    refetch,
   };
 }

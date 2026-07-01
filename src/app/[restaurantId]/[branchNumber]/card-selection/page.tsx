@@ -31,8 +31,12 @@ export default function CardSelectionPage() {
   } = useValidateAccess();
   const restaurantId = restaurantIdNum.toString();
   const { provider, isLoadingProvider } = usePaymentProvider(restaurantId);
-  const { isAgentDisconnected, isTurnoClosed, isLoadingAgentStatus } =
-    useAgentStatus(restaurantIdNum, branchNumber);
+  const {
+    isAgentDisconnected,
+    isTurnoClosed,
+    isLoadingAgentStatus,
+    refetch: refetchAgentStatus,
+  } = useAgentStatus(restaurantIdNum, branchNumber);
   const { msiConfig } = useMsiConfig();
   const { restaurant } = useRestaurant();
 
@@ -65,7 +69,9 @@ export default function CardSelectionPage() {
   const [deletingCardId, setDeletingCardId] = useState<string | null>(null);
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [errorTitle, setErrorTitle] = useState<string>("Error al procesar el pago");
+  const [errorTitle, setErrorTitle] = useState<string>(
+    "Error al procesar el pago",
+  );
 
   // Apple Pay
   const [applePayReady, setApplePayReady] = useState(false);
@@ -410,8 +416,20 @@ export default function CardSelectionPage() {
     })();
   }, [isLoadingInitial, totalAmount, googlePayUnavailable]);
 
-  const handleInitiatePayment = (): void => {
+  const handleInitiatePayment = async (): Promise<void> => {
     if (isAgentDisconnected || isTurnoClosed) {
+      setShowPOSModal(true);
+      return;
+    }
+
+    // Fresh ping — cached hook state can be stale if agent dropped after page load
+    const freshStatus = await refetchAgentStatus();
+    if (
+      freshStatus &&
+      freshStatus.hasIntegration &&
+      freshStatus.isActive &&
+      !freshStatus.isAgentConnected
+    ) {
       setShowPOSModal(true);
       return;
     }
@@ -1357,7 +1375,10 @@ export default function CardSelectionPage() {
       {errorMessage && (
         <div
           className="fixed inset-0 z-99999 flex items-end justify-center bg-black/50"
-          onClick={() => { setErrorMessage(null); setErrorTitle("Error al procesar el pago"); }}
+          onClick={() => {
+            setErrorMessage(null);
+            setErrorTitle("Error al procesar el pago");
+          }}
         >
           <div
             className="bg-white rounded-t-4xl w-full shadow-xl"
@@ -1381,7 +1402,10 @@ export default function CardSelectionPage() {
                 </p>
               </div>
               <button
-                onClick={() => { setErrorMessage(null); setErrorTitle("Error al procesar el pago"); }}
+                onClick={() => {
+                  setErrorMessage(null);
+                  setErrorTitle("Error al procesar el pago");
+                }}
                 className="w-full bg-even-grass text-even-evergreen py-3 rounded-full text-base"
               >
                 Intentar de nuevo
